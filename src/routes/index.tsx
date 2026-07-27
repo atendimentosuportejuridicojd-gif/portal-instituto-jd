@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Portal do Aluno — Instituto J&D Ensino Jurídico" },
+      { title: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
       {
         name: "description",
         content:
