@@ -14,16 +14,579 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assinaturas: {
+        Row: {
+          created_at: string
+          fim: string | null
+          hotmart_transaction_id: string | null
+          id: string
+          inicio: string
+          plano: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          fim?: string | null
+          hotmart_transaction_id?: string | null
+          id?: string
+          inicio?: string
+          plano?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          fim?: string | null
+          hotmart_transaction_id?: string | null
+          id?: string
+          inicio?: string
+          plano?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      concurso_materiais: {
+        Row: {
+          concurso_id: string
+          exclusivo: boolean
+          material_id: string
+          ordem: number
+        }
+        Insert: {
+          concurso_id: string
+          exclusivo?: boolean
+          material_id: string
+          ordem?: number
+        }
+        Update: {
+          concurso_id?: string
+          exclusivo?: boolean
+          material_id?: string
+          ordem?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concurso_materiais_concurso_id_fkey"
+            columns: ["concurso_id"]
+            isOneToOne: false
+            referencedRelation: "concursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concurso_materiais_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      concursos: {
+        Row: {
+          banca: string | null
+          created_at: string
+          data_prova: string | null
+          descricao: string | null
+          edital_url: string | null
+          id: string
+          nome: string
+          publicado: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          banca?: string | null
+          created_at?: string
+          data_prova?: string | null
+          descricao?: string | null
+          edital_url?: string | null
+          id?: string
+          nome: string
+          publicado?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          banca?: string | null
+          created_at?: string
+          data_prova?: string | null
+          descricao?: string | null
+          edital_url?: string | null
+          id?: string
+          nome?: string
+          publicado?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cronogramas: {
+        Row: {
+          concurso_id: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          publicado: boolean
+          trilha_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          concurso_id?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          publicado?: boolean
+          trilha_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          concurso_id?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          publicado?: boolean
+          trilha_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cronogramas_concurso_id_fkey"
+            columns: ["concurso_id"]
+            isOneToOne: false
+            referencedRelation: "concursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cronogramas_trilha_id_fkey"
+            columns: ["trilha_id"]
+            isOneToOne: false
+            referencedRelation: "trilhas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disciplinas: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          ordem: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          ordem?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          ordem?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      materiais: {
+        Row: {
+          arquivo_url: string | null
+          created_at: string
+          descricao: string | null
+          disciplina_id: string | null
+          id: string
+          modulo_id: string | null
+          paginas: number | null
+          publicado: boolean
+          tags: string[] | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo_url?: string | null
+          created_at?: string
+          descricao?: string | null
+          disciplina_id?: string | null
+          id?: string
+          modulo_id?: string | null
+          paginas?: number | null
+          publicado?: boolean
+          tags?: string[] | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo_url?: string | null
+          created_at?: string
+          descricao?: string | null
+          disciplina_id?: string | null
+          id?: string
+          modulo_id?: string | null
+          paginas?: number | null
+          publicado?: boolean
+          tags?: string[] | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materiais_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materiais_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modulos: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          disciplina_id: string
+          id: string
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          disciplina_id: string
+          id?: string
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          disciplina_id?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modulos_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      noticias: {
+        Row: {
+          conteudo: string | null
+          created_at: string
+          id: string
+          imagem_url: string | null
+          publicado: boolean
+          published_at: string
+          resumo: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          conteudo?: string | null
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          publicado?: boolean
+          published_at?: string
+          resumo?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          conteudo?: string | null
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          publicado?: boolean
+          published_at?: string
+          resumo?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          nome_completo: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id: string
+          nome_completo?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          nome_completo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      questao_alternativas: {
+        Row: {
+          correta: boolean
+          id: string
+          letra: string
+          ordem: number
+          questao_id: string
+          texto: string
+        }
+        Insert: {
+          correta?: boolean
+          id?: string
+          letra: string
+          ordem?: number
+          questao_id: string
+          texto: string
+        }
+        Update: {
+          correta?: boolean
+          id?: string
+          letra?: string
+          ordem?: number
+          questao_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questao_alternativas_questao_id_fkey"
+            columns: ["questao_id"]
+            isOneToOne: false
+            referencedRelation: "questoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questao_tentativas: {
+        Row: {
+          acertou: boolean
+          alternativa_id: string | null
+          created_at: string
+          id: string
+          questao_id: string
+          user_id: string
+        }
+        Insert: {
+          acertou: boolean
+          alternativa_id?: string | null
+          created_at?: string
+          id?: string
+          questao_id: string
+          user_id: string
+        }
+        Update: {
+          acertou?: boolean
+          alternativa_id?: string | null
+          created_at?: string
+          id?: string
+          questao_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questao_tentativas_alternativa_id_fkey"
+            columns: ["alternativa_id"]
+            isOneToOne: false
+            referencedRelation: "questao_alternativas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questao_tentativas_questao_id_fkey"
+            columns: ["questao_id"]
+            isOneToOne: false
+            referencedRelation: "questoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questoes: {
+        Row: {
+          ano: number | null
+          banca: string | null
+          comentario_professor: string | null
+          created_at: string
+          disciplina_id: string | null
+          enunciado: string
+          id: string
+          nivel: string | null
+          orgao: string | null
+          publicado: boolean
+          updated_at: string
+        }
+        Insert: {
+          ano?: number | null
+          banca?: string | null
+          comentario_professor?: string | null
+          created_at?: string
+          disciplina_id?: string | null
+          enunciado: string
+          id?: string
+          nivel?: string | null
+          orgao?: string | null
+          publicado?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ano?: number | null
+          banca?: string | null
+          comentario_professor?: string | null
+          created_at?: string
+          disciplina_id?: string | null
+          enunciado?: string
+          id?: string
+          nivel?: string | null
+          orgao?: string | null
+          publicado?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questoes_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trilha_materiais: {
+        Row: {
+          material_id: string
+          ordem: number
+          trilha_id: string
+        }
+        Insert: {
+          material_id: string
+          ordem?: number
+          trilha_id: string
+        }
+        Update: {
+          material_id?: string
+          ordem?: number
+          trilha_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trilha_materiais_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trilha_materiais_trilha_id_fkey"
+            columns: ["trilha_id"]
+            isOneToOne: false
+            referencedRelation: "trilhas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trilhas: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          ordem: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          ordem?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          ordem?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "administrador" | "aluno"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +713,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["administrador", "aluno"],
+    },
   },
 } as const
