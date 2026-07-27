@@ -79,13 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Portal do Aluno — Instituto J&D Ensino Jurídico" },
+      { title: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
       {
         name: "description",
         content:
-          "Plataforma oficial de estudos do Instituto J&D — preparação para Tribunais e Ministérios Públicos.",
+          "Plataforma oficial de estudos do Instituto J&D — especialistas na carreira judiciária, com preparação para Tribunais e Ministérios Públicos.",
       },
-      { name: "author", content: "Instituto J&D Ensino Jurídico" },
+      { name: "author", content: "Instituto J&D Especialistas na Carreira Judiciária" },
       { property: "og:title", content: "Portal do Aluno — Instituto J&D" },
       {
         property: "og:description",

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Portal do Aluno — Instituto J&D Ensino Jurídico" },
+      { title: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
       {
         name: "description",
         content:
@@ -39,7 +39,7 @@ function Landing() {
             <div className="leading-tight">
               <p className="text-sm font-bold tracking-tight">Instituto J&D</p>
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Ensino Jurídico
+                Especialistas na Carreira Judiciária
               </p>
             </div>
           </div>
@@ -91,7 +91,7 @@ function Landing() {
 
       <footer className="border-t border-border/60 py-8">
         <p className="text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Instituto J&D Ensino Jurídico
+          © {new Date().getFullYear()} Instituto J&D Especialistas na Carreira Judiciária
         </p>
       </footer>
     </div>

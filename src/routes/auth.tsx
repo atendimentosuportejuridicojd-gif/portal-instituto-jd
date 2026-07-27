@@ -91,7 +91,7 @@ function AuthPage() {
           </div>
           <div>
             <p className="text-sm font-bold">Instituto J&D</p>
-            <p className="text-[10px] uppercase tracking-widest opacity-70">Ensino Jurídico</p>
+            <p className="text-[10px] uppercase tracking-widest opacity-70">Especialistas na Carreira Judiciária</p>
           </div>
         </Link>
         <div>
