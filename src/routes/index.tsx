@@ -91,7 +91,7 @@ function Landing() {
 
       <footer className="border-t border-border/60 py-8">
         <p className="text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Instituto J&D Ensino Jurídico
+          © {new Date().getFullYear()} Instituto J&D Especialistas na Carreira Judiciária
         </p>
       </footer>
     </div>
