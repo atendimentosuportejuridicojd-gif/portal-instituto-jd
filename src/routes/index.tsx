@@ -39,7 +39,7 @@ function Landing() {
             <div className="leading-tight">
               <p className="text-sm font-bold tracking-tight">Instituto J&D</p>
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Ensino Jurídico
+                Especialistas na Carreira Judiciária
               </p>
             </div>
           </div>
