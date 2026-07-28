@@ -222,9 +222,9 @@ export const getSessaoAtual = createServerFn({ method: "GET" })
       .from("questao_sessoes")
       .select("id, material_id, status, total_questoes, acertos, erros, percentual, iniciada_em, concluida_em, materiais(id, titulo, disciplinas(nome))")
       .eq("id", data.sessao_id)
+      .eq("user_id", userId)
       .single();
     if (error) throw new Error(error.message);
-    if (sessao.user_id && sessao.user_id !== userId) throw new Error("Sessão não pertence ao usuário.");
 
     const { data: questoes, error: qerr } = await supabase
       .from("questoes")
