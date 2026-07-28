@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
+import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -113,6 +114,12 @@ const AuthenticatedAdminAcervoRoute =
     path: '/admin/acervo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMateriaisMaterialIdQuestoesRoute =
+  AuthenticatedMateriaisMaterialIdQuestoesRouteImport.update({
+    id: '/materiais/$materialId/questoes',
+    path: '/materiais/$materialId/questoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -147,6 +155,7 @@ export interface FileRoutesByTo {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -166,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/materiais/$materialId/questoes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/materiais/$materialId/questoes'
   id:
     | '__root__'
     | '/'
@@ -220,6 +232,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/questoes'
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/materiais/$materialId/questoes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -342,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAcervoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/materiais/$materialId/questoes': {
+      id: '/_authenticated/materiais/$materialId/questoes'
+      path: '/materiais/$materialId/questoes'
+      fullPath: '/materiais/$materialId/questoes'
+      preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -359,6 +379,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
+  AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -375,6 +396,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
+  AuthenticatedMateriaisMaterialIdQuestoesRoute:
+    AuthenticatedMateriaisMaterialIdQuestoesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
