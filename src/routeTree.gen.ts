@@ -25,6 +25,8 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
+import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
+import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -113,6 +115,18 @@ const AuthenticatedAdminAcervoRoute =
     path: '/admin/acervo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMateriaisMaterialIdQuestoesRoute =
+  AuthenticatedMateriaisMaterialIdQuestoesRouteImport.update({
+    id: '/materiais/$materialId/questoes',
+    path: '/materiais/$materialId/questoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMateriaisMaterialIdDesempenhoRoute =
+  AuthenticatedMateriaisMaterialIdDesempenhoRouteImport.update({
+    id: '/materiais/$materialId/desempenho',
+    path: '/materiais/$materialId/desempenho',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -130,6 +144,8 @@ export interface FileRoutesByFullPath {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -147,6 +163,8 @@ export interface FileRoutesByTo {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -166,6 +184,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -185,6 +205,8 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/materiais/$materialId/desempenho'
+    | '/materiais/$materialId/questoes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -202,6 +224,8 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/materiais/$materialId/desempenho'
+    | '/materiais/$materialId/questoes'
   id:
     | '__root__'
     | '/'
@@ -220,6 +244,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/questoes'
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/materiais/$materialId/desempenho'
+    | '/_authenticated/materiais/$materialId/questoes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -342,6 +368,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAcervoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/materiais/$materialId/questoes': {
+      id: '/_authenticated/materiais/$materialId/questoes'
+      path: '/materiais/$materialId/questoes'
+      fullPath: '/materiais/$materialId/questoes'
+      preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/materiais/$materialId/desempenho': {
+      id: '/_authenticated/materiais/$materialId/desempenho'
+      path: '/materiais/$materialId/desempenho'
+      fullPath: '/materiais/$materialId/desempenho'
+      preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -359,6 +399,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
+  AuthenticatedMateriaisMaterialIdDesempenhoRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -375,6 +417,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
+  AuthenticatedMateriaisMaterialIdDesempenhoRoute:
+    AuthenticatedMateriaisMaterialIdDesempenhoRoute,
+  AuthenticatedMateriaisMaterialIdQuestoesRoute:
+    AuthenticatedMateriaisMaterialIdQuestoesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -388,13 +434,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

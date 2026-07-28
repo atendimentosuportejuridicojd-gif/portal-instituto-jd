@@ -396,6 +396,59 @@ export type Database = {
           },
         ]
       }
+      questao_sessoes: {
+        Row: {
+          acertos: number
+          concluida_em: string | null
+          created_at: string
+          erros: number
+          id: string
+          iniciada_em: string
+          material_id: string
+          percentual: number
+          status: string
+          total_questoes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acertos?: number
+          concluida_em?: string | null
+          created_at?: string
+          erros?: number
+          id?: string
+          iniciada_em?: string
+          material_id: string
+          percentual?: number
+          status?: string
+          total_questoes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acertos?: number
+          concluida_em?: string | null
+          created_at?: string
+          erros?: number
+          id?: string
+          iniciada_em?: string
+          material_id?: string
+          percentual?: number
+          status?: string
+          total_questoes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questao_sessoes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questao_tentativas: {
         Row: {
           acertou: boolean
@@ -403,6 +456,7 @@ export type Database = {
           created_at: string
           id: string
           questao_id: string
+          sessao_id: string | null
           user_id: string
         }
         Insert: {
@@ -411,6 +465,7 @@ export type Database = {
           created_at?: string
           id?: string
           questao_id: string
+          sessao_id?: string | null
           user_id: string
         }
         Update: {
@@ -419,6 +474,7 @@ export type Database = {
           created_at?: string
           id?: string
           questao_id?: string
+          sessao_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -436,6 +492,13 @@ export type Database = {
             referencedRelation: "questoes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "questao_tentativas_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "questao_sessoes"
+            referencedColumns: ["id"]
+          },
         ]
       }
       questoes: {
@@ -447,9 +510,12 @@ export type Database = {
           disciplina_id: string | null
           enunciado: string
           id: string
+          material_id: string | null
           nivel: string | null
+          ordem: number
           orgao: string | null
           publicado: boolean
+          referencia: string | null
           updated_at: string
         }
         Insert: {
@@ -460,9 +526,12 @@ export type Database = {
           disciplina_id?: string | null
           enunciado: string
           id?: string
+          material_id?: string | null
           nivel?: string | null
+          ordem?: number
           orgao?: string | null
           publicado?: boolean
+          referencia?: string | null
           updated_at?: string
         }
         Update: {
@@ -473,9 +542,12 @@ export type Database = {
           disciplina_id?: string | null
           enunciado?: string
           id?: string
+          material_id?: string | null
           nivel?: string | null
+          ordem?: number
           orgao?: string | null
           publicado?: boolean
+          referencia?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -484,6 +556,13 @@ export type Database = {
             columns: ["disciplina_id"]
             isOneToOne: false
             referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questoes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
             referencedColumns: ["id"]
           },
         ]
@@ -577,6 +656,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_desempenho_material: {
+        Args: { _material_id: string; _user_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
