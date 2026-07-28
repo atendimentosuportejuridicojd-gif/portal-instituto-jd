@@ -26,6 +26,7 @@ import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
+import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -120,6 +121,12 @@ const AuthenticatedMateriaisMaterialIdQuestoesRoute =
     path: '/materiais/$materialId/questoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMateriaisMaterialIdDesempenhoRoute =
+  AuthenticatedMateriaisMaterialIdDesempenhoRouteImport.update({
+    id: '/materiais/$materialId/desempenho',
+    path: '/materiais/$materialId/desempenho',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRoutesByTo {
@@ -155,6 +163,7 @@ export interface FileRoutesByTo {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRoutesById {
@@ -175,6 +184,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 export interface FileRouteTypes {
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/questoes'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/questoes'
   id:
     | '__root__'
@@ -232,6 +244,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/questoes'
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/materiais/$materialId/desempenho'
     | '/_authenticated/materiais/$materialId/questoes'
   fileRoutesById: FileRoutesById
 }
@@ -362,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/materiais/$materialId/desempenho': {
+      id: '/_authenticated/materiais/$materialId/desempenho'
+      path: '/materiais/$materialId/desempenho'
+      fullPath: '/materiais/$materialId/desempenho'
+      preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -379,6 +399,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
+  AuthenticatedMateriaisMaterialIdDesempenhoRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 
@@ -396,6 +417,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
+  AuthenticatedMateriaisMaterialIdDesempenhoRoute:
+    AuthenticatedMateriaisMaterialIdDesempenhoRoute,
   AuthenticatedMateriaisMaterialIdQuestoesRoute:
     AuthenticatedMateriaisMaterialIdQuestoesRoute,
 }
