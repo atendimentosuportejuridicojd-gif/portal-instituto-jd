@@ -1,136 +1,116 @@
+## Etapa 4 — Hotmart, Assinaturas, Admin Completo e Finalização
 
-## ETAPA 3 — Sistema Inteligente de Questões, Desempenho e Revisão
-
-### Observação inicial
-A Etapa 2 (upload/CRUD de PDFs e leitor in-app) ainda não foi executada. A Etapa 3 pressupõe materiais cadastrados. Vou implementar toda a Etapa 3 sobre a estrutura existente (`materiais`, `questoes`, `questao_alternativas`, `questao_tentativas`) e adicionar apenas o mínimo de schema necessário para tentativas com estado (em andamento / concluída). O CRUD completo de materiais/PDF fica para a Etapa 2 quando ela for retomada.
+Escopo grande. Vou dividir em blocos entregáveis. Confirme e implemento na sequência (ou em uma rodada só, se preferir).
 
 ---
 
-### 1. Ajustes de banco (migração)
+### Bloco 1 — Banco de dados e segurança
 
-Adicionar tabela `questao_sessoes` (uma "tentativa completa" do aluno sobre um material):
+Migração única no Supabase:
 
-- `id`, `user_id`, `material_id`
-- `status` ('em_andamento' | 'concluida')
-- `total_questoes`, `acertos`, `erros`, `percentual`
-- `iniciada_em`, `concluida_em`
-- índices por (user_id, material_id)
-
-Alterar `questao_tentativas`:
-- adicionar `sessao_id` (FK), `questao_id`, `alternativa_id`, `acertou`
-- garantir unicidade (sessao_id, questao_id) — cada questão respondida uma vez por sessão.
-
-Alterar `questoes`:
-- adicionar `material_id` (FK obrigatória — questão pertence a um PDF)
-- adicionar `referencia` (texto único: banca/órgão/cargo/ano)
-- adicionar `ordem`
-
-Views/RPC:
-- função `get_desempenho_material(user_id, material_id)` retorna % da última sessão concluída.
-
-Todas as tabelas mantêm RLS: aluno vê apenas suas sessões/tentativas; admin vê tudo; leitura de questões apenas para materiais publicados.
+- `assinaturas`: `user_id`, `hotmart_subscriber_code`, `hotmart_transaction`, `produto`, `plano`, `status` (`ativa` | `inativa` | `inadimplente` | `cancelada`), `iniciada_em`, `expira_em`, `ultima_renovacao_em`, `cancelada_em`.
+- `profiles`: adicionar `ultimo_acesso_em`, `bloqueado` (bool), `bloqueado_motivo`.
+- `notificacoes`: `titulo`, `mensagem`, `tipo` (`material` | `noticia` | `cronograma` | `concurso` | `sistema`), `link`, `publicada_em`, `escopo` (`todos` | `user`), `target_user_id?`.
+- `notificacoes_leituras`: `notificacao_id`, `user_id`, `lida_em` (marcação por aluno).
+- `admin_logs`: `user_id`, `acao`, `entidade`, `entidade_id`, `metadata jsonb`, `created_at`.
+- `configuracoes_plataforma`: singleton com nome, logo_url, favicon_url, contato, redes sociais, textos rodapé, sobre.
+- Função `has_role` (se ainda não existir) + policies revisadas.
+- Função `is_assinatura_ativa(user_id)` usada nas policies de conteúdo pago (materiais, questões).
+- RLS: aluno vê apenas suas notificações/leituras/assinatura; admin vê tudo; `admin_logs` só admin.
 
 ---
 
-### 2. Área Administrativa — Cadastro de Questões
+### Bloco 2 — Webhook Hotmart
 
-Página `/admin/questoes`:
-- Listagem agrupada por Disciplina → Material.
-- Botão "Nova Questão" abre formulário.
+Rota pública `src/routes/api/public/hotmart/webhook.ts`:
 
-Formulário (campos exatamente como pedido):
-- Material relacionado (select em cascata: Disciplina → Material)
-- Referência da questão (texto livre)
-- Enunciado (textarea)
-- Alternativas A–E (5 campos)
-- Resposta correta (radio único A–E)
-- Comentário do professor (textarea)
+- Verifica `hottok` (segredo `HOTMART_HOTTOK`) em header/body.
+- Mapeia eventos:
+  - `PURCHASE_APPROVED` / `PURCHASE_COMPLETE` → cria user via `supabaseAdmin.auth.admin.inviteUserByEmail` (se novo) e ativa assinatura. Envia link de definição de senha.
+  - `PURCHASE_DELAYED` / `PURCHASE_BILLET_PRINTED` sem pagamento → `inadimplente`.
+  - `SUBSCRIPTION_CANCELLATION` / `PURCHASE_CANCELED` / `PURCHASE_REFUNDED` / `PURCHASE_CHARGEBACK` → `cancelada` / `inativa`.
+  - Renovação → atualiza `expira_em` e volta para `ativa`.
+- Idempotência por `hotmart_transaction`.
+- Grava em `admin_logs`.
 
-Edição e exclusão inline. Sem campos extras de banca/ano separados.
+Segredo: solicito `HOTMART_HOTTOK` via `add_secret` no momento certo.
 
----
-
-### 3. Área do Aluno — Integração com o material
-
-No card/linha de cada PDF (nas telas de Acervo, Trilhas e Concursos), três ações:
-- 📄 Visualizar PDF (placeholder até Etapa 2)
-- 📝 Resolver Questões / 🔄 Refazer Questões (troca automaticamente)
-- 📊 Desempenho: XX%
-
-O rótulo do botão e o percentual vêm da última sessão concluída daquele aluno naquele material.
+Gate de acesso: middleware no `_authenticated/route.tsx` que consulta assinatura; se inativa/inadimplente → redireciona para `/assinatura-bloqueada` (tela dedicada com instruções). Admin ignora o gate.
 
 ---
 
-### 4. Página de Resolução `/materiais/$materialId/questoes`
+### Bloco 3 — Autenticação e perfil
 
-Fluxo:
-1. Ao entrar: buscar sessão `em_andamento` do aluno para o material. Se não houver, criar uma nova com o snapshot atual de questões publicadas.
-2. Renderizar a próxima questão não respondida.
-
-Interface:
-- Topo: Disciplina · Material · "Questão X de N" · barra de progresso.
-- Referência (acima do enunciado).
-- Enunciado.
-- Alternativas A–E como radios.
-- Botão **Responder**.
-
-Após responder:
-- Salva tentativa no banco (imutável).
-- Bloqueia alternativas.
-- Destaca em verde a correta e em vermelho a escolhida (se errada).
-- Mostra "✅ Resposta correta" ou "❌ Resposta incorreta".
-- Exibe **Comentário do Professor**.
-- Libera botão **Próxima Questão**.
-
-Salvamento automático: cada resposta é persistida no ato. Ao reabrir a página, o sistema retoma a partir da próxima questão não respondida. Questões já respondidas ficam bloqueadas.
-
-Ao responder a última: finaliza a sessão, calcula acertos/erros/percentual, redireciona para a página de Desempenho.
-
-Refazer: cria nova sessão (mantém histórico das anteriores). Não permite editar respostas de uma sessão concluída.
+- Fluxo "definir senha" via link do Supabase Auth (recovery) em `/definir-senha`.
+- Página `/esqueci-senha` e `/redefinir-senha` (públicas).
+- `perfil.tsx`: dados pessoais, alterar senha, status/validade da assinatura, últimos acessos.
+- Registro de `ultimo_acesso_em` num `onAuthStateChange` server fn leve.
 
 ---
 
-### 5. Página de Desempenho `/materiais/$materialId/desempenho`
+### Bloco 4 — Admin: Usuários
 
-Conteúdo:
-- Resultado atual: % · total · acertos · erros.
-- Recomendação fixa: *"Para um melhor aproveitamento nos estudos para concursos, recomenda-se buscar um desempenho igual ou superior a 85% em cada conteúdo."*
-- Lista de questões da última sessão:
-  - Acertadas (colapsáveis).
-  - Erradas (expandidas): enunciado, alternativa escolhida, alternativa correta, comentário do professor.
-- Histórico de tentativas (tabela: Tentativa · Data · Aproveitamento).
-- Botões: Refazer Questões · Voltar ao material.
+`/admin/usuarios` reescrito:
+
+- Busca por nome/e-mail.
+- Colunas: status assinatura, cadastro, último acesso, materiais concluídos, questionários realizados.
+- Ações: bloquear/desbloquear, enviar redefinição de senha, editar nome/e-mail.
+- Modal de detalhes.
 
 ---
 
-### 6. Dashboard do Aluno — "Conteúdos para Revisar"
+### Bloco 5 — Admin: Dashboard
 
-Nova seção listando materiais com percentual da última sessão < 70% (ajustável).
-Cada item: Disciplina · Material · Desempenho · badge "🔴 Revisão recomendada" · atalho para refazer.
-
----
-
-### 7. Server functions (TanStack, `.functions.ts`)
-
-Todas protegidas com `requireSupabaseAuth`:
-- `iniciarOuRetomarSessao({ materialId })`
-- `responderQuestao({ sessaoId, questaoId, alternativaId })` — valida, marca acerto, se última questão finaliza a sessão.
-- `getDesempenhoMaterial({ materialId })` — última sessão + histórico.
-- `getConteudosParaRevisar()` — usado no dashboard.
-- `getQuestoesPorMaterial({ materialId })` — para admin e para aluno (aluno recebe sem `correta`/`comentario`).
-
-Admin (também `requireSupabaseAuth` + checagem de role):
-- `criarQuestao`, `atualizarQuestao`, `excluirQuestao`.
+`/admin/dashboard` com KPIs reais + gráfico simples (cadastros por semana, sessões de questões por semana) usando `recharts` (já disponível via shadcn charts).
 
 ---
 
-### 8. UI / Design
+### Bloco 6 — Configurações da plataforma
 
-Mantém o design system atual (azul-marinho + dourado, minimalista). Componentes novos: `QuestionCard`, `AlternativaOption`, `ProgressoQuestionario`, `DesempenhoResumo`, `HistoricoTentativas`. Nenhuma alteração de identidade visual.
+`/admin/configuracoes`:
+
+- Form editando singleton `configuracoes_plataforma`.
+- Upload de logo/favicon para bucket `branding` (público).
+- Hook `usePlataformaConfig()` consumido em Root, Sidebars, rodapé, `<title>`, favicon dinâmico.
 
 ---
 
-### Fora de escopo desta etapa
-- Upload/leitor de PDF (Etapa 2, pendente).
-- Hotmart, assinaturas, bloqueio de usuário (Etapa 4).
-- Alterar questão individual em sessão concluída (regra do produto: só refazendo tudo).
+### Bloco 7 — Notificações
+
+- Admin: `/admin/noticias` ganha "publicar notificação" opcional. Página adicional `/admin/notificacoes` para envios manuais.
+- Aluno: sino no header com contador de não lidas, popover com lista; item "marcar como lida" e "marcar todas".
+- Triggers automáticos ao publicar material/notícia/cronograma/concurso (server fn cria notificação de escopo `todos`).
+
+---
+
+### Bloco 8 — Busca global
+
+- Barra no header (Cmd/Ctrl+K) usando `cmdk`.
+- Server fn `buscaGlobal({ q })` que consulta disciplinas, módulos, materiais, concursos, notícias, cronogramas via `ilike` com `LIMIT` por categoria.
+- Resultado agrupado, navegação por teclado, deep-link para o item.
+
+---
+
+### Bloco 9 — Segurança, performance, acessibilidade
+
+- `admin_logs`: helper server-side chamado nos pontos-chave (login, logout, publicações, exclusões).
+- Revisão de RLS por tabela (rodo `supabase--linter` no fim).
+- Lazy loading das rotas admin pesadas.
+- Revisar `aria-label`, focus states, contraste, navegação por teclado no header/sidebar/busca.
+- Meta tags/OG por rota (Portal do Aluno – Instituto J&D Especialistas na Carreira Judiciária).
+
+---
+
+### Fora de escopo (mantido para o futuro)
+
+- App mobile, push, IA, calendário, gamificação, certificados.
+- Cobrança/checkout dentro da plataforma (a Hotmart continua sendo o checkout).
+
+---
+
+### Perguntas rápidas antes de codar
+
+1. **Criação de conta via webhook**: uso `inviteUserByEmail` (Supabase envia e-mail com link de definição de senha) — ok? Alternativa: gerar link e enviar por e-mail próprio via Lovable Emails.
+2. **Tela de bloqueio**: aluno inadimplente vê só mensagem + botão "Regularizar na Hotmart" com link configurável nas Configurações. Ok?
+3. **Gráficos do dashboard admin**: cadastros/semana + sessões/semana são suficientes, ou quer mais séries (ex.: aprovações Hotmart, receita)?
+4. **Confirma que posso executar tudo (Bloco 1–9) em sequência**, ou prefere aprovar bloco por bloco?
