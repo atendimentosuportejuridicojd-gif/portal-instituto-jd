@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageContent, PageHeader } from "@/components/page";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
   TableBody,
@@ -11,13 +12,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
-type ProfileRow = {
-  id: string;
-  nome_completo: string | null;
-  email: string | null;
-  created_at: string;
-};
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Search, Lock, Unlock, Mail, Pencil } from "lucide-react";
+import { toast } from "sonner";
+import {
+  adminListUsuarios,
+  adminEditarUsuario,
+  adminBloquearUsuario,
+  adminResetSenhaUsuario,
+} from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   head: () => ({ meta: [{ title: "Usuários — Admin J&D" }] }),
@@ -25,20 +38,69 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
 });
 
 function Usuarios() {
-  const [rows, setRows] = useState<ProfileRow[]>([]);
+  const listFn = useServerFn(adminListUsuarios);
+  const editFn = useServerFn(adminEditarUsuario);
+  const blockFn = useServerFn(adminBloquearUsuario);
+  const resetFn = useServerFn(adminResetSenhaUsuario);
+  const qc = useQueryClient();
 
-  useEffect(() => {
-    supabase
-      .from("profiles")
-      .select("id, nome_completo, email, created_at")
-      .order("created_at", { ascending: false })
-      .limit(100)
-      .then(({ data }) => setRows((data ?? []) as ProfileRow[]));
-  }, []);
+  const [q, setQ] = useState("");
+  const [editing, setEditing] = useState<any | null>(null);
+  const [blockDialog, setBlockDialog] = useState<any | null>(null);
+  const [motivo, setMotivo] = useState("");
+
+  const query = useQuery({
+    queryKey: ["admin", "usuarios", q],
+    queryFn: () => listFn({ data: { q } }),
+  });
+
+  const edit = useMutation({
+    mutationFn: (v: { id: string; nome_completo: string }) => editFn({ data: v }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setEditing(null);
+      toast.success("Usuário atualizado.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const block = useMutation({
+    mutationFn: (v: { id: string; bloqueado: boolean; motivo?: string }) => blockFn({ data: v }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setBlockDialog(null);
+      setMotivo("");
+      toast.success(v.bloqueado ? "Usuário bloqueado." : "Usuário desbloqueado.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const reset = useMutation({
+    mutationFn: (email: string) =>
+      resetFn({ data: { email, redirect_to: window.location.origin + "/reset-password" } }),
+    onSuccess: () => toast.success("Link de redefinição gerado. O usuário receberá por e-mail."),
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const rows = query.data ?? [];
 
   return (
     <>
-      <PageHeader title="Usuários" description="Alunos e administradores da plataforma." />
+      <PageHeader
+        title="Usuários"
+        description="Alunos e administradores da plataforma."
+        actions={
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              className="w-64 pl-8"
+              placeholder="Buscar por nome ou e-mail…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+        }
+      />
       <PageContent>
         <div className="surface-card overflow-hidden">
           <Table>
@@ -46,27 +108,76 @@ function Usuarios() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>E-mail</TableHead>
-                <TableHead>Cadastrado em</TableHead>
-                <TableHead>Perfil</TableHead>
+                <TableHead>Assinatura</TableHead>
+                <TableHead>Cadastro</TableHead>
+                <TableHead>Último acesso</TableHead>
+                <TableHead className="text-right">Progresso</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-12 text-center text-sm text-muted-foreground">
-                    Nenhum usuário encontrado.
+                  <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                    {query.isLoading ? "Carregando…" : "Nenhum usuário encontrado."}
                   </TableCell>
                 </TableRow>
               )}
-              {rows.map((r) => (
+              {rows.map((r: any) => (
                 <TableRow key={r.id}>
-                  <TableCell className="font-medium">{r.nome_completo || "—"}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{r.nome_completo || "—"}</span>
+                      {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
+                      {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{r.email}</TableCell>
+                  <TableCell>
+                    <AssinaturaBadge status={r.assinatura_status} plano={r.assinatura_plano} />
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(r.created_at).toLocaleDateString("pt-BR")}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">Aluno</Badge>
+                  <TableCell className="text-muted-foreground">
+                    {r.ultimo_acesso_em
+                      ? new Date(r.ultimo_acesso_em).toLocaleDateString("pt-BR")
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="text-right text-xs text-muted-foreground tabular-nums">
+                    <div>{r.questionarios_concluidos} questionário(s)</div>
+                    <div>{r.questoes_respondidas} questão(ões)</div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="inline-flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Editar"
+                        onClick={() => setEditing(r)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Enviar redefinição de senha"
+                        onClick={() => reset.mutate(r.email)}
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={r.bloqueado ? "Desbloquear" : "Bloquear"}
+                        onClick={() => {
+                          if (r.bloqueado) block.mutate({ id: r.id, bloqueado: false });
+                          else setBlockDialog(r);
+                        }}
+                      >
+                        {r.bloqueado ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -74,6 +185,72 @@ function Usuarios() {
           </Table>
         </div>
       </PageContent>
+
+      {/* Editar */}
+      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar usuário</DialogTitle>
+            <DialogDescription>{editing?.email}</DialogDescription>
+          </DialogHeader>
+          {editing && (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label>Nome completo</Label>
+                <Input
+                  value={editing.nome_completo ?? ""}
+                  onChange={(e) => setEditing({ ...editing, nome_completo: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
+            <Button
+              onClick={() =>
+                edit.mutate({ id: editing.id, nome_completo: editing.nome_completo ?? "" })
+              }
+              disabled={edit.isPending}
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bloquear */}
+      <Dialog open={!!blockDialog} onOpenChange={(v) => !v && setBlockDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bloquear usuário</DialogTitle>
+            <DialogDescription>
+              {blockDialog?.nome_completo} ({blockDialog?.email}) perderá acesso imediatamente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>Motivo (opcional)</Label>
+            <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setBlockDialog(null)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              onClick={() => block.mutate({ id: blockDialog.id, bloqueado: true, motivo })}
+              disabled={block.isPending}
+            >
+              Bloquear
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
+}
+
+function AssinaturaBadge({ status, plano }: { status: string; plano: string | null }) {
+  if (status === "ativa") return <Badge className="bg-green-600 hover:bg-green-600">Ativa{plano ? ` · ${plano}` : ""}</Badge>;
+  if (status === "inadimplente") return <Badge variant="destructive">Inadimplente</Badge>;
+  if (status === "cancelada") return <Badge variant="secondary">Cancelada</Badge>;
+  if (status === "inativa") return <Badge variant="secondary">Inativa</Badge>;
+  return <Badge variant="outline">Sem assinatura</Badge>;
 }

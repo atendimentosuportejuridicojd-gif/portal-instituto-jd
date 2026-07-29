@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -16,6 +17,7 @@ import { Route as AuthenticatedTrilhasRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
+import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
 import { Route as AuthenticatedAcervoRouteImport } from './routes/_authenticated/acervo'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authenticated/admin/trilhas'
@@ -25,9 +27,15 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
+import { Route as ApiPublicHotmartWebhookRouteImport } from './routes/api/public/hotmart/webhook'
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
 import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -62,6 +70,12 @@ const AuthenticatedConcursosRoute = AuthenticatedConcursosRouteImport.update({
   path: '/concursos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAssinaturaBloqueadaRoute =
+  AuthenticatedAssinaturaBloqueadaRouteImport.update({
+    id: '/assinatura-bloqueada',
+    path: '/assinatura-bloqueada',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAcervoRoute = AuthenticatedAcervoRouteImport.update({
   id: '/acervo',
   path: '/acervo',
@@ -115,6 +129,11 @@ const AuthenticatedAdminAcervoRoute =
     path: '/admin/acervo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHotmartWebhookRoute = ApiPublicHotmartWebhookRouteImport.update({
+  id: '/api/public/hotmart/webhook',
+  path: '/api/public/hotmart/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedMateriaisMaterialIdQuestoesRoute =
   AuthenticatedMateriaisMaterialIdQuestoesRouteImport.update({
     id: '/materiais/$materialId/questoes',
@@ -131,7 +150,9 @@ const AuthenticatedMateriaisMaterialIdDesempenhoRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/acervo': typeof AuthenticatedAcervoRoute
+  '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -146,11 +167,14 @@ export interface FileRoutesByFullPath {
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
+  '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/acervo': typeof AuthenticatedAcervoRoute
+  '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -165,13 +189,16 @@ export interface FileRoutesByTo {
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
+  '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/acervo': typeof AuthenticatedAcervoRoute
+  '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -186,13 +213,16 @@ export interface FileRoutesById {
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
+  '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/acervo'
+    | '/assinatura-bloqueada'
     | '/concursos'
     | '/dashboard'
     | '/perfil'
@@ -207,11 +237,14 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/questoes'
+    | '/api/public/hotmart/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/acervo'
+    | '/assinatura-bloqueada'
     | '/concursos'
     | '/dashboard'
     | '/perfil'
@@ -226,12 +259,15 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/questoes'
+    | '/api/public/hotmart/webhook'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/reset-password'
     | '/_authenticated/acervo'
+    | '/_authenticated/assinatura-bloqueada'
     | '/_authenticated/concursos'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfil'
@@ -246,16 +282,26 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/materiais/$materialId/desempenho'
     | '/_authenticated/materiais/$materialId/questoes'
+    | '/api/public/hotmart/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicHotmartWebhookRoute: typeof ApiPublicHotmartWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -303,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/concursos'
       fullPath: '/concursos'
       preLoaderRoute: typeof AuthenticatedConcursosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/assinatura-bloqueada': {
+      id: '/_authenticated/assinatura-bloqueada'
+      path: '/assinatura-bloqueada'
+      fullPath: '/assinatura-bloqueada'
+      preLoaderRoute: typeof AuthenticatedAssinaturaBloqueadaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/acervo': {
@@ -368,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAcervoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hotmart/webhook': {
+      id: '/api/public/hotmart/webhook'
+      path: '/api/public/hotmart/webhook'
+      fullPath: '/api/public/hotmart/webhook'
+      preLoaderRoute: typeof ApiPublicHotmartWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/materiais/$materialId/questoes': {
       id: '/_authenticated/materiais/$materialId/questoes'
       path: '/materiais/$materialId/questoes'
@@ -387,6 +447,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAcervoRoute: typeof AuthenticatedAcervoRoute
+  AuthenticatedAssinaturaBloqueadaRoute: typeof AuthenticatedAssinaturaBloqueadaRoute
   AuthenticatedConcursosRoute: typeof AuthenticatedConcursosRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -405,6 +466,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAcervoRoute: AuthenticatedAcervoRoute,
+  AuthenticatedAssinaturaBloqueadaRoute: AuthenticatedAssinaturaBloqueadaRoute,
   AuthenticatedConcursosRoute: AuthenticatedConcursosRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
@@ -430,17 +492,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicHotmartWebhookRoute: ApiPublicHotmartWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

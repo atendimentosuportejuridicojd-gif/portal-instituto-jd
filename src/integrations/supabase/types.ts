@@ -14,37 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          acao: string
+          created_at: string
+          entidade: string | null
+          entidade_id: string | null
+          id: string
+          metadata: Json
+          user_id: string | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          entidade?: string | null
+          entidade_id?: string | null
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          entidade?: string | null
+          entidade_id?: string | null
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       assinaturas: {
         Row: {
+          cancelada_em: string | null
           created_at: string
           fim: string | null
+          hotmart_subscriber_code: string | null
           hotmart_transaction_id: string | null
           id: string
           inicio: string
           plano: string | null
+          produto: string | null
           status: string
+          ultima_renovacao_em: string | null
+          ultimo_evento: string | null
+          ultimo_evento_em: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          cancelada_em?: string | null
           created_at?: string
           fim?: string | null
+          hotmart_subscriber_code?: string | null
           hotmart_transaction_id?: string | null
           id?: string
           inicio?: string
           plano?: string | null
+          produto?: string | null
           status?: string
+          ultima_renovacao_em?: string | null
+          ultimo_evento?: string | null
+          ultimo_evento_em?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          cancelada_em?: string | null
           created_at?: string
           fim?: string | null
+          hotmart_subscriber_code?: string | null
           hotmart_transaction_id?: string | null
           id?: string
           inicio?: string
           plano?: string | null
+          produto?: string | null
           status?: string
+          ultima_renovacao_em?: string | null
+          ultimo_evento?: string | null
+          ultimo_evento_em?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -122,6 +170,66 @@ export type Database = {
           publicado?: boolean
           slug?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      configuracoes_plataforma: {
+        Row: {
+          email_contato: string | null
+          facebook_url: string | null
+          favicon_url: string | null
+          hotmart_regularizacao_url: string | null
+          id: boolean
+          instagram_url: string | null
+          linkedin_url: string | null
+          logo_url: string | null
+          nome_curto: string
+          nome_plataforma: string
+          sobre: string | null
+          telefone: string | null
+          texto_rodape: string | null
+          updated_at: string
+          updated_by: string | null
+          whatsapp: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          email_contato?: string | null
+          facebook_url?: string | null
+          favicon_url?: string | null
+          hotmart_regularizacao_url?: string | null
+          id?: boolean
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          nome_curto?: string
+          nome_plataforma?: string
+          sobre?: string | null
+          telefone?: string | null
+          texto_rodape?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          whatsapp?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          email_contato?: string | null
+          facebook_url?: string | null
+          favicon_url?: string | null
+          hotmart_regularizacao_url?: string | null
+          id?: boolean
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          logo_url?: string | null
+          nome_curto?: string
+          nome_plataforma?: string
+          sobre?: string | null
+          telefone?: string | null
+          texto_rodape?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          whatsapp?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
@@ -334,29 +442,103 @@ export type Database = {
         }
         Relationships: []
       }
+      notificacoes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          escopo: string
+          id: string
+          link: string | null
+          mensagem: string
+          publicada_em: string
+          target_user_id: string | null
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          escopo?: string
+          id?: string
+          link?: string | null
+          mensagem?: string
+          publicada_em?: string
+          target_user_id?: string | null
+          tipo?: string
+          titulo: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          escopo?: string
+          id?: string
+          link?: string | null
+          mensagem?: string
+          publicada_em?: string
+          target_user_id?: string | null
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
+      notificacoes_leituras: {
+        Row: {
+          lida_em: string
+          notificacao_id: string
+          user_id: string
+        }
+        Insert: {
+          lida_em?: string
+          notificacao_id: string
+          user_id: string
+        }
+        Update: {
+          lida_em?: string
+          notificacao_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_leituras_notificacao_id_fkey"
+            columns: ["notificacao_id"]
+            isOneToOne: false
+            referencedRelation: "notificacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bloqueado: boolean
+          bloqueado_motivo: string | null
           created_at: string
           email: string
           id: string
           nome_completo: string
+          ultimo_acesso_em: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bloqueado?: boolean
+          bloqueado_motivo?: string | null
           created_at?: string
           email?: string
           id: string
           nome_completo?: string
+          ultimo_acesso_em?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bloqueado?: boolean
+          bloqueado_motivo?: string | null
           created_at?: string
           email?: string
           id?: string
           nome_completo?: string
+          ultimo_acesso_em?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -667,6 +849,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_assinatura_ativa: { Args: { _user_id: string }; Returns: boolean }
+      registrar_ultimo_acesso: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "administrador" | "aluno"
