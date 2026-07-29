@@ -17,10 +17,10 @@ export const Route = createFileRoute("/")({
         content:
           "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
       },
-      { property: "og:title", content: "Portal do Aluno — Instituto J&D" },
+      { property: "og:title", content: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
       {
         property: "og:description",
-        content: "Sua central de estudos jurídicos para concursos de Tribunais e MPs.",
+        content: "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
       },
     ],
   }),

@@ -83,16 +83,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Plataforma oficial de estudos do Instituto J&D — especialistas na carreira judiciária, com preparação para Tribunais e Ministérios Públicos.",
+          "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
       },
       { name: "author", content: "Instituto J&D Especialistas na Carreira Judiciária" },
-      { property: "og:title", content: "Portal do Aluno — Instituto J&D" },
+      { property: "og:title", content: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
       {
         property: "og:description",
-        content: "Preparação estruturada para Tribunais e Ministérios Públicos.",
+        content: "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
+      { name: "twitter:description", content: "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e4f1fce3-4ca2-4911-b593-bbbfdfa83640/id-preview-ac058030--06ba8bb0-ef74-4ce1-b40c-0352eb33163b.lovable.app-1785303678261.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e4f1fce3-4ca2-4911-b593-bbbfdfa83640/id-preview-ac058030--06ba8bb0-ef74-4ce1-b40c-0352eb33163b.lovable.app-1785303678261.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
