@@ -1,0 +1,144 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+async function assertAdmin(ctx: { supabase: any; userId: string }) {
+  const { data } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "administrador",
+  });
+  if (!data) throw new Error("Acesso restrito ao administrador.");
+}
+
+export const adminListUsuarios = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ q: z.string().trim().max(200).default("") }).parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabase } = context;
+
+    let query = supabase
+      .from("profiles")
+      .select("id, nome_completo, email, created_at, ultimo_acesso_em, bloqueado, bloqueado_motivo")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (data.q) {
+      const q = data.q.replace(/[%_]/g, "");
+      query = query.or(`nome_completo.ilike.%${q}%,email.ilike.%${q}%`);
+    }
+    const { data: profiles, error } = await query;
+    if (error) throw new Error(error.message);
+    const ids = (profiles ?? []).map((p: any) => p.id);
+    if (ids.length === 0) return [];
+
+    const [{ data: assins }, { data: sessoes }, { data: tent }, { data: roles }] = await Promise.all([
+      supabase
+        .from("assinaturas")
+        .select("user_id, status, plano, fim, ultima_renovacao_em")
+        .in("user_id", ids),
+      supabase.from("questao_sessoes").select("user_id, status").in("user_id", ids),
+      supabase.from("questao_tentativas").select("user_id").in("user_id", ids),
+      supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+    ]);
+
+    const assinMap = new Map<string, any>();
+    (assins ?? []).forEach((a: any) => {
+      const prev = assinMap.get(a.user_id);
+      if (!prev || (a.ultima_renovacao_em ?? "") > (prev.ultima_renovacao_em ?? "")) {
+        assinMap.set(a.user_id, a);
+      }
+    });
+    const sessCount = new Map<string, number>();
+    (sessoes ?? []).forEach((s: any) => {
+      if (s.status === "concluida") sessCount.set(s.user_id, (sessCount.get(s.user_id) ?? 0) + 1);
+    });
+    const tentCount = new Map<string, number>();
+    (tent ?? []).forEach((t: any) => tentCount.set(t.user_id, (tentCount.get(t.user_id) ?? 0) + 1));
+    const roleMap = new Map<string, string[]>();
+    (roles ?? []).forEach((r: any) => {
+      const arr = roleMap.get(r.user_id) ?? [];
+      arr.push(r.role);
+      roleMap.set(r.user_id, arr);
+    });
+
+    return (profiles ?? []).map((p: any) => ({
+      ...p,
+      assinatura_status: assinMap.get(p.id)?.status ?? "sem_assinatura",
+      assinatura_plano: assinMap.get(p.id)?.plano ?? null,
+      assinatura_fim: assinMap.get(p.id)?.fim ?? null,
+      questionarios_concluidos: sessCount.get(p.id) ?? 0,
+      questoes_respondidas: tentCount.get(p.id) ?? 0,
+      roles: roleMap.get(p.id) ?? ["aluno"],
+    }));
+  });
+
+const editSchema = z.object({
+  id: z.string().uuid(),
+  nome_completo: z.string().trim().min(1).max(200).optional(),
+});
+
+export const adminEditarUsuario = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => editSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ nome_completo: data.nome_completo })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await context.supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: "usuario.editar",
+      entidade: "profiles",
+      entidade_id: data.id,
+      metadata: { nome_completo: data.nome_completo },
+    });
+    return { ok: true };
+  });
+
+export const adminBloquearUsuario = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), bloqueado: z.boolean(), motivo: z.string().trim().max(500).optional() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({
+        bloqueado: data.bloqueado,
+        bloqueado_motivo: data.bloqueado ? data.motivo ?? "Bloqueado manualmente pelo administrador." : null,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await context.supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: data.bloqueado ? "usuario.bloquear" : "usuario.desbloquear",
+      entidade: "profiles",
+      entidade_id: data.id,
+      metadata: { motivo: data.motivo },
+    });
+    return { ok: true };
+  });
+
+export const adminResetSenhaUsuario = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ email: z.string().email(), redirect_to: z.string().url() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.auth.admin.generateLink({
+      type: "recovery",
+      email: data.email,
+      options: { redirectTo: data.redirect_to },
+    });
+    if (error) throw new Error(error.message);
+    await context.supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: "usuario.reset_senha",
+      entidade: "auth.users",
+      metadata: { email: data.email },
+    });
+    return { ok: true };
+  });
