@@ -311,9 +311,34 @@ export type Database = {
         }
         Relationships: []
       }
+      favoritos: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       materiais: {
         Row: {
           arquivo_url: string | null
+          atualizado_em: string | null
           created_at: string
           descricao: string | null
           disciplina_id: string | null
@@ -321,12 +346,15 @@ export type Database = {
           modulo_id: string | null
           paginas: number | null
           publicado: boolean
+          publicado_em: string
           tags: string[] | null
           titulo: string
           updated_at: string
+          versao: number
         }
         Insert: {
           arquivo_url?: string | null
+          atualizado_em?: string | null
           created_at?: string
           descricao?: string | null
           disciplina_id?: string | null
@@ -334,12 +362,15 @@ export type Database = {
           modulo_id?: string | null
           paginas?: number | null
           publicado?: boolean
+          publicado_em?: string
           tags?: string[] | null
           titulo: string
           updated_at?: string
+          versao?: number
         }
         Update: {
           arquivo_url?: string | null
+          atualizado_em?: string | null
           created_at?: string
           descricao?: string | null
           disciplina_id?: string | null
@@ -347,9 +378,11 @@ export type Database = {
           modulo_id?: string | null
           paginas?: number | null
           publicado?: boolean
+          publicado_em?: string
           tags?: string[] | null
           titulo?: string
           updated_at?: string
+          versao?: number
         }
         Relationships: [
           {
@@ -364,6 +397,82 @@ export type Database = {
             columns: ["modulo_id"]
             isOneToOne: false
             referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_leitura: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          ultima_pagina: number
+          updated_at: string
+          user_id: string
+          versao_vista: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          ultima_pagina?: number
+          updated_at?: string
+          user_id: string
+          versao_vista?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          ultima_pagina?: number
+          updated_at?: string
+          user_id?: string
+          versao_vista?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_leitura_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_versoes: {
+        Row: {
+          arquivo_url: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          material_id: string
+          notas: string | null
+          versao: number
+        }
+        Insert: {
+          arquivo_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id: string
+          notas?: string | null
+          versao: number
+        }
+        Update: {
+          arquivo_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          material_id?: string
+          notas?: string | null
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_versoes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
             referencedColumns: ["id"]
           },
         ]
@@ -410,6 +519,7 @@ export type Database = {
         Row: {
           conteudo: string | null
           created_at: string
+          fixado: boolean
           id: string
           imagem_url: string | null
           publicado: boolean
@@ -421,6 +531,7 @@ export type Database = {
         Insert: {
           conteudo?: string | null
           created_at?: string
+          fixado?: boolean
           id?: string
           imagem_url?: string | null
           publicado?: boolean
@@ -432,6 +543,7 @@ export type Database = {
         Update: {
           conteudo?: string | null
           created_at?: string
+          fixado?: boolean
           id?: string
           imagem_url?: string | null
           publicado?: boolean
