@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, FileText, PencilLine, RefreshCw, BarChart3 } from "lucide-react";
+import { BookOpen, FileText, PencilLine, RefreshCw, BarChart3, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
+import { toggleFavorito } from "@/lib/aluno.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/acervo")({
   head: () => ({ meta: [{ title: "Acervo Base — Portal J&D" }] }),
