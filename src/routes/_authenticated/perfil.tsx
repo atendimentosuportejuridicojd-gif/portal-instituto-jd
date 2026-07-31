@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getMinhaAssinatura } from "@/lib/assinaturas.functions";
+import { getResumoJornada } from "@/lib/aluno.functions";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Portal J&D" }] }),
@@ -26,6 +27,8 @@ function Perfil() {
 
   const assFn = useServerFn(getMinhaAssinatura);
   const ass = useQuery({ queryKey: ["minha-assinatura"], queryFn: () => assFn() });
+  const jornadaFn = useServerFn(getResumoJornada);
+  const jornada = useQuery({ queryKey: ["perfil", "jornada"], queryFn: () => jornadaFn() });
 
   useEffect(() => {
     supabase
@@ -65,6 +68,31 @@ function Perfil() {
       <PageHeader title="Perfil" description="Suas informações e assinatura." />
       <PageContent>
         <div className="grid gap-6 lg:grid-cols-2">
+          <div className="surface-card space-y-4 p-6 lg:col-span-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Sua jornada
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Info label="PDFs estudados">
+                <span className="text-2xl font-semibold tabular-nums">
+                  {jornada.data?.materiais_estudados ?? 0}
+                </span>
+              </Info>
+              <Info label="Questionários concluídos">
+                <span className="text-2xl font-semibold tabular-nums">
+                  {jornada.data?.questionarios_concluidos ?? 0}
+                </span>
+              </Info>
+              <Info label="Aproveitamento geral">
+                <span className="text-2xl font-semibold tabular-nums">
+                  {jornada.data?.aproveitamento_geral === null || jornada.data === undefined
+                    ? "—"
+                    : `${jornada.data.aproveitamento_geral}%`}
+                </span>
+              </Info>
+            </div>
+          </div>
+
           <form onSubmit={save} className="surface-card space-y-4 p-6">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Dados pessoais</h2>
             <div className="space-y-1.5">

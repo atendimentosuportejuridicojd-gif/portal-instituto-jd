@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, FileText, PencilLine, RefreshCw, BarChart3 } from "lucide-react";
+import { BookOpen, FileText, PencilLine, RefreshCw, BarChart3, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
+import { toggleFavorito } from "@/lib/aluno.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/acervo")({
   head: () => ({ meta: [{ title: "Acervo Base — Portal J&D" }] }),
@@ -60,6 +62,18 @@ function Acervo() {
 }
 
 function MaterialRow({ m }: { m: any }) {
+  const qc = useQueryClient();
+  const favFn = useServerFn(toggleFavorito);
+  const fav = useMutation({
+    mutationFn: () => favFn({ data: { tipo: "material" as const, item_id: m.id } }),
+    onSuccess: (r: any) => {
+      qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
+      qc.invalidateQueries({ queryKey: ["favoritos"] });
+      toast.success(r?.favorito ? "Adicionado aos favoritos." : "Removido dos favoritos.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const jaFez = m.desempenho !== null;
   const temQuestoes = m.total_questoes > 0;
   const perf = m.desempenho as number | null;
@@ -67,18 +81,36 @@ function MaterialRow({ m }: { m: any }) {
     perf === null ? "" : perf >= 85 ? "text-green-600" : perf >= 70 ? "text-yellow-600" : "text-red-600";
 
   return (
-    <div className="surface-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="surface-card flex flex-col gap-3 p-4 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
           <h3 className="truncate text-sm font-semibold">{m.titulo}</h3>
+          {m.novo && <Badge className="shrink-0">Novo</Badge>}
+          {m.atualizado && (
+            <Badge variant="secondary" className="shrink-0">
+              Atualizado · v{m.versao}
+            </Badge>
+          )}
         </div>
         {m.descricao && (
           <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{m.descricao}</p>
         )}
+        <p className="mt-1 text-xs text-muted-foreground">
+          📝 {m.total_questoes} {m.total_questoes === 1 ? "questão" : "questões"}
+        </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="ghost" size="sm" disabled title="Disponível na Etapa 2">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={m.favorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          onClick={() => fav.mutate()}
+          disabled={fav.isPending}
+        >
+          <Star className={cn("h-4 w-4", m.favorito && "fill-gold text-gold")} />
+        </Button>
+        <Button variant="ghost" size="sm" disabled title="Leitor de PDF disponível na Etapa 2">
           <FileText className="mr-1 h-3.5 w-3.5" />
           Visualizar PDF
         </Button>

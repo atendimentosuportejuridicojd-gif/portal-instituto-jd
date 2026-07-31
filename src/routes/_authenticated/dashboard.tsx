@@ -2,18 +2,58 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader } from "@/components/page";
-import { BookOpen, Target, FileText, Newspaper, Clock, TrendingUp, AlertCircle } from "lucide-react";
+import {
+  BookOpen,
+  Target,
+  FileText,
+  Newspaper,
+  Clock,
+  TrendingUp,
+  AlertCircle,
+  Star,
+  Sparkles,
+  RefreshCw,
+  ArrowRight,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getConteudosParaRevisar } from "@/lib/questoes.functions";
+import { getResumoDashboard, listFavoritos } from "@/lib/aluno.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Portal J&D" }] }),
+  head: () => ({
+    meta: [
+      { title: "Dashboard — Portal do Aluno J&D" },
+      {
+        name: "description",
+        content:
+          "Central de estudos do Instituto J&D Especialistas na Carreira Judiciária: continue de onde parou, revise conteúdos e acesse seus favoritos.",
+      },
+      { property: "og:title", content: "Dashboard — Portal do Aluno J&D" },
+      {
+        property: "og:description",
+        content: "Continue de onde parou, revise conteúdos e acesse seus favoritos.",
+      },
+    ],
+  }),
   component: Dashboard,
 });
 
 function Dashboard() {
-  const fetchFn = useServerFn(getConteudosParaRevisar);
-  const q = useQuery({ queryKey: ["dashboard", "revisar"], queryFn: () => fetchFn() });
-  const revisar = q.data ?? [];
+  const revisarFn = useServerFn(getConteudosParaRevisar);
+  const resumoFn = useServerFn(getResumoDashboard);
+  const favFn = useServerFn(listFavoritos);
+
+  const qRevisar = useQuery({ queryKey: ["dashboard", "revisar"], queryFn: () => revisarFn() });
+  const qResumo = useQuery({ queryKey: ["dashboard", "resumo"], queryFn: () => resumoFn() });
+  const qFav = useQuery({ queryKey: ["favoritos"], queryFn: () => favFn() });
+
+  const revisar = qRevisar.data ?? [];
+  const continuar = qResumo.data?.continuar ?? null;
+  const atualizados = qResumo.data?.atualizados ?? [];
+  const novos = qResumo.data?.novos ?? [];
+  const favoritos = qFav.data ?? [];
 
   return (
     <>
@@ -22,76 +62,227 @@ function Dashboard() {
         description="Sua central de estudos para Tribunais e Ministérios Públicos."
       />
       <PageContent>
-        {revisar.length > 0 && (
-          <section className="mb-8">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              <AlertCircle className="h-4 w-4 text-red-500" />
-              Conteúdos para Revisar
-            </h2>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {revisar.map((r: any) => (
-                <Link
-                  key={r.material_id}
-                  to="/materiais/$materialId/questoes"
-                  params={{ materialId: r.material_id }}
-                  className="surface-card block border-red-500/20 p-5 transition-colors hover:border-red-500/40"
-                >
-                  <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-red-600">
-                    <span>🔴</span>
-                    Revisão recomendada
-                  </div>
-                  <h3 className="mt-2 text-sm font-semibold">{r.titulo}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{r.disciplina}</p>
-                  <div className="mt-3 text-sm">
-                    Desempenho: <span className="font-semibold tabular-nums text-red-600">{r.percentual}%</span>
-                  </div>
-                </Link>
-              ))}
+        <div className="space-y-8">
+          {/* Continuar de onde parei */}
+          <section className="animate-in fade-in duration-500">
+            <SectionTitle icon={Clock}>Continuar de onde parei</SectionTitle>
+            {qResumo.isLoading ? (
+              <Skeleton className="h-24 w-full rounded-lg" />
+            ) : continuar ? (
+              <div className="surface-card flex flex-col gap-4 p-5 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {continuar.disciplina}
+                  </p>
+                  <h3 className="mt-1 truncate text-base font-semibold">{continuar.titulo}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{continuar.detalhe}</p>
+                </div>
+                <Button asChild>
+                  <Link
+                    to={
+                      continuar.tipo === "questoes"
+                        ? "/materiais/$materialId/questoes"
+                        : "/materiais/$materialId/questoes"
+                    }
+                    params={{ materialId: continuar.material_id }}
+                  >
+                    Retomar
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="surface-card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Você ainda não iniciou seus estudos. Comece pelo Acervo Base.
+                </p>
+                <Button asChild variant="outline">
+                  <Link to="/acervo">
+                    Ir para o acervo
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </section>
+
+          {/* Avisos de material atualizado / novo */}
+          {(atualizados.length > 0 || novos.length > 0) && (
+            <section className="animate-in fade-in duration-500">
+              <SectionTitle icon={Sparkles}>Novidades no acervo</SectionTitle>
+              <div className="space-y-2">
+                {atualizados.map((m) => (
+                  <Link
+                    key={`up-${m.id}`}
+                    to="/materiais/$materialId/questoes"
+                    params={{ materialId: m.id }}
+                    className="surface-card flex items-center gap-3 p-4 transition-colors hover:border-gold/50"
+                  >
+                    <RefreshCw className="h-4 w-4 shrink-0 text-gold" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        Material atualizado: {m.disciplina} – {m.titulo}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Versão {m.versao} disponível.</p>
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">
+                      Revisado
+                    </Badge>
+                  </Link>
+                ))}
+                {novos.map((m) => (
+                  <Link
+                    key={`new-${m.id}`}
+                    to="/materiais/$materialId/questoes"
+                    params={{ materialId: m.id }}
+                    className="surface-card flex items-center gap-3 p-4 transition-colors hover:border-primary/40"
+                  >
+                    <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {m.disciplina} – {m.titulo}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Publicado recentemente.</p>
+                    </div>
+                    <Badge className="shrink-0">Novo</Badge>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Conteúdos para revisar */}
+          {revisar.length > 0 && (
+            <section className="animate-in fade-in duration-500">
+              <SectionTitle icon={AlertCircle}>Conteúdos para revisar</SectionTitle>
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {revisar.map((r: any) => (
+                  <Link
+                    key={r.material_id}
+                    to="/materiais/$materialId/questoes"
+                    params={{ materialId: r.material_id }}
+                    className="surface-card block p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">{r.disciplina}</p>
+                    <h3 className="mt-1 text-sm font-semibold">{r.titulo}</h3>
+                    <div className="mt-3 text-sm">
+                      Desempenho:{" "}
+                      <span className="font-semibold tabular-nums text-destructive">{r.percentual}%</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Meus favoritos */}
+          <section className="animate-in fade-in duration-500">
+            <SectionTitle icon={Star}>Meus favoritos</SectionTitle>
+            {qFav.isLoading ? (
+              <Skeleton className="h-20 w-full rounded-lg" />
+            ) : favoritos.length === 0 ? (
+              <p className="surface-card p-5 text-sm text-muted-foreground">
+                Você ainda não favoritou nenhum conteúdo. Use o ícone de estrela nos materiais para
+                salvá-los aqui.
+              </p>
+            ) : (
+              <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                {favoritos.map((f) => (
+                  <FavoritoCard key={f.id} f={f} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Atalhos */}
+          <section>
+            <SectionTitle icon={TrendingUp}>Atalhos</SectionTitle>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Atalho to="/acervo" icon={BookOpen} title="Acervo Base" desc="Materiais e questões." />
+              <Atalho to="/trilhas" icon={Target} title="Trilhas" desc="Técnico e Analista." />
+              <Atalho to="/concursos" icon={FileText} title="Concursos" desc="Preparação específica." />
+              <Atalho to="/perfil" icon={Newspaper} title="Meu perfil" desc="Jornada e assinatura." />
             </div>
           </section>
-        )}
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card icon={Clock} label="Continuar estudando" title="Retome de onde parou" desc="Acesse o acervo para continuar." />
-          <Card icon={BookOpen} label="Acervo" title="Materiais e questões" desc="Estude PDFs e resolva questões." />
-          <Card icon={Newspaper} label="Fique por dentro" title="Notícias e atualizações" desc="Nenhuma notícia publicada." />
-          <Card
-            icon={TrendingUp}
-            label="Revisão recomendada"
-            title="Reforce o que mais errou"
-            desc={
-              revisar.length > 0
-                ? `${revisar.length} conteúdo${revisar.length > 1 ? "s" : ""} abaixo de 70%.`
-                : "Nenhum conteúdo em revisão. Continue assim!"
-            }
-          />
-          <Card icon={Target} label="Trilha atual" title="Sua preparação" desc="Selecione uma trilha em Trilhas." />
-          <Card icon={FileText} label="Cronograma" title="Metas da semana" desc="Nenhum cronograma ativo." />
         </div>
       </PageContent>
     </>
   );
 }
 
-function Card({
+function FavoritoCard({ f }: { f: { tipo: string; item_id: string; titulo: string } }) {
+  const rotulo =
+    f.tipo === "material"
+      ? "Material"
+      : f.tipo === "trilha"
+        ? "Trilha"
+        : f.tipo === "concurso"
+          ? "Concurso"
+          : "Notícia";
+
+  const inner = (
+    <>
+      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+        <Star className="h-3.5 w-3.5 text-gold" />
+        {rotulo}
+      </div>
+      <h3 className="mt-2 truncate text-sm font-semibold">{f.titulo}</h3>
+    </>
+  );
+
+  if (f.tipo === "material") {
+    return (
+      <Link
+        to="/materiais/$materialId/questoes"
+        params={{ materialId: f.item_id }}
+        className="surface-card block p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+      >
+        {inner}
+      </Link>
+    );
+  }
+  const to = f.tipo === "trilha" ? "/trilhas" : f.tipo === "concurso" ? "/concursos" : "/dashboard";
+  return (
+    <Link to={to} className="surface-card block p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
+      {inner}
+    </Link>
+  );
+}
+
+function SectionTitle({
   icon: Icon,
-  label,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <h2 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <Icon className="h-4 w-4" />
+      {children}
+    </h2>
+  );
+}
+
+function Atalho({
+  to,
+  icon: Icon,
   title,
   desc,
 }: {
+  to: string;
   icon: React.ComponentType<{ className?: string }>;
-  label: string;
   title: string;
   desc: string;
 }) {
   return (
-    <div className="surface-card p-6 transition-colors hover:border-primary/30">
-      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        <Icon className="h-3.5 w-3.5" />
-        {label}
-      </div>
-      <h3 className="mt-3 text-base font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
-    </div>
+    <Link
+      to={to}
+      className="surface-card group block p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <Icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
+      <h3 className="mt-3 text-sm font-semibold">{title}</h3>
+      <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
+    </Link>
   );
 }

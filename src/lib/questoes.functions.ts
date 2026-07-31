@@ -139,18 +139,25 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: materiais, error } = await supabase
       .from("materiais")
-      .select("id, titulo, descricao, disciplina_id, disciplinas(id, nome)")
+      .select(
+        "id, titulo, descricao, disciplina_id, versao, publicado_em, atualizado_em, disciplinas(id, nome)",
+      )
       .eq("publicado", true)
       .order("titulo");
     if (error) throw new Error(error.message);
 
-    const [{ data: sessoes }, { data: qcounts }] = await Promise.all([
+    const [{ data: sessoes }, { data: qcounts }, { data: favs }, { data: leituras }] = await Promise.all([
       supabase
         .from("questao_sessoes")
         .select("material_id, percentual, status, concluida_em")
         .eq("user_id", userId)
         .order("concluida_em", { ascending: false, nullsFirst: false }),
       supabase.from("questoes").select("material_id").eq("publicado", true),
+      supabase.from("favoritos").select("item_id").eq("user_id", userId).eq("tipo", "material"),
+      supabase
+        .from("material_leitura")
+        .select("material_id, ultima_pagina, versao_vista")
+        .eq("user_id", userId),
     ]);
 
     const bestByMat = new Map<string, { percentual: number }>();
@@ -163,16 +170,27 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
       if (!r.material_id) return;
       qcountMap.set(r.material_id, (qcountMap.get(r.material_id) ?? 0) + 1);
     });
+    const favSet = new Set((favs ?? []).map((f: any) => f.item_id));
+    const leituraMap = new Map((leituras ?? []).map((l: any) => [l.material_id, l]));
+    const limiteNovo = Date.now() - 14 * 24 * 60 * 60 * 1000;
 
-    return (materiais ?? []).map((m: any) => ({
-      id: m.id,
-      titulo: m.titulo,
-      descricao: m.descricao,
-      disciplina: m.disciplinas?.nome ?? "Sem disciplina",
-      disciplina_id: m.disciplina_id,
-      total_questoes: qcountMap.get(m.id) ?? 0,
-      desempenho: bestByMat.get(m.id)?.percentual ?? null,
-    }));
+    return (materiais ?? []).map((m: any) => {
+      const leitura = leituraMap.get(m.id);
+      return {
+        id: m.id,
+        titulo: m.titulo,
+        descricao: m.descricao,
+        disciplina: m.disciplinas?.nome ?? "Sem disciplina",
+        disciplina_id: m.disciplina_id,
+        total_questoes: qcountMap.get(m.id) ?? 0,
+        desempenho: bestByMat.get(m.id)?.percentual ?? null,
+        favorito: favSet.has(m.id),
+        versao: m.versao ?? 1,
+        novo: !!m.publicado_em && new Date(m.publicado_em).getTime() >= limiteNovo && !leitura,
+        atualizado: !!leitura && (m.versao ?? 1) > (leitura.versao_vista ?? 1),
+        ultima_pagina: leitura?.ultima_pagina ?? null,
+      };
+    });
   });
 
 export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
