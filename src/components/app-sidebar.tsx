@@ -7,7 +7,6 @@ import {
   User,
   LogOut,
   Shield,
-  Scale,
 } from "lucide-react";
 import {
   Sidebar,
@@ -21,6 +20,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { BrandLogo } from "@/components/brand";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
