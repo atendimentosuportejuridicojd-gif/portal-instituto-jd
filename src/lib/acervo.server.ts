@@ -1,5 +1,17 @@
 /** Helpers server-only do acervo (nunca importado pelo cliente). */
 
+export function gerarSlug(nome: string) {
+  return (
+    nome
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60) || `item-${Date.now()}`
+  );
+}
+
 export async function assertAdmin(ctx: { supabase: any; userId: string }) {
   const { data, error } = await ctx.supabase.rpc("has_role", {
     _user_id: ctx.userId,
