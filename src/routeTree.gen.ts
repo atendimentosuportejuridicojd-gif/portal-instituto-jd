@@ -29,6 +29,7 @@ import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
 import { Route as ApiPublicHotmartWebhookRouteImport } from './routes/api/public/hotmart/webhook'
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
+import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './routes/_authenticated/materiais.$materialId.pdf'
 import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -140,6 +141,12 @@ const AuthenticatedMateriaisMaterialIdQuestoesRoute =
     path: '/materiais/$materialId/questoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMateriaisMaterialIdPdfRoute =
+  AuthenticatedMateriaisMaterialIdPdfRouteImport.update({
+    id: '/materiais/$materialId/pdf',
+    path: '/materiais/$materialId/pdf',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMateriaisMaterialIdDesempenhoRoute =
   AuthenticatedMateriaisMaterialIdDesempenhoRouteImport.update({
     id: '/materiais/$materialId/desempenho',
@@ -166,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
 }
@@ -188,6 +196,7 @@ export interface FileRoutesByTo {
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
 }
@@ -212,6 +221,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  '/_authenticated/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
 }
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/materiais/$materialId/desempenho'
+    | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/materiais/$materialId/desempenho'
+    | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
   id:
@@ -281,6 +293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/materiais/$materialId/desempenho'
+    | '/_authenticated/materiais/$materialId/pdf'
     | '/_authenticated/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
   fileRoutesById: FileRoutesById
@@ -435,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/materiais/$materialId/pdf': {
+      id: '/_authenticated/materiais/$materialId/pdf'
+      path: '/materiais/$materialId/pdf'
+      fullPath: '/materiais/$materialId/pdf'
+      preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdPdfRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/materiais/$materialId/desempenho': {
       id: '/_authenticated/materiais/$materialId/desempenho'
       path: '/materiais/$materialId/desempenho'
@@ -461,6 +481,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedMateriaisMaterialIdDesempenhoRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
+  AuthenticatedMateriaisMaterialIdPdfRoute: typeof AuthenticatedMateriaisMaterialIdPdfRoute
   AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 
@@ -481,6 +502,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedMateriaisMaterialIdDesempenhoRoute:
     AuthenticatedMateriaisMaterialIdDesempenhoRoute,
+  AuthenticatedMateriaisMaterialIdPdfRoute:
+    AuthenticatedMateriaisMaterialIdPdfRoute,
   AuthenticatedMateriaisMaterialIdQuestoesRoute:
     AuthenticatedMateriaisMaterialIdQuestoesRoute,
 }

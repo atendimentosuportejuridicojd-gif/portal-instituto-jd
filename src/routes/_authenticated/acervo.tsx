@@ -110,9 +110,11 @@ function MaterialRow({ m }: { m: any }) {
         >
           <Star className={cn("h-4 w-4", m.favorito && "fill-gold text-gold")} />
         </Button>
-        <Button variant="ghost" size="sm" disabled title="Leitor de PDF disponível na Etapa 2">
-          <FileText className="mr-1 h-3.5 w-3.5" />
-          Visualizar PDF
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
+            <FileText className="mr-1 h-3.5 w-3.5" />
+            Visualizar PDF
+          </Link>
         </Button>
         {temQuestoes ? (
           <Button asChild variant="outline" size="sm">

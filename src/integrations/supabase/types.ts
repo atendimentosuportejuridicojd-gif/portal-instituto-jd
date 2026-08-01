@@ -136,37 +136,49 @@ export type Database = {
       }
       concursos: {
         Row: {
+          ano: number | null
           banca: string | null
           created_at: string
           data_prova: string | null
           descricao: string | null
           edital_url: string | null
+          estado: string | null
           id: string
           nome: string
+          observacoes: string | null
+          orgao: string | null
           publicado: boolean
           slug: string
           updated_at: string
         }
         Insert: {
+          ano?: number | null
           banca?: string | null
           created_at?: string
           data_prova?: string | null
           descricao?: string | null
           edital_url?: string | null
+          estado?: string | null
           id?: string
           nome: string
+          observacoes?: string | null
+          orgao?: string | null
           publicado?: boolean
           slug: string
           updated_at?: string
         }
         Update: {
+          ano?: number | null
           banca?: string | null
           created_at?: string
           data_prova?: string | null
           descricao?: string | null
           edital_url?: string | null
+          estado?: string | null
           id?: string
           nome?: string
+          observacoes?: string | null
+          orgao?: string | null
           publicado?: boolean
           slug?: string
           updated_at?: string
@@ -342,12 +354,16 @@ export type Database = {
           created_at: string
           descricao: string | null
           disciplina_id: string | null
+          download_permitido: boolean
           id: string
           modulo_id: string | null
+          ordem: number
           paginas: number | null
           publicado: boolean
           publicado_em: string
+          storage_path: string | null
           tags: string[] | null
+          tamanho_bytes: number | null
           titulo: string
           updated_at: string
           versao: number
@@ -358,12 +374,16 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           disciplina_id?: string | null
+          download_permitido?: boolean
           id?: string
           modulo_id?: string | null
+          ordem?: number
           paginas?: number | null
           publicado?: boolean
           publicado_em?: string
+          storage_path?: string | null
           tags?: string[] | null
+          tamanho_bytes?: number | null
           titulo: string
           updated_at?: string
           versao?: number
@@ -374,12 +394,16 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           disciplina_id?: string | null
+          download_permitido?: boolean
           id?: string
           modulo_id?: string | null
+          ordem?: number
           paginas?: number | null
           publicado?: boolean
           publicado_em?: string
+          storage_path?: string | null
           tags?: string[] | null
+          tamanho_bytes?: number | null
           titulo?: string
           updated_at?: string
           versao?: number
@@ -447,6 +471,7 @@ export type Database = {
           id: string
           material_id: string
           notas: string | null
+          storage_path: string | null
           versao: number
         }
         Insert: {
@@ -456,6 +481,7 @@ export type Database = {
           id?: string
           material_id: string
           notas?: string | null
+          storage_path?: string | null
           versao: number
         }
         Update: {
@@ -465,6 +491,7 @@ export type Database = {
           id?: string
           material_id?: string
           notas?: string | null
+          storage_path?: string | null
           versao?: number
         }
         Relationships: [
