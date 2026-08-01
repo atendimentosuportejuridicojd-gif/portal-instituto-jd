@@ -70,9 +70,17 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
+    const slug =
+      data.nome
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 60) || `disciplina-${Date.now()}`;
     const { data: ins, error } = await context.supabase
       .from("disciplinas")
-      .insert(payload)
+      .insert({ ...payload, slug })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
