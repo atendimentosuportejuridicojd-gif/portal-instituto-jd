@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTrilhasRouteImport } from './routes/_authenticated/trilhas'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCronogramasRouteImport } from './routes/_authenticated/cronogramas'
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
 import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
@@ -67,6 +68,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCronogramasRoute =
+  AuthenticatedCronogramasRouteImport.update({
+    id: '/cronogramas',
+    path: '/cronogramas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConcursosRoute = AuthenticatedConcursosRouteImport.update({
   id: '/concursos',
   path: '/concursos',
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
+  '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
+  '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
@@ -218,6 +227,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
+  '/_authenticated/cronogramas': typeof AuthenticatedCronogramasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/trilhas': typeof AuthenticatedTrilhasRoute
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/assinatura-bloqueada'
     | '/concursos'
+    | '/cronogramas'
     | '/dashboard'
     | '/perfil'
     | '/trilhas'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/assinatura-bloqueada'
     | '/concursos'
+    | '/cronogramas'
     | '/dashboard'
     | '/perfil'
     | '/trilhas'
@@ -293,6 +305,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/assinatura-bloqueada'
     | '/_authenticated/concursos'
+    | '/_authenticated/cronogramas'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfil'
     | '/_authenticated/trilhas'
@@ -369,6 +382,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cronogramas': {
+      id: '/_authenticated/cronogramas'
+      path: '/cronogramas'
+      fullPath: '/cronogramas'
+      preLoaderRoute: typeof AuthenticatedCronogramasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/concursos': {
@@ -489,6 +509,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAssinaturaBloqueadaRoute: typeof AuthenticatedAssinaturaBloqueadaRoute
   AuthenticatedConcursosRoute: typeof AuthenticatedConcursosRoute
+  AuthenticatedCronogramasRoute: typeof AuthenticatedCronogramasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedTrilhasRoute: typeof AuthenticatedTrilhasRoute
@@ -510,6 +531,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAssinaturaBloqueadaRoute: AuthenticatedAssinaturaBloqueadaRoute,
   AuthenticatedConcursosRoute: AuthenticatedConcursosRoute,
+  AuthenticatedCronogramasRoute: AuthenticatedCronogramasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedTrilhasRoute: AuthenticatedTrilhasRoute,
