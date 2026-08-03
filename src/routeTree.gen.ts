@@ -18,7 +18,7 @@ import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
-import { Route as AuthenticatedAcervoRouteImport } from './routes/_authenticated/acervo'
+import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authenticated/admin/trilhas'
 import { Route as AuthenticatedAdminQuestoesRouteImport } from './routes/_authenticated/admin/questoes'
@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
+import { Route as AuthenticatedAcervoDisciplinaIdRouteImport } from './routes/_authenticated/acervo.$disciplinaId'
 import { Route as ApiPublicHotmartWebhookRouteImport } from './routes/api/public/hotmart/webhook'
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
 import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './routes/_authenticated/materiais.$materialId.pdf'
@@ -77,11 +78,12 @@ const AuthenticatedAssinaturaBloqueadaRoute =
     path: '/assinatura-bloqueada',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAcervoRoute = AuthenticatedAcervoRouteImport.update({
-  id: '/acervo',
-  path: '/acervo',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
+const AuthenticatedAcervoIndexRoute =
+  AuthenticatedAcervoIndexRouteImport.update({
+    id: '/acervo/',
+    path: '/acervo/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUsuariosRoute =
   AuthenticatedAdminUsuariosRouteImport.update({
     id: '/admin/usuarios',
@@ -130,6 +132,12 @@ const AuthenticatedAdminAcervoRoute =
     path: '/admin/acervo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAcervoDisciplinaIdRoute =
+  AuthenticatedAcervoDisciplinaIdRouteImport.update({
+    id: '/acervo/$disciplinaId',
+    path: '/acervo/$disciplinaId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicHotmartWebhookRoute = ApiPublicHotmartWebhookRouteImport.update({
   id: '/api/public/hotmart/webhook',
   path: '/api/public/hotmart/webhook',
@@ -158,12 +166,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/acervo': typeof AuthenticatedAcervoRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
+  '/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -172,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
@@ -181,12 +190,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/acervo': typeof AuthenticatedAcervoRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
+  '/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -195,6 +204,7 @@ export interface FileRoutesByTo {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/acervo': typeof AuthenticatedAcervoIndexRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
@@ -206,12 +216,12 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_authenticated/acervo': typeof AuthenticatedAcervoRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/trilhas': typeof AuthenticatedTrilhasRoute
+  '/_authenticated/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -220,6 +230,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/_authenticated/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
@@ -231,12 +242,12 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
-    | '/acervo'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/dashboard'
     | '/perfil'
     | '/trilhas'
+    | '/acervo/$disciplinaId'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/acervo/'
     | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
@@ -254,12 +266,12 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
-    | '/acervo'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/dashboard'
     | '/perfil'
     | '/trilhas'
+    | '/acervo/$disciplinaId'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -268,6 +280,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/acervo'
     | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
@@ -278,12 +291,12 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
-    | '/_authenticated/acervo'
     | '/_authenticated/assinatura-bloqueada'
     | '/_authenticated/concursos'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfil'
     | '/_authenticated/trilhas'
+    | '/_authenticated/acervo/$disciplinaId'
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
     | '/_authenticated/admin/configuracoes'
@@ -292,6 +305,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/questoes'
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/acervo/'
     | '/_authenticated/materiais/$materialId/desempenho'
     | '/_authenticated/materiais/$materialId/pdf'
     | '/_authenticated/materiais/$materialId/questoes'
@@ -371,11 +385,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAssinaturaBloqueadaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/acervo': {
-      id: '/_authenticated/acervo'
+    '/_authenticated/acervo/': {
+      id: '/_authenticated/acervo/'
       path: '/acervo'
-      fullPath: '/acervo'
-      preLoaderRoute: typeof AuthenticatedAcervoRouteImport
+      fullPath: '/acervo/'
+      preLoaderRoute: typeof AuthenticatedAcervoIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/usuarios': {
@@ -434,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAcervoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/acervo/$disciplinaId': {
+      id: '/_authenticated/acervo/$disciplinaId'
+      path: '/acervo/$disciplinaId'
+      fullPath: '/acervo/$disciplinaId'
+      preLoaderRoute: typeof AuthenticatedAcervoDisciplinaIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/hotmart/webhook': {
       id: '/api/public/hotmart/webhook'
       path: '/api/public/hotmart/webhook'
@@ -466,12 +487,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAcervoRoute: typeof AuthenticatedAcervoRoute
   AuthenticatedAssinaturaBloqueadaRoute: typeof AuthenticatedAssinaturaBloqueadaRoute
   AuthenticatedConcursosRoute: typeof AuthenticatedConcursosRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedTrilhasRoute: typeof AuthenticatedTrilhasRoute
+  AuthenticatedAcervoDisciplinaIdRoute: typeof AuthenticatedAcervoDisciplinaIdRoute
   AuthenticatedAdminAcervoRoute: typeof AuthenticatedAdminAcervoRoute
   AuthenticatedAdminConcursosRoute: typeof AuthenticatedAdminConcursosRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
@@ -480,18 +501,19 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
+  AuthenticatedAcervoIndexRoute: typeof AuthenticatedAcervoIndexRoute
   AuthenticatedMateriaisMaterialIdDesempenhoRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   AuthenticatedMateriaisMaterialIdPdfRoute: typeof AuthenticatedMateriaisMaterialIdPdfRoute
   AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAcervoRoute: AuthenticatedAcervoRoute,
   AuthenticatedAssinaturaBloqueadaRoute: AuthenticatedAssinaturaBloqueadaRoute,
   AuthenticatedConcursosRoute: AuthenticatedConcursosRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedTrilhasRoute: AuthenticatedTrilhasRoute,
+  AuthenticatedAcervoDisciplinaIdRoute: AuthenticatedAcervoDisciplinaIdRoute,
   AuthenticatedAdminAcervoRoute: AuthenticatedAdminAcervoRoute,
   AuthenticatedAdminConcursosRoute: AuthenticatedAdminConcursosRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
@@ -500,6 +522,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
+  AuthenticatedAcervoIndexRoute: AuthenticatedAcervoIndexRoute,
   AuthenticatedMateriaisMaterialIdDesempenhoRoute:
     AuthenticatedMateriaisMaterialIdDesempenhoRoute,
   AuthenticatedMateriaisMaterialIdPdfRoute:
@@ -521,13 +544,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

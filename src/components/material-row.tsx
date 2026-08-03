@@ -1,67 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PageContent, PageHeader, EmptyState } from "@/components/page";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, FileText, PencilLine, RefreshCw, BarChart3, Star } from "lucide-react";
+import { FileText, PencilLine, RefreshCw, BarChart3, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
 import { toggleFavorito } from "@/lib/aluno.functions";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/acervo")({
-  head: () => ({ meta: [{ title: "Acervo Base — Portal J&D" }] }),
-  component: Acervo,
-});
-
-function Acervo() {
-  const fetchFn = useServerFn(alunoListMateriaisComProgresso);
-  const q = useQuery({ queryKey: ["aluno", "acervo"], queryFn: () => fetchFn() });
-
-  const materiais = q.data ?? [];
-  const grupos = materiais.reduce((acc: Record<string, any[]>, m: any) => {
-    (acc[m.disciplina] ??= []).push(m);
-    return acc;
-  }, {});
-
-  return (
-    <>
-      <PageHeader
-        title="Acervo Base"
-        description="Biblioteca principal organizada por disciplinas."
-      />
-      <PageContent>
-        {q.isLoading ? (
-          <div className="text-sm text-muted-foreground">Carregando…</div>
-        ) : materiais.length === 0 ? (
-          <EmptyState
-            icon={BookOpen}
-            title="Acervo em preparação"
-            description="Os materiais serão publicados em breve."
-          />
-        ) : (
-          <div className="space-y-8">
-            {Object.entries(grupos).map(([disciplina, items]) => (
-              <section key={disciplina}>
-                <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {disciplina}
-                </h2>
-                <div className="space-y-2">
-                  {items.map((m: any) => (
-                    <MaterialRow key={m.id} m={m} />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        )}
-      </PageContent>
-    </>
-  );
-}
-
-function MaterialRow({ m }: { m: any }) {
+export function MaterialRow({ m }: { m: any }) {
   const qc = useQueryClient();
   const favFn = useServerFn(toggleFavorito);
   const fav = useMutation({
@@ -98,6 +45,7 @@ function MaterialRow({ m }: { m: any }) {
         )}
         <p className="mt-1 text-xs text-muted-foreground">
           📝 {m.total_questoes} {m.total_questoes === 1 ? "questão" : "questões"}
+          {m.ultima_pagina ? ` · você parou na página ${m.ultima_pagina}` : ""}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
