@@ -1,8 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 
 const configSchema = z.object({
   nome_plataforma: z.string().trim().min(1).max(200).optional(),
@@ -21,24 +19,18 @@ const configSchema = z.object({
   sobre: z.string().trim().max(5000).nullable().optional(),
 });
 
-// Public read (no auth) — SSR safe
-export const getPlataformaConfig = createServerFn({ method: "GET" }).handler(async () => {
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
-  const client = createClient<Database>(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input, init) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
+// Authenticated read — configuration includes internal contact data
+export const getPlataformaConfig = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("configuracoes_plataforma")
+      .select("*")
+      .eq("id", true)
+      .maybeSingle();
+    return data;
   });
-  const { data } = await client.from("configuracoes_plataforma").select("*").eq("id", true).maybeSingle();
-  return data;
-});
+
 
 export const updatePlataformaConfig = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

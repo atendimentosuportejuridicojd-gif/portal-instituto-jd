@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAcessoAluno } from "@/lib/acervo.server";
 
 // ============ Admin ============
 
@@ -136,6 +137,7 @@ export const adminListMateriaisComQuestoes = createServerFn({ method: "GET" })
 export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await assertAcessoAluno(context);
     const { supabase, userId } = context;
     const { data: materiais, error } = await supabase
       .from("materiais")
@@ -197,6 +199,7 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ material_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
     const { supabase, userId } = context;
 
     const { data: existing } = await supabase
@@ -235,6 +238,7 @@ export const getSessaoAtual = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ sessao_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
     const { supabase, userId } = context;
     const { data: sessao, error } = await supabase
       .from("questao_sessoes")
@@ -298,6 +302,7 @@ export const responderQuestao = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
     const { supabase, userId } = context;
 
     const { data: sessao, error: serr } = await supabase
@@ -398,6 +403,7 @@ export const getDesempenhoMaterial = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ material_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
     const { supabase, userId } = context;
 
     const { data: material } = await supabase
@@ -466,6 +472,7 @@ export const getDesempenhoMaterial = createServerFn({ method: "GET" })
 export const getConteudosParaRevisar = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await assertAcessoAluno(context);
     const { supabase, userId } = context;
     const { data: sessoes } = await supabase
       .from("questao_sessoes")
