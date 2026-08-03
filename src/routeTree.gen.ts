@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminQuestoesRouteImport } from './routes/_authenticated/admin/questoes'
 import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
+import { Route as AuthenticatedAdminCronogramasRouteImport } from './routes/_authenticated/admin/cronogramas'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
@@ -133,6 +134,12 @@ const AuthenticatedAdminDashboardRoute =
     path: '/admin/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCronogramasRoute =
+  AuthenticatedAdminCronogramasRouteImport.update({
+    id: '/admin/cronogramas',
+    path: '/admin/cronogramas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminConfiguracoesRoute =
   AuthenticatedAdminConfiguracoesRouteImport.update({
     id: '/admin/configuracoes',
@@ -197,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
@@ -224,6 +232,7 @@ export interface FileRoutesByTo {
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
@@ -253,6 +262,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/_authenticated/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
+    | '/admin/cronogramas'
     | '/admin/dashboard'
     | '/admin/noticias'
     | '/admin/questoes'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
+    | '/admin/cronogramas'
     | '/admin/dashboard'
     | '/admin/noticias'
     | '/admin/questoes'
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
     | '/_authenticated/admin/configuracoes'
+    | '/_authenticated/admin/cronogramas'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/noticias'
     | '/_authenticated/admin/questoes'
@@ -485,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/cronogramas': {
+      id: '/_authenticated/admin/cronogramas'
+      path: '/admin/cronogramas'
+      fullPath: '/admin/cronogramas'
+      preLoaderRoute: typeof AuthenticatedAdminCronogramasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/configuracoes': {
       id: '/_authenticated/admin/configuracoes'
       path: '/admin/configuracoes'
@@ -557,6 +577,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAcervoRoute: typeof AuthenticatedAdminAcervoRoute
   AuthenticatedAdminConcursosRoute: typeof AuthenticatedAdminConcursosRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
+  AuthenticatedAdminCronogramasRoute: typeof AuthenticatedAdminCronogramasRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminNoticiasRoute: typeof AuthenticatedAdminNoticiasRoute
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
@@ -581,6 +602,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAcervoRoute: AuthenticatedAdminAcervoRoute,
   AuthenticatedAdminConcursosRoute: AuthenticatedAdminConcursosRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
+  AuthenticatedAdminCronogramasRoute: AuthenticatedAdminCronogramasRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminNoticiasRoute: AuthenticatedAdminNoticiasRoute,
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,

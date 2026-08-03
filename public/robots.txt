@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /acervo
+Disallow: /trilhas
+Disallow: /concursos
+Disallow: /questoes
+Disallow: /cronogramas
+Disallow: /noticias
+Disallow: /perfil
+Disallow: /materiais
+Disallow: /admin
+
+Sitemap: https://portal-instituto-jd.lovable.app/sitemap.xml
