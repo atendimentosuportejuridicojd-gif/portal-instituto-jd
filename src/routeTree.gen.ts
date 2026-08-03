@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTrilhasRouteImport } from './routes/_authenticated/trilhas'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedNoticiasRouteImport } from './routes/_authenticated/noticias'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCronogramasRouteImport } from './routes/_authenticated/cronogramas'
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
@@ -61,6 +62,11 @@ const AuthenticatedTrilhasRoute = AuthenticatedTrilhasRouteImport.update({
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNoticiasRoute = AuthenticatedNoticiasRouteImport.update({
+  id: '/noticias',
+  path: '/noticias',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
   '/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
   '/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
   '/_authenticated/cronogramas': typeof AuthenticatedCronogramasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/noticias': typeof AuthenticatedNoticiasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/trilhas': typeof AuthenticatedTrilhasRoute
   '/_authenticated/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/concursos'
     | '/cronogramas'
     | '/dashboard'
+    | '/noticias'
     | '/perfil'
     | '/trilhas'
     | '/acervo/$disciplinaId'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/concursos'
     | '/cronogramas'
     | '/dashboard'
+    | '/noticias'
     | '/perfil'
     | '/trilhas'
     | '/acervo/$disciplinaId'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/_authenticated/concursos'
     | '/_authenticated/cronogramas'
     | '/_authenticated/dashboard'
+    | '/_authenticated/noticias'
     | '/_authenticated/perfil'
     | '/_authenticated/trilhas'
     | '/_authenticated/acervo/$disciplinaId'
@@ -375,6 +387,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/noticias': {
+      id: '/_authenticated/noticias'
+      path: '/noticias'
+      fullPath: '/noticias'
+      preLoaderRoute: typeof AuthenticatedNoticiasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -511,6 +530,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConcursosRoute: typeof AuthenticatedConcursosRoute
   AuthenticatedCronogramasRoute: typeof AuthenticatedCronogramasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedNoticiasRoute: typeof AuthenticatedNoticiasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedTrilhasRoute: typeof AuthenticatedTrilhasRoute
   AuthenticatedAcervoDisciplinaIdRoute: typeof AuthenticatedAcervoDisciplinaIdRoute
@@ -533,6 +553,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConcursosRoute: AuthenticatedConcursosRoute,
   AuthenticatedCronogramasRoute: AuthenticatedCronogramasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedNoticiasRoute: AuthenticatedNoticiasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedTrilhasRoute: AuthenticatedTrilhasRoute,
   AuthenticatedAcervoDisciplinaIdRoute: AuthenticatedAcervoDisciplinaIdRoute,
