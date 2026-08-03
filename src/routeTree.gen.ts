@@ -14,8 +14,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTrilhasRouteImport } from './routes/_authenticated/trilhas'
+import { Route as AuthenticatedQuestoesRouteImport } from './routes/_authenticated/questoes'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedNoticiasRouteImport } from './routes/_authenticated/noticias'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCronogramasRouteImport } from './routes/_authenticated/cronogramas'
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
 import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
@@ -24,6 +27,7 @@ import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminQuestoesRouteImport } from './routes/_authenticated/admin/questoes'
 import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
+import { Route as AuthenticatedAdminCronogramasRouteImport } from './routes/_authenticated/admin/cronogramas'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
@@ -57,9 +61,19 @@ const AuthenticatedTrilhasRoute = AuthenticatedTrilhasRouteImport.update({
   path: '/trilhas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedQuestoesRoute = AuthenticatedQuestoesRouteImport.update({
+  id: '/questoes',
+  path: '/questoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNoticiasRoute = AuthenticatedNoticiasRouteImport.update({
+  id: '/noticias',
+  path: '/noticias',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -67,6 +81,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCronogramasRoute =
+  AuthenticatedCronogramasRouteImport.update({
+    id: '/cronogramas',
+    path: '/cronogramas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConcursosRoute = AuthenticatedConcursosRouteImport.update({
   id: '/concursos',
   path: '/concursos',
@@ -112,6 +132,12 @@ const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin/dashboard',
     path: '/admin/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminCronogramasRoute =
+  AuthenticatedAdminCronogramasRouteImport.update({
+    id: '/admin/cronogramas',
+    path: '/admin/cronogramas',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminConfiguracoesRoute =
@@ -168,13 +194,17 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
+  '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/questoes': typeof AuthenticatedQuestoesRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
   '/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
@@ -192,13 +222,17 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
+  '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/questoes': typeof AuthenticatedQuestoesRoute
   '/trilhas': typeof AuthenticatedTrilhasRoute
   '/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
@@ -218,13 +252,17 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
+  '/_authenticated/cronogramas': typeof AuthenticatedCronogramasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/noticias': typeof AuthenticatedNoticiasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/questoes': typeof AuthenticatedQuestoesRoute
   '/_authenticated/trilhas': typeof AuthenticatedTrilhasRoute
   '/_authenticated/acervo/$disciplinaId': typeof AuthenticatedAcervoDisciplinaIdRoute
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/_authenticated/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
@@ -244,13 +282,17 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/assinatura-bloqueada'
     | '/concursos'
+    | '/cronogramas'
     | '/dashboard'
+    | '/noticias'
     | '/perfil'
+    | '/questoes'
     | '/trilhas'
     | '/acervo/$disciplinaId'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
+    | '/admin/cronogramas'
     | '/admin/dashboard'
     | '/admin/noticias'
     | '/admin/questoes'
@@ -268,13 +310,17 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/assinatura-bloqueada'
     | '/concursos'
+    | '/cronogramas'
     | '/dashboard'
+    | '/noticias'
     | '/perfil'
+    | '/questoes'
     | '/trilhas'
     | '/acervo/$disciplinaId'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
+    | '/admin/cronogramas'
     | '/admin/dashboard'
     | '/admin/noticias'
     | '/admin/questoes'
@@ -293,13 +339,17 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/assinatura-bloqueada'
     | '/_authenticated/concursos'
+    | '/_authenticated/cronogramas'
     | '/_authenticated/dashboard'
+    | '/_authenticated/noticias'
     | '/_authenticated/perfil'
+    | '/_authenticated/questoes'
     | '/_authenticated/trilhas'
     | '/_authenticated/acervo/$disciplinaId'
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
     | '/_authenticated/admin/configuracoes'
+    | '/_authenticated/admin/cronogramas'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/noticias'
     | '/_authenticated/admin/questoes'
@@ -357,6 +407,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrilhasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/questoes': {
+      id: '/_authenticated/questoes'
+      path: '/questoes'
+      fullPath: '/questoes'
+      preLoaderRoute: typeof AuthenticatedQuestoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
@@ -364,11 +421,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/noticias': {
+      id: '/_authenticated/noticias'
+      path: '/noticias'
+      fullPath: '/noticias'
+      preLoaderRoute: typeof AuthenticatedNoticiasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cronogramas': {
+      id: '/_authenticated/cronogramas'
+      path: '/cronogramas'
+      fullPath: '/cronogramas'
+      preLoaderRoute: typeof AuthenticatedCronogramasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/concursos': {
@@ -425,6 +496,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/cronogramas': {
+      id: '/_authenticated/admin/cronogramas'
+      path: '/admin/cronogramas'
+      fullPath: '/admin/cronogramas'
+      preLoaderRoute: typeof AuthenticatedAdminCronogramasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/configuracoes': {
@@ -489,13 +567,17 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAssinaturaBloqueadaRoute: typeof AuthenticatedAssinaturaBloqueadaRoute
   AuthenticatedConcursosRoute: typeof AuthenticatedConcursosRoute
+  AuthenticatedCronogramasRoute: typeof AuthenticatedCronogramasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedNoticiasRoute: typeof AuthenticatedNoticiasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedQuestoesRoute: typeof AuthenticatedQuestoesRoute
   AuthenticatedTrilhasRoute: typeof AuthenticatedTrilhasRoute
   AuthenticatedAcervoDisciplinaIdRoute: typeof AuthenticatedAcervoDisciplinaIdRoute
   AuthenticatedAdminAcervoRoute: typeof AuthenticatedAdminAcervoRoute
   AuthenticatedAdminConcursosRoute: typeof AuthenticatedAdminConcursosRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
+  AuthenticatedAdminCronogramasRoute: typeof AuthenticatedAdminCronogramasRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminNoticiasRoute: typeof AuthenticatedAdminNoticiasRoute
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
@@ -510,13 +592,17 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAssinaturaBloqueadaRoute: AuthenticatedAssinaturaBloqueadaRoute,
   AuthenticatedConcursosRoute: AuthenticatedConcursosRoute,
+  AuthenticatedCronogramasRoute: AuthenticatedCronogramasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedNoticiasRoute: AuthenticatedNoticiasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedQuestoesRoute: AuthenticatedQuestoesRoute,
   AuthenticatedTrilhasRoute: AuthenticatedTrilhasRoute,
   AuthenticatedAcervoDisciplinaIdRoute: AuthenticatedAcervoDisciplinaIdRoute,
   AuthenticatedAdminAcervoRoute: AuthenticatedAdminAcervoRoute,
   AuthenticatedAdminConcursosRoute: AuthenticatedAdminConcursosRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
+  AuthenticatedAdminCronogramasRoute: AuthenticatedAdminCronogramasRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminNoticiasRoute: AuthenticatedAdminNoticiasRoute,
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,

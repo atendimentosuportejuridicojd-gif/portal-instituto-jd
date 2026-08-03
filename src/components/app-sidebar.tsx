@@ -5,6 +5,9 @@ import {
   Target,
   FileText,
   User,
+  HelpCircle,
+  CalendarDays,
+  Newspaper,
   LogOut,
   Shield,
 } from "lucide-react";
@@ -29,6 +32,9 @@ const items = [
   { title: "Acervo Base", url: "/acervo", icon: BookOpen },
   { title: "Trilhas", url: "/trilhas", icon: Target },
   { title: "Concursos", url: "/concursos", icon: FileText },
+  { title: "Questões", url: "/questoes", icon: HelpCircle },
+  { title: "Cronogramas", url: "/cronogramas", icon: CalendarDays },
+  { title: "Fique por Dentro", url: "/noticias", icon: Newspaper },
   { title: "Perfil", url: "/perfil", icon: User },
 ];
 

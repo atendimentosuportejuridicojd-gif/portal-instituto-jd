@@ -245,6 +245,57 @@ export type Database = {
         }
         Relationships: []
       }
+      cronograma_itens: {
+        Row: {
+          created_at: string
+          cronograma_id: string
+          dia: number
+          id: string
+          material_id: string | null
+          observacoes: string | null
+          ordem: number
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cronograma_id: string
+          dia?: number
+          id?: string
+          material_id?: string | null
+          observacoes?: string | null
+          ordem?: number
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cronograma_id?: string
+          dia?: number
+          id?: string
+          material_id?: string | null
+          observacoes?: string | null
+          ordem?: number
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cronograma_itens_cronograma_id_fkey"
+            columns: ["cronograma_id"]
+            isOneToOne: false
+            referencedRelation: "cronogramas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cronograma_itens_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cronogramas: {
         Row: {
           concurso_id: string | null
