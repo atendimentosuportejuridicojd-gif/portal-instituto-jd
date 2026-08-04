@@ -243,28 +243,35 @@ function VincularDialog({
             Marque os materiais do acervo que fazem parte desta trilha.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-2">
+        <div className="space-y-4">
           {materiais.length === 0 && (
             <p className="text-sm text-muted-foreground">Nenhum material no acervo ainda.</p>
           )}
-          {materiais.map((m: any) => {
-            const checked = vinculados.includes(m.id);
-            return (
-              <label
-                key={m.id}
-                className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 p-3 text-sm"
-              >
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={(v) => mut.mutate(onToggle(m.id, !!v))}
-                />
-                <span className="min-w-0 flex-1 truncate">
-                  {m.titulo}
-                  <span className="text-xs text-muted-foreground"> · {m.disciplina}</span>
+          {agruparPorDisciplina(materiais).map((grupo) => (
+            <div key={grupo.disciplina} className="rounded-lg border border-border/60">
+              <div className="flex items-center justify-between border-b border-border/60 bg-muted/40 px-3 py-2">
+                <p className="text-sm font-semibold">{grupo.disciplina}</p>
+                <span className="text-xs text-muted-foreground">
+                  {grupo.materiais.filter((m: any) => vinculados.includes(m.id)).length}/
+                  {grupo.materiais.length}
                 </span>
-              </label>
-            );
-          })}
+              </div>
+              <div className="divide-y divide-border/60">
+                {grupo.materiais.map((m: any) => (
+                  <label
+                    key={m.id}
+                    className="flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm"
+                  >
+                    <Checkbox
+                      checked={vinculados.includes(m.id)}
+                      onCheckedChange={(v) => mut.mutate(onToggle(m.id, !!v))}
+                    />
+                    <span className="min-w-0 flex-1 truncate">{m.titulo}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </DialogContent>
     </Dialog>
