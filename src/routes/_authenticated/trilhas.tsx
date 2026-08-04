@@ -59,39 +59,48 @@ function TrilhasPage() {
                     Materiais desta trilha serão liberados em breve.
                   </p>
                 ) : (
-                  <ul className="mt-4 space-y-2">
-                    {t.materiais.map((m: any, i: number) => (
-                      <li
-                        key={m.id}
-                        className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2.5"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
-                            <span className="mr-2 text-xs text-muted-foreground">{i + 1}.</span>
-                            {m.titulo}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{m.disciplina}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {!m.tem_arquivo && <Badge variant="outline">Em breve</Badge>}
-                          {m.tem_arquivo && (
-                            <Button asChild size="sm" variant="outline">
-                              <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
-                                <FileText className="mr-1 h-3.5 w-3.5" />
-                                Visualizar PDF
-                              </Link>
-                            </Button>
-                          )}
-                          <Button asChild size="sm" variant="ghost">
-                            <Link to="/materiais/$materialId/questoes" params={{ materialId: m.id }}>
-                              <ListChecks className="mr-1 h-3.5 w-3.5" />
-                              Questões
-                            </Link>
-                          </Button>
-                        </div>
-                      </li>
+                  <div className="mt-4 space-y-5">
+                    {agruparPorDisciplina(t.materiais).map((grupo) => (
+                      <div key={grupo.disciplina}>
+                        <p className="text-eyebrow mb-2">{grupo.disciplina}</p>
+                        <ul className="space-y-2">
+                          {grupo.materiais.map((m: any, i: number) => (
+                            <li
+                              key={m.id}
+                              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2.5"
+                            >
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium">
+                                  <span className="mr-2 text-xs text-muted-foreground">{i + 1}.</span>
+                                  {m.titulo}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {!m.tem_arquivo && <Badge variant="outline">Em breve</Badge>}
+                                {m.tem_arquivo && (
+                                  <Button asChild size="sm" variant="outline">
+                                    <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
+                                      <FileText className="mr-1 h-3.5 w-3.5" />
+                                      Visualizar PDF
+                                    </Link>
+                                  </Button>
+                                )}
+                                <Button asChild size="sm" variant="ghost">
+                                  <Link
+                                    to="/materiais/$materialId/questoes"
+                                    params={{ materialId: m.id }}
+                                  >
+                                    <ListChecks className="mr-1 h-3.5 w-3.5" />
+                                    Questões
+                                  </Link>
+                                </Button>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </section>
             ))}
