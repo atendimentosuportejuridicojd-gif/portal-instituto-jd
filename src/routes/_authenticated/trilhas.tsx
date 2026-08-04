@@ -110,3 +110,15 @@ function TrilhasPage() {
     </>
   );
 }
+
+function agruparPorDisciplina(materiais: any[]) {
+  const mapa = new Map<string, any[]>();
+  for (const m of materiais) {
+    const chave = m.disciplina ?? "Sem disciplina";
+    if (!mapa.has(chave)) mapa.set(chave, []);
+    mapa.get(chave)!.push(m);
+  }
+  return [...mapa.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0], "pt-BR"))
+    .map(([disciplina, itens]) => ({ disciplina, materiais: itens }));
+}
