@@ -78,7 +78,7 @@ function Usuarios() {
   const reset = useMutation({
     mutationFn: (email: string) =>
       resetFn({ data: { email, redirect_to: window.location.origin + "/reset-password" } }),
-    onSuccess: () => toast.success("Link de redefinição gerado. O usuário receberá por e-mail."),
+    onSuccess: () => toast.success("E-mail de redefinição de senha enviado ao aluno."),
     onError: (e: any) => toast.error(e.message),
   });
 
