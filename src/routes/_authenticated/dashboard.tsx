@@ -229,7 +229,7 @@ function FavoritoCard({ f }: { f: { tipo: string; item_id: string; titulo: strin
       </Link>
     );
   }
-  const to = f.tipo === "trilha" ? "/trilhas" : f.tipo === "concurso" ? "/concursos" : "/dashboard";
+  const to = f.tipo === "concurso" ? "/concursos" : f.tipo === "trilha" ? "/acervo" : "/dashboard";
   return (
     <Link to={to} className="surface-card block p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
       {inner}
