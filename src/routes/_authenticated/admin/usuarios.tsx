@@ -24,12 +24,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Search, Lock, Unlock, Mail, Pencil } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   adminListUsuarios,
   adminEditarUsuario,
   adminBloquearUsuario,
   adminResetSenhaUsuario,
+  adminDefinirRoles,
 } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
@@ -42,6 +44,17 @@ function Usuarios() {
   const editFn = useServerFn(adminEditarUsuario);
   const blockFn = useServerFn(adminBloquearUsuario);
   const resetFn = useServerFn(adminResetSenhaUsuario);
+  const rolesFn = useServerFn(adminDefinirRoles);
+
+  const roleMut = useMutation({
+    mutationFn: (v: { id: string; roles: string[] }) => rolesFn({ data: v as any }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setEditing(null);
+      toast.success("Funções atualizadas.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
   const qc = useQueryClient();
 
   const [q, setQ] = useState("");
@@ -130,6 +143,9 @@ function Usuarios() {
                       <span className="font-medium">{r.nome_completo || "—"}</span>
                       {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
                       {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
+                      {r.roles?.includes("aluno_teste") && (
+                        <Badge variant="secondary">Aluno teste</Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{r.email}</TableCell>
@@ -194,7 +210,7 @@ function Usuarios() {
             <DialogDescription>{editing?.email}</DialogDescription>
           </DialogHeader>
           {editing && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label>Nome completo</Label>
                 <Input
@@ -202,19 +218,55 @@ function Usuarios() {
                   onChange={(e) => setEditing({ ...editing, nome_completo: e.target.value })}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Funções de acesso</Label>
+                {[
+                  { role: "administrador", label: "Administrador", hint: "Acesso total ao painel administrativo." },
+                  { role: "aluno", label: "Aluno", hint: "Acesso padrão, conforme assinatura." },
+                  { role: "aluno_teste", label: "Aluno teste", hint: "Libera todo o conteúdo sem assinatura paga." },
+                ].map((opt) => {
+                  const roles: string[] = editing.roles ?? [];
+                  const checked = roles.includes(opt.role);
+                  return (
+                    <label
+                      key={opt.role}
+                      className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-3"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(v) =>
+                          setEditing({
+                            ...editing,
+                            roles: v
+                              ? [...roles, opt.role]
+                              : roles.filter((r) => r !== opt.role),
+                          })
+                        }
+                      />
+                      <span className="leading-tight">
+                        <span className="block text-sm font-medium">{opt.label}</span>
+                        <span className="block text-xs text-muted-foreground">{opt.hint}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
             <Button
-              onClick={() =>
-                edit.mutate({ id: editing.id, nome_completo: editing.nome_completo ?? "" })
-              }
-              disabled={edit.isPending}
+              onClick={async () => {
+                const roles: string[] = editing.roles?.length ? editing.roles : ["aluno"];
+                await edit.mutateAsync({ id: editing.id, nome_completo: editing.nome_completo ?? "" });
+                await roleMut.mutateAsync({ id: editing.id, roles });
+              }}
+              disabled={edit.isPending || roleMut.isPending}
             >
               Salvar
             </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
 
