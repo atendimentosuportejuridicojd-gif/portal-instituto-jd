@@ -80,8 +80,8 @@ function Resolver() {
 
   const total = state.questoes.length;
   const respondidasCount = state.questoes.filter((q: any) => q.respondida).length;
-  const currentIdx = state.questoes.findIndex((q: any) => !q.respondida);
-  const current = currentIdx === -1 ? null : state.questoes[currentIdx];
+  const currentIdx = idx;
+  const current = currentIdx >= total ? null : state.questoes[currentIdx];
   const progresso = total === 0 ? 0 : Math.round((respondidasCount / total) * 100);
 
   async function submitResposta() {
@@ -92,17 +92,12 @@ function Resolver() {
         data: { sessao_id: sessaoId, questao_id: current.id, alternativa_id: selected },
       });
       setFeedback({ acertou: r.acertou, correta_id: r.correta_id, comentario: r.comentario });
-      // Refresh state to mark this question answered
+      // Refresh state to mark this question answered (stay on the same question)
       const s = await carregar({ data: { sessao_id: sessaoId } });
       setState(s);
       if (r.finalizada) {
+        setFinalizada(true);
         toast.success(`Tentativa concluída — ${r.resumo?.percentual}%`);
-        setTimeout(() => {
-          navigate({
-            to: "/materiais/$materialId/desempenho",
-            params: { materialId },
-          });
-        }, 1500);
       }
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao responder.");
@@ -114,7 +109,14 @@ function Resolver() {
   function proxima() {
     setFeedback(null);
     setSelected(null);
+    if (finalizada) {
+      navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } });
+      return;
+    }
+    const next = state.questoes.findIndex((q: any, i: number) => i > currentIdx && !q.respondida);
+    setIdx(next === -1 ? total : next);
   }
+
 
   if (total === 0) {
     return (
