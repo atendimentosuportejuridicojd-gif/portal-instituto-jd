@@ -1097,7 +1097,7 @@ export type Database = {
       tem_acesso_conteudo: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "administrador" | "aluno"
+      app_role: "administrador" | "aluno" | "aluno_teste"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1225,7 +1225,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["administrador", "aluno"],
+      app_role: ["administrador", "aluno", "aluno_teste"],
     },
   },
 } as const
