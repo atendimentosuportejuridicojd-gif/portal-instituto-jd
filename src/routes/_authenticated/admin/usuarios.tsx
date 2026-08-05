@@ -44,6 +44,17 @@ function Usuarios() {
   const editFn = useServerFn(adminEditarUsuario);
   const blockFn = useServerFn(adminBloquearUsuario);
   const resetFn = useServerFn(adminResetSenhaUsuario);
+  const rolesFn = useServerFn(adminDefinirRoles);
+
+  const roleMut = useMutation({
+    mutationFn: (v: { id: string; roles: string[] }) => rolesFn({ data: v as any }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setEditing(null);
+      toast.success("Funções atualizadas.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
   const qc = useQueryClient();
 
   const [q, setQ] = useState("");
