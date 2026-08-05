@@ -3,20 +3,44 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, PencilLine, RefreshCw, BarChart3, Star } from "lucide-react";
+import {
+  FileText,
+  PencilLine,
+  RefreshCw,
+  BarChart3,
+  Star,
+  CheckCircle2,
+  Circle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toggleFavorito } from "@/lib/aluno.functions";
+import { toggleFavorito, toggleMaterialLido } from "@/lib/aluno.functions";
 import { toast } from "sonner";
 
 export function MaterialRow({ m }: { m: any }) {
   const qc = useQueryClient();
   const favFn = useServerFn(toggleFavorito);
+  const lidoFn = useServerFn(toggleMaterialLido);
+
+  const invalidar = () => {
+    qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
+    qc.invalidateQueries({ queryKey: ["favoritos"] });
+    qc.invalidateQueries({ queryKey: ["dashboard"] });
+  };
+
   const fav = useMutation({
     mutationFn: () => favFn({ data: { tipo: "material" as const, item_id: m.id } }),
     onSuccess: (r: any) => {
-      qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
-      qc.invalidateQueries({ queryKey: ["favoritos"] });
+      invalidar();
       toast.success(r?.favorito ? "Adicionado aos favoritos." : "Removido dos favoritos.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const lido = useMutation({
+    mutationFn: () => lidoFn({ data: { material_id: m.id, lido: !m.lido } }),
+    onSuccess: (r: any) => {
+      invalidar();
+      toast.success(r?.lido ? "Material marcado como lido." : "Marcação de leitura removida.");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -26,6 +50,7 @@ export function MaterialRow({ m }: { m: any }) {
   const perf = m.desempenho as number | null;
   const perfColor =
     perf === null ? "" : perf >= 85 ? "text-green-600" : perf >= 70 ? "text-yellow-600" : "text-red-600";
+
 
   return (
     <div className="surface-card flex flex-col gap-3 p-4 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between">

@@ -34,6 +34,7 @@ import { Route as ApiPublicHotmartWebhookRouteImport } from './routes/api/public
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
 import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './routes/_authenticated/materiais.$materialId.pdf'
 import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
+import { Route as AuthenticatedAcervoCargoIdDisciplinaIdRouteImport } from './routes/_authenticated/acervo.$cargoId.$disciplinaId'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -175,6 +176,12 @@ const AuthenticatedMateriaisMaterialIdDesempenhoRoute =
     path: '/materiais/$materialId/desempenho',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAcervoCargoIdDisciplinaIdRoute =
+  AuthenticatedAcervoCargoIdDisciplinaIdRouteImport.update({
+    id: '/acervo/$cargoId/$disciplinaId',
+    path: '/acervo/$cargoId/$disciplinaId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/acervo/': typeof AuthenticatedAcervoIndexRoute
+  '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
@@ -222,6 +230,7 @@ export interface FileRoutesByTo {
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/acervo': typeof AuthenticatedAcervoIndexRoute
+  '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
@@ -250,6 +259,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/acervo/': typeof AuthenticatedAcervoIndexRoute
+  '/_authenticated/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   '/_authenticated/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/acervo/'
+    | '/acervo/$cargoId/$disciplinaId'
     | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/acervo'
+    | '/acervo/$cargoId/$disciplinaId'
     | '/materiais/$materialId/desempenho'
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
@@ -331,6 +343,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/acervo/'
+    | '/_authenticated/acervo/$cargoId/$disciplinaId'
     | '/_authenticated/materiais/$materialId/desempenho'
     | '/_authenticated/materiais/$materialId/pdf'
     | '/_authenticated/materiais/$materialId/questoes'
@@ -523,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/acervo/$cargoId/$disciplinaId': {
+      id: '/_authenticated/acervo/$cargoId/$disciplinaId'
+      path: '/acervo/$cargoId/$disciplinaId'
+      fullPath: '/acervo/$cargoId/$disciplinaId'
+      preLoaderRoute: typeof AuthenticatedAcervoCargoIdDisciplinaIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -543,6 +563,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAcervoIndexRoute: typeof AuthenticatedAcervoIndexRoute
+  AuthenticatedAcervoCargoIdDisciplinaIdRoute: typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   AuthenticatedMateriaisMaterialIdDesempenhoRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   AuthenticatedMateriaisMaterialIdPdfRoute: typeof AuthenticatedMateriaisMaterialIdPdfRoute
   AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
@@ -566,6 +587,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedAcervoIndexRoute: AuthenticatedAcervoIndexRoute,
+  AuthenticatedAcervoCargoIdDisciplinaIdRoute:
+    AuthenticatedAcervoCargoIdDisciplinaIdRoute,
   AuthenticatedMateriaisMaterialIdDesempenhoRoute:
     AuthenticatedMateriaisMaterialIdDesempenhoRoute,
   AuthenticatedMateriaisMaterialIdPdfRoute:
