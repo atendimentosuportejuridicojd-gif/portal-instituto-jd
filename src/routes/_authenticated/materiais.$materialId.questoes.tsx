@@ -36,6 +36,8 @@ function Resolver() {
     comentario: string | null;
   }>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [finalizada, setFinalizada] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -44,6 +46,8 @@ function Resolver() {
         setSessaoId(sessaoId);
         const s = await carregar({ data: { sessao_id: sessaoId } });
         setState(s);
+        const first = s.questoes.findIndex((q: any) => !q.respondida);
+        setIdx(first === -1 ? s.questoes.length : first);
       } catch (e: any) {
         setErro(e.message ?? "Erro ao carregar.");
       } finally {
