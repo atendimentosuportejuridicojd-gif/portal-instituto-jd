@@ -158,3 +158,57 @@ export const adminResetSenhaUsuario = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+const ROLES = ["administrador", "aluno", "aluno_teste"] as const;
+
+export const adminDefinirRoles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        roles: z.array(z.enum(ROLES)).min(1).max(3),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabase } = context;
+
+    const { data: atuais, error: eSel } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.id);
+    if (eSel) throw new Error(eSel.message);
+
+    const current = new Set((atuais ?? []).map((r: any) => r.role as string));
+    const desired = new Set<string>(data.roles);
+
+    const toAdd = [...desired].filter((r) => !current.has(r));
+    const toRemove = [...current].filter((r) => !desired.has(r));
+
+    if (toAdd.length > 0) {
+      const { error } = await supabase
+        .from("user_roles")
+        .insert(toAdd.map((role) => ({ user_id: data.id, role: role as any })));
+      if (error) throw new Error(error.message);
+    }
+    if (toRemove.length > 0) {
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.id)
+        .in("role", toRemove as any);
+      if (error) throw new Error(error.message);
+    }
+
+    await supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: "usuario.definir_roles",
+      entidade: "user_roles",
+      entidade_id: data.id,
+      metadata: { roles: data.roles },
+    });
+    return { ok: true };
+  });
+
