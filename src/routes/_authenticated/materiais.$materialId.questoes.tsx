@@ -251,7 +251,7 @@ function Resolver() {
                 </Button>
               ) : (
                 <Button onClick={proxima}>
-                  Próxima questão
+                  {finalizada ? "Ver desempenho" : "Próxima questão"}
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               )}
