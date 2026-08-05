@@ -198,6 +198,64 @@ function Dashboard() {
   );
 }
 
+type ContinuarItem = {
+  material_id: string;
+  titulo: string;
+  disciplina: string;
+  detalhe: string;
+} | null;
+
+function ContinuarCard({
+  rotulo,
+  icon: Icon,
+  item,
+  to,
+  vazio,
+}: {
+  rotulo: string;
+  icon: React.ComponentType<{ className?: string }>;
+  item: ContinuarItem;
+  to: "/materiais/$materialId/questoes" | "/materiais/$materialId/pdf";
+  vazio: string;
+}) {
+  return (
+    <div className="surface-card flex flex-col gap-4 p-5 transition-shadow hover:shadow-md">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <Icon className="h-4 w-4" />
+        {rotulo}
+      </div>
+      {item ? (
+        <>
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              {item.disciplina}
+            </p>
+            <h3 className="mt-1 truncate text-base font-semibold">{item.titulo}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">{item.detalhe}</p>
+          </div>
+          <Button asChild className="mt-auto w-fit">
+            <Link to={to} params={{ materialId: item.material_id }}>
+              Retomar
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground">{vazio}</p>
+          <Button asChild variant="outline" className="mt-auto w-fit">
+            <Link to="/acervo">
+              Ir para o acervo
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
+
+
 function FavoritoCard({ f }: { f: { tipo: string; item_id: string; titulo: string } }) {
   const rotulo =
     f.tipo === "material"
