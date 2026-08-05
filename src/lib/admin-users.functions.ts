@@ -127,13 +127,29 @@ export const adminResetSenhaUsuario = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ email: z.string().email(), redirect_to: z.string().url() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "recovery",
-      email: data.email,
-      options: { redirectTo: data.redirect_to },
-    });
-    if (error) throw new Error(error.message);
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const ANON_KEY = process.env.SUPABASE_ANON_KEY;
+    if (!SUPABASE_URL || !ANON_KEY) throw new Error("Configuração de e-mail indisponível no servidor.");
+
+    // GoTrue /recover envia efetivamente o e-mail de redefinição.
+    const res = await fetch(
+      `${SUPABASE_URL}/auth/v1/recover?redirect_to=${encodeURIComponent(data.redirect_to)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: ANON_KEY },
+        body: JSON.stringify({ email: data.email }),
+      },
+    );
+
+    if (!res.ok) {
+      const body = await res.text();
+      if (res.status === 429) {
+        throw new Error("Limite de envio de e-mails atingido. Tente novamente em alguns minutos.");
+      }
+      throw new Error(`Falha ao enviar o e-mail de redefinição (${res.status}). ${body.slice(0, 200)}`);
+    }
+
     await context.supabase.from("admin_logs").insert({
       user_id: context.userId,
       acao: "usuario.reset_senha",
