@@ -29,6 +29,7 @@ import { Route as AuthenticatedAdminCronogramasRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
+import { Route as AuthenticatedAcervoCargoIdIndexRouteImport } from './routes/_authenticated/acervo.$cargoId.index'
 import { Route as ApiPublicHotmartWebhookRouteImport } from './routes/api/public/hotmart/webhook'
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
 import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './routes/_authenticated/materiais.$materialId.pdf'
@@ -145,6 +146,12 @@ const AuthenticatedAdminAcervoRoute =
     path: '/admin/acervo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAcervoCargoIdIndexRoute =
+  AuthenticatedAcervoCargoIdIndexRouteImport.update({
+    id: '/acervo/$cargoId/',
+    path: '/acervo/$cargoId/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicHotmartWebhookRoute = ApiPublicHotmartWebhookRouteImport.update({
   id: '/api/public/hotmart/webhook',
   path: '/api/public/hotmart/webhook',
@@ -193,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
+  '/acervo/$cargoId/': typeof AuthenticatedAcervoCargoIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -218,6 +226,7 @@ export interface FileRoutesByTo {
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
+  '/acervo/$cargoId': typeof AuthenticatedAcervoCargoIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -245,6 +254,7 @@ export interface FileRoutesById {
   '/_authenticated/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
+  '/_authenticated/acervo/$cargoId/': typeof AuthenticatedAcervoCargoIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
+    | '/acervo/$cargoId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
+    | '/acervo/$cargoId'
   id:
     | '__root__'
     | '/'
@@ -323,6 +335,7 @@ export interface FileRouteTypes {
     | '/_authenticated/materiais/$materialId/pdf'
     | '/_authenticated/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
+    | '/_authenticated/acervo/$cargoId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -475,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAcervoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/acervo/$cargoId/': {
+      id: '/_authenticated/acervo/$cargoId/'
+      path: '/acervo/$cargoId'
+      fullPath: '/acervo/$cargoId/'
+      preLoaderRoute: typeof AuthenticatedAcervoCargoIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/hotmart/webhook': {
       id: '/api/public/hotmart/webhook'
       path: '/api/public/hotmart/webhook'
@@ -526,6 +546,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMateriaisMaterialIdDesempenhoRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
   AuthenticatedMateriaisMaterialIdPdfRoute: typeof AuthenticatedMateriaisMaterialIdPdfRoute
   AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
+  AuthenticatedAcervoCargoIdIndexRoute: typeof AuthenticatedAcervoCargoIdIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -551,6 +572,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedMateriaisMaterialIdPdfRoute,
   AuthenticatedMateriaisMaterialIdQuestoesRoute:
     AuthenticatedMateriaisMaterialIdQuestoesRoute,
+  AuthenticatedAcervoCargoIdIndexRoute: AuthenticatedAcervoCargoIdIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
