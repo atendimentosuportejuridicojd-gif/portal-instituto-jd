@@ -53,12 +53,19 @@ function AssinaturaBloqueada() {
         <h1 className="mt-6 text-2xl font-semibold tracking-tight">{titulo}</h1>
         <p className="mt-3 text-sm text-muted-foreground">{descricao}</p>
 
-        <div className="mt-8 flex flex-col gap-2">
+        {!bloqueado && (
+          <p className="mt-6 text-sm font-medium">
+            Regularize sua assinatura para liberar o acesso imediatamente.
+          </p>
+        )}
+
+        <div className="mt-4 flex flex-col gap-2">
           {regularizarUrl && !bloqueado && (
             <Button asChild size="lg">
               <a href={regularizarUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Regularizar na Hotmart
+                <CreditCard className="mr-2 h-4 w-4" />
+                Pagar agora
+                <ExternalLink className="ml-2 h-3.5 w-3.5 opacity-70" />
               </a>
             </Button>
           )}
