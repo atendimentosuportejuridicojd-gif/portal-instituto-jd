@@ -24,12 +24,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Search, Lock, Unlock, Mail, Pencil } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   adminListUsuarios,
   adminEditarUsuario,
   adminBloquearUsuario,
   adminResetSenhaUsuario,
+  adminDefinirRoles,
 } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
