@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader } from "@/components/page";
 import {
   BookOpen,
-  Target,
+  CalendarDays,
   FileText,
   Newspaper,
   Clock,
@@ -14,6 +14,7 @@ import {
   Sparkles,
   RefreshCw,
   ArrowRight,
+  PencilLine,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,12 +29,12 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       {
         name: "description",
         content:
-          "Central de estudos do Instituto J&D Especialistas na Carreira Judiciária: continue de onde parou, revise conteúdos e acesse seus favoritos.",
+          "Central de estudos do Instituto J&D Especialistas na Carreira Judiciária: continue de onde parou nas questões e na leitura, revise conteúdos e acesse seus favoritos.",
       },
       { property: "og:title", content: "Dashboard — Portal do Aluno J&D" },
       {
         property: "og:description",
-        content: "Continue de onde parou, revise conteúdos e acesse seus favoritos.",
+        content: "Continue de onde parou nas questões e na leitura dos PDFs.",
       },
     ],
   }),
@@ -50,7 +51,8 @@ function Dashboard() {
   const qFav = useQuery({ queryKey: ["favoritos"], queryFn: () => favFn() });
 
   const revisar = qRevisar.data ?? [];
-  const continuar = qResumo.data?.continuar ?? null;
+  const continuarQuestoes = qResumo.data?.continuarQuestoes ?? null;
+  const continuarLeitura = qResumo.data?.continuarLeitura ?? null;
   const atualizados = qResumo.data?.atualizados ?? [];
   const novos = qResumo.data?.novos ?? [];
   const favoritos = qFav.data ?? [];
@@ -67,44 +69,30 @@ function Dashboard() {
           <section className="animate-in fade-in duration-500">
             <SectionTitle icon={Clock}>Continuar de onde parei</SectionTitle>
             {qResumo.isLoading ? (
-              <Skeleton className="h-24 w-full rounded-lg" />
-            ) : continuar ? (
-              <div className="surface-card flex flex-col gap-4 p-5 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {continuar.disciplina}
-                  </p>
-                  <h3 className="mt-1 truncate text-base font-semibold">{continuar.titulo}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{continuar.detalhe}</p>
-                </div>
-                <Button asChild>
-                  <Link
-                    to={
-                      continuar.tipo === "questoes"
-                        ? "/materiais/$materialId/questoes"
-                        : "/materiais/$materialId/questoes"
-                    }
-                    params={{ materialId: continuar.material_id }}
-                  >
-                    Retomar
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Skeleton className="h-28 w-full rounded-lg" />
+                <Skeleton className="h-28 w-full rounded-lg" />
               </div>
             ) : (
-              <div className="surface-card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Você ainda não iniciou seus estudos. Comece pelo Acervo Base.
-                </p>
-                <Button asChild variant="outline">
-                  <Link to="/acervo">
-                    Ir para o acervo
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
+              <div className="grid gap-3 md:grid-cols-2">
+                <ContinuarCard
+                  rotulo="Questões"
+                  icon={PencilLine}
+                  item={continuarQuestoes}
+                  to="/materiais/$materialId/questoes"
+                  vazio="Você ainda não resolveu questões. Escolha um material e comece a prática dirigida."
+                />
+                <ContinuarCard
+                  rotulo="Leitura do PDF"
+                  icon={BookOpen}
+                  item={continuarLeitura}
+                  to="/materiais/$materialId/pdf"
+                  vazio="Você ainda não abriu nenhum PDF. Comece pelo Acervo Base."
+                />
               </div>
             )}
           </section>
+
 
           {/* Avisos de material atualizado / novo */}
           {(atualizados.length > 0 || novos.length > 0) && (
@@ -199,7 +187,7 @@ function Dashboard() {
             <SectionTitle icon={TrendingUp}>Atalhos</SectionTitle>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Atalho to="/acervo" icon={BookOpen} title="Acervo Base" desc="Materiais e questões." />
-              <Atalho to="/trilhas" icon={Target} title="Trilhas" desc="Técnico e Analista." />
+              <Atalho to="/cronogramas" icon={CalendarDays} title="Meu cronograma" desc="Seu plano de estudos." />
               <Atalho to="/concursos" icon={FileText} title="Concursos" desc="Preparação específica." />
               <Atalho to="/perfil" icon={Newspaper} title="Meu perfil" desc="Jornada e assinatura." />
             </div>
@@ -209,6 +197,64 @@ function Dashboard() {
     </>
   );
 }
+
+type ContinuarItem = {
+  material_id: string;
+  titulo: string;
+  disciplina: string;
+  detalhe: string;
+} | null;
+
+function ContinuarCard({
+  rotulo,
+  icon: Icon,
+  item,
+  to,
+  vazio,
+}: {
+  rotulo: string;
+  icon: React.ComponentType<{ className?: string }>;
+  item: ContinuarItem;
+  to: "/materiais/$materialId/questoes" | "/materiais/$materialId/pdf";
+  vazio: string;
+}) {
+  return (
+    <div className="surface-card flex flex-col gap-4 p-5 transition-shadow hover:shadow-md">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <Icon className="h-4 w-4" />
+        {rotulo}
+      </div>
+      {item ? (
+        <>
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              {item.disciplina}
+            </p>
+            <h3 className="mt-1 truncate text-base font-semibold">{item.titulo}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">{item.detalhe}</p>
+          </div>
+          <Button asChild className="mt-auto w-fit">
+            <Link to={to} params={{ materialId: item.material_id }}>
+              Retomar
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground">{vazio}</p>
+          <Button asChild variant="outline" className="mt-auto w-fit">
+            <Link to="/acervo">
+              Ir para o acervo
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
+
 
 function FavoritoCard({ f }: { f: { tipo: string; item_id: string; titulo: string } }) {
   const rotulo =
@@ -241,7 +287,7 @@ function FavoritoCard({ f }: { f: { tipo: string; item_id: string; titulo: strin
       </Link>
     );
   }
-  const to = f.tipo === "trilha" ? "/trilhas" : f.tipo === "concurso" ? "/concursos" : "/dashboard";
+  const to = f.tipo === "concurso" ? "/concursos" : f.tipo === "trilha" ? "/acervo" : "/dashboard";
   return (
     <Link to={to} className="surface-card block p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
       {inner}

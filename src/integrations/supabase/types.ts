@@ -478,6 +478,8 @@ export type Database = {
       }
       material_leitura: {
         Row: {
+          concluido: boolean
+          concluido_em: string | null
           created_at: string
           id: string
           material_id: string
@@ -487,6 +489,8 @@ export type Database = {
           versao_vista: number
         }
         Insert: {
+          concluido?: boolean
+          concluido_em?: string | null
           created_at?: string
           id?: string
           material_id: string
@@ -496,6 +500,8 @@ export type Database = {
           versao_vista?: number
         }
         Update: {
+          concluido?: boolean
+          concluido_em?: string | null
           created_at?: string
           id?: string
           material_id?: string
@@ -693,6 +699,53 @@ export type Database = {
             columns: ["notificacao_id"]
             isOneToOne: false
             referencedRelation: "notificacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plano_estudo_itens: {
+        Row: {
+          concluido: boolean
+          created_at: string
+          data: string
+          id: string
+          material_id: string | null
+          observacoes: string | null
+          ordem: number
+          titulo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          concluido?: boolean
+          created_at?: string
+          data: string
+          id?: string
+          material_id?: string | null
+          observacoes?: string | null
+          ordem?: number
+          titulo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          concluido?: boolean
+          created_at?: string
+          data?: string
+          id?: string
+          material_id?: string | null
+          observacoes?: string | null
+          ordem?: number
+          titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plano_estudo_itens_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
             referencedColumns: ["id"]
           },
         ]

@@ -129,6 +129,43 @@ export const salvarLeituraMaterial = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Marca/desmarca manualmente um material como já lido pelo aluno. */
+export const toggleMaterialLido = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ material_id: z.string().uuid(), lido: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: m } = await supabase
+      .from("materiais")
+      .select("versao")
+      .eq("id", data.material_id)
+      .maybeSingle();
+
+    const { data: atual } = await supabase
+      .from("material_leitura")
+      .select("ultima_pagina, versao_vista")
+      .eq("user_id", userId)
+      .eq("material_id", data.material_id)
+      .maybeSingle();
+
+    const { error } = await supabase.from("material_leitura").upsert(
+      {
+        user_id: userId,
+        material_id: data.material_id,
+        ultima_pagina: atual?.ultima_pagina ?? 1,
+        versao_vista: data.lido ? (m?.versao ?? 1) : (atual?.versao_vista ?? m?.versao ?? 1),
+        concluido: data.lido,
+        concluido_em: data.lido ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,material_id" },
+    );
+    if (error) throw new Error(error.message);
+    return { lido: data.lido };
+  });
+
 /** Dados agregados do dashboard: continuar de onde parou, novidades e favoritos. */
 export const getResumoDashboard = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -143,7 +180,7 @@ export const getResumoDashboard = createServerFn({ method: "GET" })
         .eq("publicado", true),
       supabase
         .from("material_leitura")
-        .select("material_id, ultima_pagina, versao_vista, updated_at")
+        .select("material_id, ultima_pagina, versao_vista, concluido, updated_at")
         .eq("user_id", userId)
         .order("updated_at", { ascending: false }),
       supabase
@@ -156,36 +193,41 @@ export const getResumoDashboard = createServerFn({ method: "GET" })
     const mats = materiais ?? [];
     const byId = new Map(mats.map((m: any) => [m.id, m]));
 
-    // Continuar de onde parei
-    const sessaoAberta = (sessoes ?? []).find((s: any) => s.status === "em_andamento" && s.material_id);
-    const ultimaLeitura = (leituras ?? [])[0];
-    let continuar: {
-      tipo: "questoes" | "leitura";
+    type Continuar = {
       material_id: string;
       titulo: string;
       disciplina: string;
       detalhe: string;
-    } | null = null;
+    } | null;
 
-    if (sessaoAberta && byId.has(sessaoAberta.material_id)) {
-      const m: any = byId.get(sessaoAberta.material_id);
-      continuar = {
-        tipo: "questoes",
+    const monta = (materialId: string, detalhe: string): Continuar => {
+      const m: any = byId.get(materialId);
+      if (!m) return null;
+      return {
         material_id: m.id,
         titulo: m.titulo,
         disciplina: m.disciplinas?.nome ?? "Sem disciplina",
-        detalhe: "Questionário em andamento",
+        detalhe,
       };
-    } else if (ultimaLeitura && byId.has(ultimaLeitura.material_id)) {
-      const m: any = byId.get(ultimaLeitura.material_id);
-      continuar = {
-        tipo: "leitura",
-        material_id: m.id,
-        titulo: m.titulo,
-        disciplina: m.disciplinas?.nome ?? "Sem disciplina",
-        detalhe: `Leitura na página ${ultimaLeitura.ultima_pagina}`,
-      };
-    }
+    };
+
+    // Continuar questões: sessão em andamento; se não houver, a última sessão registrada
+    const sessaoAberta = (sessoes ?? []).find(
+      (s: any) => s.status === "em_andamento" && s.material_id,
+    );
+    const ultimaSessao = (sessoes ?? []).find((s: any) => s.material_id);
+    const continuarQuestoes: Continuar = sessaoAberta
+      ? monta(sessaoAberta.material_id, "Questionário em andamento")
+      : ultimaSessao
+        ? monta(ultimaSessao.material_id, "Retomar a prática dirigida")
+        : null;
+
+    // Continuar leitura: último PDF aberto e ainda não concluído
+    const ultimaLeitura =
+      (leituras ?? []).find((l: any) => !l.concluido) ?? (leituras ?? [])[0];
+    const continuarLeitura: Continuar = ultimaLeitura
+      ? monta(ultimaLeitura.material_id, `Leitura na página ${ultimaLeitura.ultima_pagina}`)
+      : null;
 
     // Materiais atualizados que o aluno já leu mas ainda não viu a nova versão
     const leituraMap = new Map((leituras ?? []).map((l: any) => [l.material_id, l]));
@@ -212,8 +254,9 @@ export const getResumoDashboard = createServerFn({ method: "GET" })
         publicado_em: m.publicado_em,
       }));
 
-    return { continuar, atualizados, novos };
+    return { continuarQuestoes, continuarLeitura, atualizados, novos };
   });
+
 
 /** Resumo da jornada exibido no perfil. */
 export const getResumoJornada = createServerFn({ method: "GET" })

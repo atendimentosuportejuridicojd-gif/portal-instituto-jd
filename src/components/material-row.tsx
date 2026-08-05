@@ -3,20 +3,44 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, PencilLine, RefreshCw, BarChart3, Star } from "lucide-react";
+import {
+  FileText,
+  PencilLine,
+  RefreshCw,
+  BarChart3,
+  Star,
+  CheckCircle2,
+  Circle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toggleFavorito } from "@/lib/aluno.functions";
+import { toggleFavorito, toggleMaterialLido } from "@/lib/aluno.functions";
 import { toast } from "sonner";
 
 export function MaterialRow({ m }: { m: any }) {
   const qc = useQueryClient();
   const favFn = useServerFn(toggleFavorito);
+  const lidoFn = useServerFn(toggleMaterialLido);
+
+  const invalidar = () => {
+    qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
+    qc.invalidateQueries({ queryKey: ["favoritos"] });
+    qc.invalidateQueries({ queryKey: ["dashboard"] });
+  };
+
   const fav = useMutation({
     mutationFn: () => favFn({ data: { tipo: "material" as const, item_id: m.id } }),
     onSuccess: (r: any) => {
-      qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
-      qc.invalidateQueries({ queryKey: ["favoritos"] });
+      invalidar();
       toast.success(r?.favorito ? "Adicionado aos favoritos." : "Removido dos favoritos.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const lido = useMutation({
+    mutationFn: () => lidoFn({ data: { material_id: m.id, lido: !m.lido } }),
+    onSuccess: (r: any) => {
+      invalidar();
+      toast.success(r?.lido ? "Material marcado como lido." : "Marcação de leitura removida.");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -27,12 +51,18 @@ export function MaterialRow({ m }: { m: any }) {
   const perfColor =
     perf === null ? "" : perf >= 85 ? "text-green-600" : perf >= 70 ? "text-yellow-600" : "text-red-600";
 
+
   return (
     <div className="surface-card flex flex-col gap-3 p-4 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
           <h3 className="truncate text-sm font-semibold">{m.titulo}</h3>
+          {m.lido && (
+            <Badge variant="outline" className="shrink-0 border-green-600/40 text-green-700">
+              Lido
+            </Badge>
+          )}
           {m.novo && <Badge className="shrink-0">Novo</Badge>}
           {m.atualizado && (
             <Badge variant="secondary" className="shrink-0">
@@ -50,6 +80,20 @@ export function MaterialRow({ m }: { m: any }) {
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button
+          variant={m.lido ? "secondary" : "ghost"}
+          size="sm"
+          onClick={() => lido.mutate()}
+          disabled={lido.isPending}
+          aria-pressed={!!m.lido}
+        >
+          {m.lido ? (
+            <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />
+          ) : (
+            <Circle className="mr-1 h-3.5 w-3.5" />
+          )}
+          {m.lido ? "Já li" : "Marcar como lido"}
+        </Button>
+        <Button
           variant="ghost"
           size="icon"
           aria-label={m.favorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}
@@ -58,6 +102,7 @@ export function MaterialRow({ m }: { m: any }) {
         >
           <Star className={cn("h-4 w-4", m.favorito && "fill-gold text-gold")} />
         </Button>
+
         <Button asChild variant="ghost" size="sm">
           <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
             <FileText className="mr-1 h-3.5 w-3.5" />

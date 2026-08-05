@@ -162,3 +162,101 @@ export const alunoListCronogramas = createServerFn({ method: "GET" })
         })),
     }));
   });
+
+// ============ PLANO DE ESTUDOS PESSOAL DO ALUNO ============
+
+const planoItemSchema = z.object({
+  id: z.string().uuid().optional(),
+  titulo: z.string().trim().min(1).max(200),
+  material_id: z.string().uuid().nullable().optional(),
+  data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  observacoes: z.string().trim().max(1000).optional().nullable(),
+  ordem: z.number().int().min(0).max(999).default(0),
+});
+
+/** Lista o plano de estudos montado pelo próprio aluno, com os materiais disponíveis. */
+export const alunoListPlano = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAcessoAluno(context);
+    const { supabase, userId } = context;
+
+    const [{ data: itens, error }, { data: materiais }] = await Promise.all([
+      supabase
+        .from("plano_estudo_itens")
+        .select("id, titulo, material_id, data, observacoes, concluido, ordem")
+        .eq("user_id", userId)
+        .order("data")
+        .order("ordem"),
+      supabase
+        .from("materiais")
+        .select("id, titulo, disciplinas(nome)")
+        .eq("publicado", true)
+        .order("titulo"),
+    ]);
+    if (error) throw new Error(error.message);
+
+    return {
+      itens: itens ?? [],
+      materiais: (materiais ?? []).map((m: any) => ({
+        id: m.id,
+        titulo: m.titulo,
+        disciplina: m.disciplinas?.nome ?? "Sem disciplina",
+      })),
+    };
+  });
+
+export const alunoSalvarPlanoItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => planoItemSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
+    const { supabase, userId } = context;
+    const payload = {
+      user_id: userId,
+      titulo: data.titulo,
+      material_id: data.material_id ?? null,
+      data: data.data,
+      observacoes: data.observacoes ?? null,
+      ordem: data.ordem,
+    };
+    const { error } = data.id
+      ? await supabase
+          .from("plano_estudo_itens")
+          .update(payload)
+          .eq("id", data.id)
+          .eq("user_id", userId)
+      : await supabase.from("plano_estudo_itens").insert(payload);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const alunoTogglePlanoItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.string().uuid(), concluido: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("plano_estudo_itens")
+      .update({ concluido: data.concluido })
+      .eq("id", data.id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { concluido: data.concluido };
+  });
+
+export const alunoDeletePlanoItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase
+      .from("plano_estudo_itens")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

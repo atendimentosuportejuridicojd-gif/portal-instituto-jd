@@ -2,10 +2,8 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   BookOpen,
-  Target,
   FileText,
   User,
-  HelpCircle,
   CalendarDays,
   Newspaper,
   LogOut,
@@ -30,13 +28,12 @@ import { toast } from "sonner";
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Acervo Base", url: "/acervo", icon: BookOpen },
-  { title: "Trilhas", url: "/trilhas", icon: Target },
   { title: "Concursos", url: "/concursos", icon: FileText },
-  { title: "Questões", url: "/questoes", icon: HelpCircle },
   { title: "Cronogramas", url: "/cronogramas", icon: CalendarDays },
   { title: "Fique por Dentro", url: "/noticias", icon: Newspaper },
   { title: "Perfil", url: "/perfil", icon: User },
 ];
+
 
 export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
   const path = useRouterState({ select: (r) => r.location.pathname });

@@ -158,7 +158,7 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
       supabase.from("favoritos").select("item_id").eq("user_id", userId).eq("tipo", "material"),
       supabase
         .from("material_leitura")
-        .select("material_id, ultima_pagina, versao_vista")
+        .select("material_id, ultima_pagina, versao_vista, concluido")
         .eq("user_id", userId),
     ]);
 
@@ -191,6 +191,7 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
         novo: !!m.publicado_em && new Date(m.publicado_em).getTime() >= limiteNovo && !leitura,
         atualizado: !!leitura && (m.versao ?? 1) > (leitura.versao_vista ?? 1),
         ultima_pagina: leitura?.ultima_pagina ?? null,
+        lido: !!leitura?.concluido,
       };
     });
   });
