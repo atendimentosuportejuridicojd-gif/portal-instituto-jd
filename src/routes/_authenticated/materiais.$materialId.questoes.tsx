@@ -36,6 +36,8 @@ function Resolver() {
     comentario: string | null;
   }>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [finalizada, setFinalizada] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -44,6 +46,8 @@ function Resolver() {
         setSessaoId(sessaoId);
         const s = await carregar({ data: { sessao_id: sessaoId } });
         setState(s);
+        const first = s.questoes.findIndex((q: any) => !q.respondida);
+        setIdx(first === -1 ? s.questoes.length : first);
       } catch (e: any) {
         setErro(e.message ?? "Erro ao carregar.");
       } finally {
@@ -76,8 +80,8 @@ function Resolver() {
 
   const total = state.questoes.length;
   const respondidasCount = state.questoes.filter((q: any) => q.respondida).length;
-  const currentIdx = state.questoes.findIndex((q: any) => !q.respondida);
-  const current = currentIdx === -1 ? null : state.questoes[currentIdx];
+  const currentIdx = idx;
+  const current = currentIdx >= total ? null : state.questoes[currentIdx];
   const progresso = total === 0 ? 0 : Math.round((respondidasCount / total) * 100);
 
   async function submitResposta() {
@@ -88,17 +92,12 @@ function Resolver() {
         data: { sessao_id: sessaoId, questao_id: current.id, alternativa_id: selected },
       });
       setFeedback({ acertou: r.acertou, correta_id: r.correta_id, comentario: r.comentario });
-      // Refresh state to mark this question answered
+      // Refresh state to mark this question answered (stay on the same question)
       const s = await carregar({ data: { sessao_id: sessaoId } });
       setState(s);
       if (r.finalizada) {
+        setFinalizada(true);
         toast.success(`Tentativa concluída — ${r.resumo?.percentual}%`);
-        setTimeout(() => {
-          navigate({
-            to: "/materiais/$materialId/desempenho",
-            params: { materialId },
-          });
-        }, 1500);
       }
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao responder.");
@@ -110,7 +109,14 @@ function Resolver() {
   function proxima() {
     setFeedback(null);
     setSelected(null);
+    if (finalizada) {
+      navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } });
+      return;
+    }
+    const next = state.questoes.findIndex((q: any, i: number) => i > currentIdx && !q.respondida);
+    setIdx(next === -1 ? total : next);
   }
+
 
   if (total === 0) {
     return (
@@ -133,7 +139,15 @@ function Resolver() {
         <PageHeader title="Tentativa concluída" description={state.sessao.material} />
         <PageContent>
           <div className="surface-card p-8 text-center">
-            <p className="text-sm text-muted-foreground">Redirecionando para o desempenho…</p>
+            <p className="text-sm text-muted-foreground">Você respondeu todas as questões desta tentativa.</p>
+            <Button
+              className="mt-4"
+              onClick={() =>
+                navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } })
+              }
+            >
+              Ver desempenho
+            </Button>
           </div>
         </PageContent>
       </>
@@ -237,7 +251,7 @@ function Resolver() {
                 </Button>
               ) : (
                 <Button onClick={proxima}>
-                  Próxima questão
+                  {finalizada ? "Ver desempenho" : "Próxima questão"}
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               )}
