@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Lock, LogOut, ExternalLink } from "lucide-react";
+import { Lock, LogOut, ExternalLink, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlataformaConfig } from "@/lib/config.functions";
 import { getMinhaAssinatura } from "@/lib/assinaturas.functions";
