@@ -58,6 +58,11 @@ export function MaterialRow({ m }: { m: any }) {
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
           <h3 className="truncate text-sm font-semibold">{m.titulo}</h3>
+          {m.lido && (
+            <Badge variant="outline" className="shrink-0 border-green-600/40 text-green-700">
+              Lido
+            </Badge>
+          )}
           {m.novo && <Badge className="shrink-0">Novo</Badge>}
           {m.atualizado && (
             <Badge variant="secondary" className="shrink-0">
@@ -75,6 +80,20 @@ export function MaterialRow({ m }: { m: any }) {
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button
+          variant={m.lido ? "secondary" : "ghost"}
+          size="sm"
+          onClick={() => lido.mutate()}
+          disabled={lido.isPending}
+          aria-pressed={!!m.lido}
+        >
+          {m.lido ? (
+            <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />
+          ) : (
+            <Circle className="mr-1 h-3.5 w-3.5" />
+          )}
+          {m.lido ? "Já li" : "Marcar como lido"}
+        </Button>
+        <Button
           variant="ghost"
           size="icon"
           aria-label={m.favorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}
@@ -83,6 +102,7 @@ export function MaterialRow({ m }: { m: any }) {
         >
           <Star className={cn("h-4 w-4", m.favorito && "fill-gold text-gold")} />
         </Button>
+
         <Button asChild variant="ghost" size="sm">
           <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
             <FileText className="mr-1 h-3.5 w-3.5" />
