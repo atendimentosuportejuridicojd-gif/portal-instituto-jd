@@ -139,7 +139,15 @@ function Resolver() {
         <PageHeader title="Tentativa concluída" description={state.sessao.material} />
         <PageContent>
           <div className="surface-card p-8 text-center">
-            <p className="text-sm text-muted-foreground">Redirecionando para o desempenho…</p>
+            <p className="text-sm text-muted-foreground">Você respondeu todas as questões desta tentativa.</p>
+            <Button
+              className="mt-4"
+              onClick={() =>
+                navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } })
+              }
+            >
+              Ver desempenho
+            </Button>
           </div>
         </PageContent>
       </>
