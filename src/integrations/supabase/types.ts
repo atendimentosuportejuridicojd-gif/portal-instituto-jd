@@ -1041,6 +1041,7 @@ export type Database = {
       }
       is_assinatura_ativa: { Args: { _user_id: string }; Returns: boolean }
       registrar_ultimo_acesso: { Args: never; Returns: undefined }
+      tem_acesso_conteudo: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "administrador" | "aluno"
