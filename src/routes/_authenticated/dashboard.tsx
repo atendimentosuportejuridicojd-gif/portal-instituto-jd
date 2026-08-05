@@ -187,7 +187,7 @@ function Dashboard() {
             <SectionTitle icon={TrendingUp}>Atalhos</SectionTitle>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Atalho to="/acervo" icon={BookOpen} title="Acervo Base" desc="Materiais e questões." />
-              <Atalho to="/trilhas" icon={Target} title="Trilhas" desc="Técnico e Analista." />
+              <Atalho to="/cronogramas" icon={CalendarDays} title="Meu cronograma" desc="Seu plano de estudos." />
               <Atalho to="/concursos" icon={FileText} title="Concursos" desc="Preparação específica." />
               <Atalho to="/perfil" icon={Newspaper} title="Meu perfil" desc="Jornada e assinatura." />
             </div>
