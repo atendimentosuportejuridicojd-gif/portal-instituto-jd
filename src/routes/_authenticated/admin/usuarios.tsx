@@ -143,6 +143,9 @@ function Usuarios() {
                       <span className="font-medium">{r.nome_completo || "—"}</span>
                       {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
                       {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
+                      {r.roles?.includes("aluno_teste") && (
+                        <Badge variant="secondary">Aluno teste</Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{r.email}</TableCell>
