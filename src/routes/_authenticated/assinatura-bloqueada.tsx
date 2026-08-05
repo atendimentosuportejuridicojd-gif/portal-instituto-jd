@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Lock, LogOut, ExternalLink } from "lucide-react";
+import { Lock, LogOut, ExternalLink, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlataformaConfig } from "@/lib/config.functions";
 import { getMinhaAssinatura } from "@/lib/assinaturas.functions";
@@ -29,7 +29,8 @@ function AssinaturaBloqueada() {
   const status = ass.data?.assinatura?.status ?? "sem_assinatura";
   const bloqueado = ass.data?.bloqueado;
   const motivo = ass.data?.bloqueado_motivo;
-  const regularizarUrl = cfg.data?.hotmart_regularizacao_url;
+  const regularizarUrl =
+    cfg.data?.hotmart_regularizacao_url || "https://pay.hotmart.com/W105831049I";
 
   const titulo = bloqueado
     ? "Sua conta foi bloqueada"
@@ -52,12 +53,19 @@ function AssinaturaBloqueada() {
         <h1 className="mt-6 text-2xl font-semibold tracking-tight">{titulo}</h1>
         <p className="mt-3 text-sm text-muted-foreground">{descricao}</p>
 
-        <div className="mt-8 flex flex-col gap-2">
+        {!bloqueado && (
+          <p className="mt-6 text-sm font-medium">
+            Regularize sua assinatura para liberar o acesso imediatamente.
+          </p>
+        )}
+
+        <div className="mt-4 flex flex-col gap-2">
           {regularizarUrl && !bloqueado && (
             <Button asChild size="lg">
               <a href={regularizarUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Regularizar na Hotmart
+                <CreditCard className="mr-2 h-4 w-4" />
+                Pagar agora
+                <ExternalLink className="ml-2 h-3.5 w-3.5 opacity-70" />
               </a>
             </Button>
           )}
