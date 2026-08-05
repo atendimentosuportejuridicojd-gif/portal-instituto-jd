@@ -196,7 +196,7 @@ function Usuarios() {
             <DialogDescription>{editing?.email}</DialogDescription>
           </DialogHeader>
           {editing && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label>Nome completo</Label>
                 <Input
@@ -204,19 +204,55 @@ function Usuarios() {
                   onChange={(e) => setEditing({ ...editing, nome_completo: e.target.value })}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Funções de acesso</Label>
+                {[
+                  { role: "administrador", label: "Administrador", hint: "Acesso total ao painel administrativo." },
+                  { role: "aluno", label: "Aluno", hint: "Acesso padrão, conforme assinatura." },
+                  { role: "aluno_teste", label: "Aluno teste", hint: "Libera todo o conteúdo sem assinatura paga." },
+                ].map((opt) => {
+                  const roles: string[] = editing.roles ?? [];
+                  const checked = roles.includes(opt.role);
+                  return (
+                    <label
+                      key={opt.role}
+                      className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-3"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(v) =>
+                          setEditing({
+                            ...editing,
+                            roles: v
+                              ? [...roles, opt.role]
+                              : roles.filter((r) => r !== opt.role),
+                          })
+                        }
+                      />
+                      <span className="leading-tight">
+                        <span className="block text-sm font-medium">{opt.label}</span>
+                        <span className="block text-xs text-muted-foreground">{opt.hint}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
             <Button
-              onClick={() =>
-                edit.mutate({ id: editing.id, nome_completo: editing.nome_completo ?? "" })
-              }
-              disabled={edit.isPending}
+              onClick={async () => {
+                const roles: string[] = editing.roles?.length ? editing.roles : ["aluno"];
+                await edit.mutateAsync({ id: editing.id, nome_completo: editing.nome_completo ?? "" });
+                await roleMut.mutateAsync({ id: editing.id, roles });
+              }}
+              disabled={edit.isPending || roleMut.isPending}
             >
               Salvar
             </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
 
