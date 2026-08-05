@@ -29,7 +29,8 @@ function AssinaturaBloqueada() {
   const status = ass.data?.assinatura?.status ?? "sem_assinatura";
   const bloqueado = ass.data?.bloqueado;
   const motivo = ass.data?.bloqueado_motivo;
-  const regularizarUrl = cfg.data?.hotmart_regularizacao_url;
+  const regularizarUrl =
+    cfg.data?.hotmart_regularizacao_url || "https://pay.hotmart.com/W105831049I";
 
   const titulo = bloqueado
     ? "Sua conta foi bloqueada"
