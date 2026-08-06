@@ -24,6 +24,7 @@ import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authenticated/admin/trilhas'
 import { Route as AuthenticatedAdminQuestoesRouteImport } from './routes/_authenticated/admin/questoes'
 import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
+import { Route as AuthenticatedAdminDisciplinasEspecificasRouteImport } from './routes/_authenticated/admin/disciplinas-especificas'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminCronogramasRouteImport } from './routes/_authenticated/admin/cronogramas'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
@@ -117,6 +118,12 @@ const AuthenticatedAdminNoticiasRoute =
     path: '/admin/noticias',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDisciplinasEspecificasRoute =
+  AuthenticatedAdminDisciplinasEspecificasRouteImport.update({
+    id: '/admin/disciplinas-especificas',
+    path: '/admin/disciplinas-especificas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin/dashboard',
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/disciplinas-especificas': typeof AuthenticatedAdminDisciplinasEspecificasRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
@@ -225,6 +233,7 @@ export interface FileRoutesByTo {
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/disciplinas-especificas': typeof AuthenticatedAdminDisciplinasEspecificasRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
@@ -254,6 +263,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/cronogramas': typeof AuthenticatedAdminCronogramasRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/disciplinas-especificas': typeof AuthenticatedAdminDisciplinasEspecificasRoute
   '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/cronogramas'
     | '/admin/dashboard'
+    | '/admin/disciplinas-especificas'
     | '/admin/noticias'
     | '/admin/questoes'
     | '/admin/trilhas'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/admin/configuracoes'
     | '/admin/cronogramas'
     | '/admin/dashboard'
+    | '/admin/disciplinas-especificas'
     | '/admin/noticias'
     | '/admin/questoes'
     | '/admin/trilhas'
@@ -338,6 +350,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/cronogramas'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/disciplinas-especificas'
     | '/_authenticated/admin/noticias'
     | '/_authenticated/admin/questoes'
     | '/_authenticated/admin/trilhas'
@@ -466,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNoticiasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/disciplinas-especificas': {
+      id: '/_authenticated/admin/disciplinas-especificas'
+      path: '/admin/disciplinas-especificas'
+      fullPath: '/admin/disciplinas-especificas'
+      preLoaderRoute: typeof AuthenticatedAdminDisciplinasEspecificasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/dashboard': {
       id: '/_authenticated/admin/dashboard'
       path: '/admin/dashboard'
@@ -558,6 +578,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminCronogramasRoute: typeof AuthenticatedAdminCronogramasRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminDisciplinasEspecificasRoute: typeof AuthenticatedAdminDisciplinasEspecificasRoute
   AuthenticatedAdminNoticiasRoute: typeof AuthenticatedAdminNoticiasRoute
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
@@ -582,6 +603,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
   AuthenticatedAdminCronogramasRoute: AuthenticatedAdminCronogramasRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminDisciplinasEspecificasRoute:
+    AuthenticatedAdminDisciplinasEspecificasRoute,
   AuthenticatedAdminNoticiasRoute: AuthenticatedAdminNoticiasRoute,
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
