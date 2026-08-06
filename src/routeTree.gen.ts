@@ -20,6 +20,7 @@ import { Route as AuthenticatedCronogramasRouteImport } from './routes/_authenti
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
 import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
+import { Route as AuthenticatedConcursosEspecificosConcursoIdRouteImport } from './routes/_authenticated/concursos-especificos.$concursoId'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authenticated/admin/trilhas'
 import { Route as AuthenticatedAdminQuestoesRouteImport } from './routes/_authenticated/admin/questoes'
@@ -92,6 +93,12 @@ const AuthenticatedAcervoIndexRoute =
   AuthenticatedAcervoIndexRouteImport.update({
     id: '/acervo/',
     path: '/acervo/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedConcursosEspecificosConcursoIdRoute =
+  AuthenticatedConcursosEspecificosConcursoIdRouteImport.update({
+    id: '/concursos-especificos/$concursoId',
+    path: '/concursos-especificos/$concursoId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminUsuariosRoute =
@@ -210,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
   '/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
   '/acervo': typeof AuthenticatedAcervoIndexRoute
   '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
@@ -268,6 +277,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
   '/_authenticated/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/_authenticated/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/concursos-especificos/$concursoId'
     | '/acervo/'
     | '/acervo/$cargoId/$disciplinaId'
     | '/materiais/$materialId/desempenho'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/admin/questoes'
     | '/admin/trilhas'
     | '/admin/usuarios'
+    | '/concursos-especificos/$concursoId'
     | '/acervo'
     | '/acervo/$cargoId/$disciplinaId'
     | '/materiais/$materialId/desempenho'
@@ -355,6 +367,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/questoes'
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/concursos-especificos/$concursoId'
     | '/_authenticated/acervo/'
     | '/_authenticated/acervo/$cargoId/$disciplinaId'
     | '/_authenticated/materiais/$materialId/desempenho'
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       path: '/acervo'
       fullPath: '/acervo/'
       preLoaderRoute: typeof AuthenticatedAcervoIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/concursos-especificos/$concursoId': {
+      id: '/_authenticated/concursos-especificos/$concursoId'
+      path: '/concursos-especificos/$concursoId'
+      fullPath: '/concursos-especificos/$concursoId'
+      preLoaderRoute: typeof AuthenticatedConcursosEspecificosConcursoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/usuarios': {
@@ -583,6 +603,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
+  AuthenticatedConcursosEspecificosConcursoIdRoute: typeof AuthenticatedConcursosEspecificosConcursoIdRoute
   AuthenticatedAcervoIndexRoute: typeof AuthenticatedAcervoIndexRoute
   AuthenticatedAcervoCargoIdDisciplinaIdRoute: typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   AuthenticatedMateriaisMaterialIdDesempenhoRoute: typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
@@ -609,6 +630,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
+  AuthenticatedConcursosEspecificosConcursoIdRoute:
+    AuthenticatedConcursosEspecificosConcursoIdRoute,
   AuthenticatedAcervoIndexRoute: AuthenticatedAcervoIndexRoute,
   AuthenticatedAcervoCargoIdDisciplinaIdRoute:
     AuthenticatedAcervoCargoIdDisciplinaIdRoute,
