@@ -228,6 +228,7 @@ function MeuCronograma() {
         }
       />
       <PageContent>
+        <ConcursosEspecificos />
         {q.isLoading ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : itens.length === 0 ? (
