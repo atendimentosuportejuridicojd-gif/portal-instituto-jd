@@ -5,16 +5,19 @@ export const getMinhaAssinatura = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [{ data: assin }, { data: isAdmin }] = await Promise.all([
-      supabase
-        .from("assinaturas")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase.rpc("has_role", { _user_id: userId, _role: "administrador" }),
-    ]);
+    const [{ data: assin }, { data: isAdmin }, { data: alunoTeste }, { data: liberado }] =
+      await Promise.all([
+        supabase
+          .from("assinaturas")
+          .select("*")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase.rpc("has_role", { _user_id: userId, _role: "administrador" }),
+        supabase.rpc("has_role", { _user_id: userId, _role: "aluno_teste" }),
+        supabase.rpc("tem_acesso_conteudo"),
+      ]);
     const { data: profile } = await supabase
       .from("profiles")
       .select("bloqueado, bloqueado_motivo")
@@ -26,11 +29,16 @@ export const getMinhaAssinatura = createServerFn({ method: "GET" })
       assin.status === "ativa" &&
       (!assin.fim || new Date(assin.fim).getTime() > Date.now());
 
+    const bloqueado = !!profile?.bloqueado;
+
     return {
       assinatura: assin,
       isAdmin: !!isAdmin,
+      alunoTeste: !!alunoTeste,
       ativa,
-      bloqueado: !!profile?.bloqueado,
+      // Acesso liberado para admin, aluno teste ou assinatura ativa (nunca se bloqueado)
+      acessoLiberado: !!isAdmin || (!bloqueado && (!!liberado || !!alunoTeste || ativa)),
+      bloqueado,
       bloqueado_motivo: profile?.bloqueado_motivo ?? null,
     };
   });
