@@ -19,7 +19,11 @@ export const adminListAcervo = createServerFn({ method: "GET" })
 
     const [{ data: disciplinas }, { data: modulos }, { data: materiais }, { data: questoes }] =
       await Promise.all([
-        supabase.from("disciplinas").select("id, nome, descricao, ordem").order("ordem"),
+        supabase
+          .from("disciplinas")
+          .select("id, nome, descricao, ordem")
+          .eq("especifica", false)
+          .order("ordem"),
         supabase.from("modulos").select("id, nome, disciplina_id, ordem").order("ordem"),
         supabase
           .from("materiais")

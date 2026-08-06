@@ -42,6 +42,7 @@ function CargoDisciplinaMateriais() {
   const permitidos = new Set<string>((cargo?.materiais ?? []).map((m: any) => m.id));
 
   const items = (qMats.data ?? [])
+    .filter((m: any) => !m.especifica)
     .filter((m: any) => todos || permitidos.has(m.id))
     .filter((m: any) => (m.disciplina_id ?? "sem-disciplina") === disciplinaId);
 

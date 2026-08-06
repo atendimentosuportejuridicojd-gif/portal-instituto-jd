@@ -39,7 +39,8 @@ function CargoDisciplinas() {
   const todos = cargoId === "todos";
   const cargo = (qCargos.data ?? []).find((c: any) => c.id === cargoId);
   const permitidos = new Set<string>((cargo?.materiais ?? []).map((m: any) => m.id));
-  const materiais = (qMats.data ?? []).filter((m: any) => todos || permitidos.has(m.id));
+  const materiais = (qMats.data ?? []).filter((m: any) => !m.especifica)
+    .filter((m: any) => todos || permitidos.has(m.id));
 
   const mapa = new Map<string, { id: string; nome: string; total: number; novos: number }>();
   materiais.forEach((m: any) => {
