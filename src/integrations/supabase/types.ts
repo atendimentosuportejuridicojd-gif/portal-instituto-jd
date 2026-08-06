@@ -346,8 +346,10 @@ export type Database = {
       }
       disciplinas: {
         Row: {
+          concurso_id: string | null
           created_at: string
           descricao: string | null
+          especifica: boolean
           id: string
           nome: string
           ordem: number
@@ -355,8 +357,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          concurso_id?: string | null
           created_at?: string
           descricao?: string | null
+          especifica?: boolean
           id?: string
           nome: string
           ordem?: number
@@ -364,15 +368,25 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          concurso_id?: string | null
           created_at?: string
           descricao?: string | null
+          especifica?: boolean
           id?: string
           nome?: string
           ordem?: number
           slug?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "disciplinas_concurso_id_fkey"
+            columns: ["concurso_id"]
+            isOneToOne: false
+            referencedRelation: "concursos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favoritos: {
         Row: {
