@@ -11,8 +11,6 @@ import {
   TrendingUp,
   AlertCircle,
   Star,
-  Sparkles,
-  RefreshCw,
   ArrowRight,
   PencilLine,
 } from "lucide-react";
@@ -53,8 +51,6 @@ function Dashboard() {
   const revisar = qRevisar.data ?? [];
   const continuarQuestoes = qResumo.data?.continuarQuestoes ?? null;
   const continuarLeitura = qResumo.data?.continuarLeitura ?? null;
-  const atualizados = qResumo.data?.atualizados ?? [];
-  const novos = qResumo.data?.novos ?? [];
   const favoritos = qFav.data ?? [];
 
   return (
@@ -93,51 +89,6 @@ function Dashboard() {
             )}
           </section>
 
-
-          {/* Avisos de material atualizado / novo */}
-          {(atualizados.length > 0 || novos.length > 0) && (
-            <section className="animate-in fade-in duration-500">
-              <SectionTitle icon={Sparkles}>Novidades no acervo</SectionTitle>
-              <div className="space-y-2">
-                {atualizados.map((m) => (
-                  <Link
-                    key={`up-${m.id}`}
-                    to="/materiais/$materialId/questoes"
-                    params={{ materialId: m.id }}
-                    className="surface-card flex items-center gap-3 p-4 transition-colors hover:border-gold/50"
-                  >
-                    <RefreshCw className="h-4 w-4 shrink-0 text-gold" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        Material atualizado: {m.disciplina} – {m.titulo}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Versão {m.versao} disponível.</p>
-                    </div>
-                    <Badge variant="secondary" className="shrink-0">
-                      Revisado
-                    </Badge>
-                  </Link>
-                ))}
-                {novos.map((m) => (
-                  <Link
-                    key={`new-${m.id}`}
-                    to="/materiais/$materialId/questoes"
-                    params={{ materialId: m.id }}
-                    className="surface-card flex items-center gap-3 p-4 transition-colors hover:border-primary/40"
-                  >
-                    <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {m.disciplina} – {m.titulo}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Publicado recentemente.</p>
-                    </div>
-                    <Badge className="shrink-0">Novo</Badge>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
 
           {/* Conteúdos para revisar */}
           {revisar.length > 0 && (

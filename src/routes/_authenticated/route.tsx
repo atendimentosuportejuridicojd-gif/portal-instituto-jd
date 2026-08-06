@@ -40,8 +40,7 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     if (!q.data || redirecting || isBlockedPage) return;
-    const acessoLiberado = q.data.isAdmin || (q.data.ativa && !q.data.bloqueado);
-    if (!acessoLiberado) {
+    if (!q.data.acessoLiberado) {
       setRedirecting(true);
       window.location.replace("/assinatura-bloqueada");
     }

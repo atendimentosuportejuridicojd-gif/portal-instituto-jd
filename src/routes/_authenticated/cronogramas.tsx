@@ -24,13 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarDays, FileText, Plus, Trash2, Pencil } from "lucide-react";
+import { CalendarDays, FileText, Plus, Trash2, Pencil, BookMarked } from "lucide-react";
 import {
   alunoListPlano,
   alunoSalvarPlanoItem,
   alunoTogglePlanoItem,
   alunoDeletePlanoItem,
 } from "@/lib/cronogramas.functions";
+import { alunoListConcursosEspecificos } from "@/lib/disciplinas-especificas.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/cronogramas")({
@@ -228,6 +229,7 @@ function MeuCronograma() {
         }
       />
       <PageContent>
+        <ConcursosEspecificos />
         {q.isLoading ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : itens.length === 0 ? (
@@ -319,5 +321,44 @@ function MeuCronograma() {
         )}
       </PageContent>
     </>
+  );
+}
+
+/** Concursos abertos com disciplinas específicas (fora do Acervo Base). */
+function ConcursosEspecificos() {
+  const fn = useServerFn(alunoListConcursosEspecificos);
+  const q = useQuery({ queryKey: ["aluno", "concursos-especificos"], queryFn: () => fn() });
+  const lista = q.data ?? [];
+  if (lista.length === 0) return null;
+
+  return (
+    <section className="mb-8">
+      <div className="flex items-center gap-2">
+        <BookMarked className="h-4 w-4 text-muted-foreground" />
+        <h2 className="text-sm font-semibold">Concursos abertos — disciplinas específicas</h2>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Matérias exclusivas do edital, que não fazem parte do Acervo Base.
+      </p>
+      <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {lista.map((c: any) => (
+          <Link
+            key={c.id}
+            to="/concursos-especificos/$concursoId"
+            params={{ concursoId: c.id }}
+            className="surface-card block p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <p className="text-sm font-semibold">{c.nome}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {[c.orgao, c.banca, c.ano].filter(Boolean).join(" · ") || "Concurso em aberto"}
+            </p>
+            <p className="mt-2 text-xs text-primary">
+              {c.total_disciplinas} disciplina{c.total_disciplinas > 1 ? "s" : ""} específica
+              {c.total_disciplinas > 1 ? "s" : ""}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

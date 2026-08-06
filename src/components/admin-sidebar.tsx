@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   ArrowLeft,
+  BookMarked,
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,6 +34,7 @@ const items = [
   { title: "Acervo Base", url: "/admin/acervo", icon: BookOpen },
   { title: "Trilhas", url: "/admin/trilhas", icon: Target },
   { title: "Concursos", url: "/admin/concursos", icon: FileText },
+  { title: "Disciplinas Específicas", url: "/admin/disciplinas-especificas", icon: BookMarked },
   { title: "Questões", url: "/admin/questoes", icon: HelpCircle },
   { title: "Cronogramas", url: "/admin/cronogramas", icon: CalendarDays },
   { title: "Notícias", url: "/admin/noticias", icon: Newspaper },

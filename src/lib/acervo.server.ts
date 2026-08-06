@@ -29,7 +29,10 @@ export async function isAdmin(ctx: { supabase: any; userId: string }) {
   return !!data;
 }
 
-/** Garante que o aluno tem direito de abrir o material (assinatura ativa e não bloqueado). */
+/**
+ * Garante que o aluno tem direito de abrir o material.
+ * Liberado para: administrador, aluno teste ou assinatura ativa — sempre que não estiver bloqueado.
+ */
 export async function assertAcessoAluno(ctx: { supabase: any; userId: string }) {
   if (await isAdmin(ctx)) return;
 
@@ -40,8 +43,8 @@ export async function assertAcessoAluno(ctx: { supabase: any; userId: string }) 
     .maybeSingle();
   if (perfil?.bloqueado) throw new Error("Sua conta está bloqueada.");
 
-  const { data: ativa } = await ctx.supabase.rpc("is_assinatura_ativa", { _user_id: ctx.userId });
-  if (!ativa) throw new Error("Assinatura inativa. Regularize para acessar o material.");
+  const { data: liberado } = await ctx.supabase.rpc("tem_acesso_conteudo");
+  if (!liberado) throw new Error("Assinatura inativa. Regularize para acessar o material.");
 }
 
 /** Link temporário para leitura do PDF (bucket privado). */
