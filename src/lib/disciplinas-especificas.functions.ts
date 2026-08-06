@@ -150,5 +150,21 @@ export const alunoGetConcursoEspecifico = createServerFn({ method: "GET" })
     ]);
     if (!concurso) throw new Error("Concurso indisponível.");
 
-    return { concurso, disciplinas: disciplinas ?? [] };
+    const ids = (disciplinas ?? []).map((d: any) => d.id);
+    const { data: materiais } = ids.length
+      ? await supabase
+          .from("materiais")
+          .select("id, titulo, descricao, disciplina_id, versao, ordem")
+          .in("disciplina_id", ids)
+          .eq("publicado", true)
+          .order("ordem")
+      : { data: [] as any[] };
+
+    return {
+      concurso,
+      disciplinas: (disciplinas ?? []).map((d: any) => ({
+        ...d,
+        materiais: (materiais ?? []).filter((m: any) => m.disciplina_id === d.id),
+      })),
+    };
   });
