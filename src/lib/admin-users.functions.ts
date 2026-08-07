@@ -38,7 +38,7 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
         .in("user_id", ids),
       supabase.from("questao_sessoes").select("user_id, status").in("user_id", ids),
       supabase.from("questao_tentativas").select("user_id").in("user_id", ids),
-      supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+      supabase.from("user_roles").select("user_id, role, expira_em").in("user_id", ids),
     ]);
 
     const assinMap = new Map<string, any>();
@@ -55,10 +55,12 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
     const tentCount = new Map<string, number>();
     (tent ?? []).forEach((t: any) => tentCount.set(t.user_id, (tentCount.get(t.user_id) ?? 0) + 1));
     const roleMap = new Map<string, string[]>();
+    const testeFim = new Map<string, string | null>();
     (roles ?? []).forEach((r: any) => {
       const arr = roleMap.get(r.user_id) ?? [];
       arr.push(r.role);
       roleMap.set(r.user_id, arr);
+      if (r.role === "aluno_teste") testeFim.set(r.user_id, r.expira_em ?? null);
     });
 
     return (profiles ?? []).map((p: any) => ({
@@ -69,8 +71,14 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
       questionarios_concluidos: sessCount.get(p.id) ?? 0,
       questoes_respondidas: tentCount.get(p.id) ?? 0,
       roles: roleMap.get(p.id) ?? ["aluno"],
+      teste_expira_em: testeFim.get(p.id) ?? null,
+      teste_expirado:
+        roleMap.get(p.id)?.includes("aluno_teste") === true &&
+        !!testeFim.get(p.id) &&
+        new Date(testeFim.get(p.id)!).getTime() <= Date.now(),
     }));
   });
+
 
 const editSchema = z.object({
   id: z.string().uuid(),
@@ -168,6 +176,9 @@ export const adminDefinirRoles = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         roles: z.array(z.enum(ROLES)).min(1).max(3),
+        // Dias de teste; ao (re)ativar "aluno teste" o acesso expira nesse prazo.
+        dias_teste: z.number().int().min(1).max(365).default(5),
+        reiniciar_teste: z.boolean().default(false),
       })
       .parse(d),
   )
@@ -177,7 +188,7 @@ export const adminDefinirRoles = createServerFn({ method: "POST" })
 
     const { data: atuais, error: eSel } = await supabase
       .from("user_roles")
-      .select("role")
+      .select("role, expira_em")
       .eq("user_id", data.id);
     if (eSel) throw new Error(eSel.message);
 
@@ -187,10 +198,16 @@ export const adminDefinirRoles = createServerFn({ method: "POST" })
     const toAdd = [...desired].filter((r) => !current.has(r));
     const toRemove = [...current].filter((r) => !desired.has(r));
 
+    const expiraTeste = new Date(Date.now() + data.dias_teste * 24 * 60 * 60 * 1000).toISOString();
+
     if (toAdd.length > 0) {
-      const { error } = await supabase
-        .from("user_roles")
-        .insert(toAdd.map((role) => ({ user_id: data.id, role: role as any })));
+      const { error } = await supabase.from("user_roles").insert(
+        toAdd.map((role) => ({
+          user_id: data.id,
+          role: role as any,
+          expira_em: role === "aluno_teste" ? expiraTeste : null,
+        })),
+      );
       if (error) throw new Error(error.message);
     }
     if (toRemove.length > 0) {
@@ -202,13 +219,24 @@ export const adminDefinirRoles = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     }
 
+    // Renovar o prazo de um aluno teste já existente
+    if (data.reiniciar_teste && desired.has("aluno_teste") && current.has("aluno_teste")) {
+      const { error } = await supabase
+        .from("user_roles")
+        .update({ expira_em: expiraTeste })
+        .eq("user_id", data.id)
+        .eq("role", "aluno_teste" as any);
+      if (error) throw new Error(error.message);
+    }
+
     await supabase.from("admin_logs").insert({
       user_id: context.userId,
       acao: "usuario.definir_roles",
       entidade: "user_roles",
       entidade_id: data.id,
-      metadata: { roles: data.roles },
+      metadata: { roles: data.roles, dias_teste: data.dias_teste },
     });
+
     return { ok: true };
   });
 

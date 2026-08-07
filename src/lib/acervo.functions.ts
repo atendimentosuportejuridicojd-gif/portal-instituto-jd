@@ -8,6 +8,8 @@ import {
   montarStoragePath,
   removerArquivo,
 } from "@/lib/acervo.server";
+import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
+
 
 // ===================== ADMIN =====================
 
@@ -17,7 +19,7 @@ export const adminListAcervo = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
 
-    const [{ data: disciplinas }, { data: modulos }, { data: materiais }, { data: questoes }] =
+    const [{ data: disciplinas }, { data: modulos }, { data: materiais }, contagem] =
       await Promise.all([
         supabase
           .from("disciplinas")
@@ -31,14 +33,9 @@ export const adminListAcervo = createServerFn({ method: "GET" })
             "id, titulo, descricao, disciplina_id, modulo_id, publicado, versao, ordem, storage_path, tamanho_bytes, paginas, download_permitido, publicado_em, atualizado_em",
           )
           .order("ordem"),
-        supabase.from("questoes").select("material_id"),
+        contarQuestoesPorMaterial(supabase),
       ]);
 
-    const contagem = new Map<string, number>();
-    (questoes ?? []).forEach((q: any) => {
-      if (!q.material_id) return;
-      contagem.set(q.material_id, (contagem.get(q.material_id) ?? 0) + 1);
-    });
 
     return {
       disciplinas: (disciplinas ?? []).map((d: any) => ({

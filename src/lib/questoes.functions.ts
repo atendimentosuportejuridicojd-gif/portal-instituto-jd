@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAcessoAluno } from "@/lib/acervo.server";
+import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 
 // ============ Admin ============
 
@@ -114,14 +115,8 @@ export const adminListMateriaisComQuestoes = createServerFn({ method: "GET" })
       .order("titulo");
     if (error) throw new Error(error.message);
 
-    const { data: counts } = await context.supabase
-      .from("questoes")
-      .select("material_id");
-    const countMap = new Map<string, number>();
-    (counts ?? []).forEach((r: { material_id: string | null }) => {
-      if (!r.material_id) return;
-      countMap.set(r.material_id, (countMap.get(r.material_id) ?? 0) + 1);
-    });
+    const countMap = await contarQuestoesPorMaterial(context.supabase);
+
 
     return (materiais ?? []).map((m: any) => ({
       id: m.id,
@@ -148,13 +143,13 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
       .order("titulo");
     if (error) throw new Error(error.message);
 
-    const [{ data: sessoes }, { data: qcounts }, { data: favs }, { data: leituras }] = await Promise.all([
+    const [{ data: sessoes }, qcountMap, { data: favs }, { data: leituras }] = await Promise.all([
       supabase
         .from("questao_sessoes")
         .select("material_id, percentual, status, concluida_em")
         .eq("user_id", userId)
         .order("concluida_em", { ascending: false, nullsFirst: false }),
-      supabase.from("questoes").select("material_id").eq("publicado", true),
+      contarQuestoesPorMaterial(supabase, { somentePublicadas: true }),
       supabase.from("favoritos").select("item_id").eq("user_id", userId).eq("tipo", "material"),
       supabase
         .from("material_leitura")
@@ -167,11 +162,7 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
       if (s.status !== "concluida" || !s.material_id) return;
       if (!bestByMat.has(s.material_id)) bestByMat.set(s.material_id, { percentual: Number(s.percentual) });
     });
-    const qcountMap = new Map<string, number>();
-    (qcounts ?? []).forEach((r: any) => {
-      if (!r.material_id) return;
-      qcountMap.set(r.material_id, (qcountMap.get(r.material_id) ?? 0) + 1);
-    });
+
     const favSet = new Set((favs ?? []).map((f: any) => f.item_id));
     const leituraMap = new Map((leituras ?? []).map((l: any) => [l.material_id, l]));
     const limiteNovo = Date.now() - 14 * 24 * 60 * 60 * 1000;

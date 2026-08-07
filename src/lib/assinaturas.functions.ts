@@ -15,7 +15,7 @@ export const getMinhaAssinatura = createServerFn({ method: "GET" })
           .limit(1)
           .maybeSingle(),
         supabase.rpc("has_role", { _user_id: userId, _role: "administrador" }),
-        supabase.rpc("has_role", { _user_id: userId, _role: "aluno_teste" }),
+        supabase.rpc("aluno_teste_ativo", { _user_id: userId }),
         supabase.rpc("tem_acesso_conteudo"),
       ]);
     const { data: profile } = await supabase

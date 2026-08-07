@@ -1072,18 +1072,21 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string
+          expira_em: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          expira_em?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string
+          expira_em?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -1095,6 +1098,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aluno_teste_ativo: { Args: { _user_id: string }; Returns: boolean }
       get_desempenho_material: {
         Args: { _material_id: string; _user_id: string }
         Returns: number

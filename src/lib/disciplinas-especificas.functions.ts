@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAcessoAluno, assertAdmin, gerarSlug } from "@/lib/acervo.server";
+import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 
 // ===================== ADMIN =====================
 
@@ -12,7 +13,7 @@ export const adminListDisciplinasEspecificas = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
 
-    const [{ data: concursos }, { data: disciplinas }, { data: materiais }, { data: questoes }] =
+    const [{ data: concursos }, { data: disciplinas }, { data: materiais }, contagem] =
       await Promise.all([
         supabase.from("concursos").select("id, nome, orgao, publicado").order("nome"),
         supabase
@@ -24,14 +25,9 @@ export const adminListDisciplinasEspecificas = createServerFn({ method: "GET" })
           .from("materiais")
           .select("id, titulo, descricao, disciplina_id, publicado, versao, ordem, storage_path")
           .order("ordem"),
-        supabase.from("questoes").select("material_id"),
+        contarQuestoesPorMaterial(supabase),
       ]);
 
-    const contagem = new Map<string, number>();
-    (questoes ?? []).forEach((q: any) => {
-      if (!q.material_id) return;
-      contagem.set(q.material_id, (contagem.get(q.material_id) ?? 0) + 1);
-    });
 
     return {
       concursos: concursos ?? [],
