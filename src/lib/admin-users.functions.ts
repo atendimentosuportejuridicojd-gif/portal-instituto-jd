@@ -38,7 +38,7 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
         .in("user_id", ids),
       supabase.from("questao_sessoes").select("user_id, status").in("user_id", ids),
       supabase.from("questao_tentativas").select("user_id").in("user_id", ids),
-      supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+      supabase.from("user_roles").select("user_id, role, expira_em").in("user_id", ids),
     ]);
 
     const assinMap = new Map<string, any>();
@@ -55,10 +55,12 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
     const tentCount = new Map<string, number>();
     (tent ?? []).forEach((t: any) => tentCount.set(t.user_id, (tentCount.get(t.user_id) ?? 0) + 1));
     const roleMap = new Map<string, string[]>();
+    const testeFim = new Map<string, string | null>();
     (roles ?? []).forEach((r: any) => {
       const arr = roleMap.get(r.user_id) ?? [];
       arr.push(r.role);
       roleMap.set(r.user_id, arr);
+      if (r.role === "aluno_teste") testeFim.set(r.user_id, r.expira_em ?? null);
     });
 
     return (profiles ?? []).map((p: any) => ({
@@ -69,8 +71,14 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
       questionarios_concluidos: sessCount.get(p.id) ?? 0,
       questoes_respondidas: tentCount.get(p.id) ?? 0,
       roles: roleMap.get(p.id) ?? ["aluno"],
+      teste_expira_em: testeFim.get(p.id) ?? null,
+      teste_expirado:
+        roleMap.get(p.id)?.includes("aluno_teste") === true &&
+        !!testeFim.get(p.id) &&
+        new Date(testeFim.get(p.id)!).getTime() <= Date.now(),
     }));
   });
+
 
 const editSchema = z.object({
   id: z.string().uuid(),
