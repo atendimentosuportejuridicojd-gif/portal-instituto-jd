@@ -47,7 +47,13 @@ function Usuarios() {
   const rolesFn = useServerFn(adminDefinirRoles);
 
   const roleMut = useMutation({
-    mutationFn: (v: { id: string; roles: string[] }) => rolesFn({ data: v as any }),
+    mutationFn: (v: {
+      id: string;
+      roles: string[];
+      dias_teste?: number;
+      reiniciar_teste?: boolean;
+    }) => rolesFn({ data: v as any }),
+
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
       setEditing(null);
