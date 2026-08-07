@@ -230,7 +230,7 @@ function Usuarios() {
                 {[
                   { role: "administrador", label: "Administrador", hint: "Acesso total ao painel administrativo." },
                   { role: "aluno", label: "Aluno", hint: "Acesso padrão, conforme assinatura." },
-                  { role: "aluno_teste", label: "Aluno teste", hint: "Libera todo o conteúdo sem assinatura paga." },
+                  { role: "aluno_teste", label: "Aluno teste", hint: "Libera todo o conteúdo sem assinatura paga, por tempo limitado." },
                 ].map((opt) => {
                   const roles: string[] = editing.roles ?? [];
                   const checked = roles.includes(opt.role);
