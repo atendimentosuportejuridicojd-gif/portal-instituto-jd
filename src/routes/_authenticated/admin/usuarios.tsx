@@ -144,8 +144,15 @@ function Usuarios() {
                       {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
                       {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
                       {r.roles?.includes("aluno_teste") && (
-                        <Badge variant="secondary">Aluno teste</Badge>
+                        <Badge variant={r.teste_expirado ? "destructive" : "secondary"}>
+                          {r.teste_expirado
+                            ? "Teste expirado"
+                            : r.teste_expira_em
+                              ? `Teste até ${new Date(r.teste_expira_em).toLocaleDateString("pt-BR")}`
+                              : "Aluno teste"}
+                        </Badge>
                       )}
+
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{r.email}</TableCell>
