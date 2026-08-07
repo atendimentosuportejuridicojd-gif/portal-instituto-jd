@@ -114,14 +114,8 @@ export const adminListMateriaisComQuestoes = createServerFn({ method: "GET" })
       .order("titulo");
     if (error) throw new Error(error.message);
 
-    const { data: counts } = await context.supabase
-      .from("questoes")
-      .select("material_id");
-    const countMap = new Map<string, number>();
-    (counts ?? []).forEach((r: { material_id: string | null }) => {
-      if (!r.material_id) return;
-      countMap.set(r.material_id, (countMap.get(r.material_id) ?? 0) + 1);
-    });
+    const countMap = await contarQuestoesPorMaterial(context.supabase);
+
 
     return (materiais ?? []).map((m: any) => ({
       id: m.id,
