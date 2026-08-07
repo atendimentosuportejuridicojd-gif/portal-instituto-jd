@@ -257,6 +257,37 @@ function Usuarios() {
                     </label>
                   );
                 })}
+                {editing.roles?.includes("aluno_teste") && (
+                  <div className="space-y-2 rounded-md border border-border p-3">
+                    <Label htmlFor="dias-teste">Duração do teste (dias)</Label>
+                    <Input
+                      id="dias-teste"
+                      type="number"
+                      min={1}
+                      max={365}
+                      value={editing.dias_teste ?? 5}
+                      onChange={(e) =>
+                        setEditing({ ...editing, dias_teste: Number(e.target.value) || 5 })
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {editing.teste_expira_em
+                        ? `Prazo atual: ${new Date(editing.teste_expira_em).toLocaleString("pt-BR")}. Marque abaixo para renovar.`
+                        : "Ao salvar, o acesso de teste expira nesse prazo."}
+                    </p>
+                    {editing.teste_expira_em && (
+                      <label className="flex cursor-pointer items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={!!editing.reiniciar_teste}
+                          onCheckedChange={(v) =>
+                            setEditing({ ...editing, reiniciar_teste: !!v })
+                          }
+                        />
+                        Renovar prazo a partir de hoje
+                      </label>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -266,7 +297,12 @@ function Usuarios() {
               onClick={async () => {
                 const roles: string[] = editing.roles?.length ? editing.roles : ["aluno"];
                 await edit.mutateAsync({ id: editing.id, nome_completo: editing.nome_completo ?? "" });
-                await roleMut.mutateAsync({ id: editing.id, roles });
+                await roleMut.mutateAsync({
+                  id: editing.id,
+                  roles,
+                  dias_teste: Number(editing.dias_teste) || 5,
+                  reiniciar_teste: !!editing.reiniciar_teste,
+                });
               }}
               disabled={edit.isPending || roleMut.isPending}
             >
@@ -275,6 +311,7 @@ function Usuarios() {
           </DialogFooter>
 
         </DialogContent>
+
       </Dialog>
 
       {/* Bloquear */}
