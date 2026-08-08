@@ -33,17 +33,15 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
-              <Scale className="h-5 w-5" />
-            </div>
-            <div className="leading-tight">
-              <p className="text-sm font-bold tracking-tight">Instituto J&D</p>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Especialistas na Carreira Judiciária
-              </p>
-            </div>
-          </div>
+          <img
+            src={lockupAsset.url}
+            alt="Instituto J&D — Carreira Judiciária 360"
+            width={280}
+            height={92}
+            loading="eager"
+            decoding="async"
+            className="h-11 w-auto rounded-md object-contain sm:h-14"
+          />
           <Button asChild size="sm">
             <Link to="/auth">Entrar</Link>
           </Button>
