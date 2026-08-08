@@ -2,6 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Scale, Target, FileText, Newspaper, CalendarDays } from "lucide-react";
+import lockupAsset from "@/assets/lockup-jd.png.asset.json";
 
 export const Route = createFileRoute("/")({
   ssr: false,
