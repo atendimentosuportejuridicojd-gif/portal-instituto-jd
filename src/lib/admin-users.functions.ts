@@ -136,16 +136,20 @@ export const adminResetSenhaUsuario = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const ANON_KEY = process.env.SUPABASE_ANON_KEY;
-    if (!SUPABASE_URL || !ANON_KEY) throw new Error("Configuração de e-mail indisponível no servidor.");
+    const SUPABASE_URL = process.env['SUPABASE_URL'] ?? process.env['VITE_SUPABASE_URL'];
+    const API_KEY =
+      process.env['SUPABASE_PUBLISHABLE_KEY'] ??
+      process.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ??
+      process.env['SUPABASE_ANON_KEY'] ??
+      process.env['SUPABASE_SERVICE_ROLE_KEY'];
+    if (!SUPABASE_URL || !API_KEY) throw new Error("Configuração de e-mail indisponível no servidor.");
 
     // GoTrue /recover envia efetivamente o e-mail de redefinição.
     const res = await fetch(
       `${SUPABASE_URL}/auth/v1/recover?redirect_to=${encodeURIComponent(data.redirect_to)}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json", apikey: ANON_KEY },
+        headers: { "Content-Type": "application/json", apikey: API_KEY },
         body: JSON.stringify({ email: data.email }),
       },
     );
