@@ -11,15 +11,19 @@ Depois de ativo, confira rapidamente se os sites continuam abrindo:
 Todos os registros devem permanecer como **Somente DNS** (nuvem cinza).
 
 ## 2. Adicionar os registros de e-mail na Cloudflare
-No painel do Lovable, em **Cloud → Emails**, aparecem os registros do domínio de envio `notify.portal.institutojd.ia.br`. Na Cloudflare, em **DNS → Registros**, adicionar:
+Em **DNS → Registros** da Cloudflare, adicionar exatamente estes três registros (todos sem proxy):
 
-- **2 registros NS** com nome `notify.portal` e os dois valores `nsX.lovable.cloud` mostrados na tela do Lovable
-- **1 registro TXT** de verificação, caso ainda não exista (nome `_lovable-email.portal`)
+| Tipo | Nome | Conteúdo |
+|------|------|----------|
+| TXT | `_lovable-email.portal` | `lovable_email_verify=210bc9eddeafc32afdebd3b93bf4d14ba0beeebf8bded832a468bb7761ac33bd` |
+| NS | `notify.portal` | `ns7.lovable.cloud` |
+| NS | `notify.portal` | `ns8.lovable.cloud` |
 
-Registro NS não tem opção de proxy — é só nome e valor.
+Os dois NS têm o mesmo nome e valores diferentes — são dois registros separados. Registro NS não tem opção de proxy.
 
 ## 3. Verificar o domínio de e-mail
-De volta em **Cloud → Emails**, clicar em **Verify Domain**. A verificação pode levar de minutos a algumas horas.
+Depois de salvar, a verificação acontece automaticamente (alguns minutos). Você pode acompanhar em **Cloud → Emails**, e eu confiro aqui quando você avisar.
+
 
 ## 4. Testar os e-mails com a marca
 Assim que o domínio ficar verificado, testar um envio real (redefinição de senha de um usuário) para confirmar que o e-mail chega com o remetente **Instituto J&D** e a logo oficial. Os templates em português com a identidade visual já estão prontos no projeto — nenhuma alteração de código é necessária.
