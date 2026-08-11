@@ -24,7 +24,7 @@ export const BRAND = {
 }
 
 export const LOGO_URL =
-  'https://portal.institutojd.ia.br/__l5e/assets-v1/48b64b53-7548-47ab-a005-de51f2f208bc/lockup-jd.png'
+  'https://portal.institutojd.ia.br/__l5e/assets-v1/37ed9c29-1b7a-48bf-98d0-dea61641d5aa/logo-jd.png'
 
 export const SITE_LABEL = 'Instituto J&D — Especialistas na Carreira Judiciária'
 
@@ -47,7 +47,7 @@ export function EmailLayout({
         <Container style={container}>
           <Section style={header}>
             <Link href={siteUrl}>
-              <Img src={LOGO_URL} alt={SITE_LABEL} width="300" style={logo} />
+              <Img src={LOGO_URL} alt={SITE_LABEL} width="180" style={logo} />
             </Link>
           </Section>
           <Section style={card}>
