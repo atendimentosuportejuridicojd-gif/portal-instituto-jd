@@ -47,7 +47,7 @@ export function EmailLayout({
         <Container style={container}>
           <Section style={header}>
             <Link href={siteUrl}>
-              <Img src={LOGO_URL} alt={SITE_LABEL} width="300" style={logo} />
+              <Img src={LOGO_URL} alt={SITE_LABEL} width="180" style={logo} />
             </Link>
           </Section>
           <Section style={card}>
