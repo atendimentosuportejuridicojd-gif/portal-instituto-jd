@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TesteRouteImport } from './routes/teste'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -40,6 +41,11 @@ import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './route
 import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
 import { Route as AuthenticatedAcervoCargoIdDisciplinaIdRouteImport } from './routes/_authenticated/acervo.$cargoId.$disciplinaId'
 
+const TesteRoute = TesteRouteImport.update({
+  id: '/teste',
+  path: '/teste',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/teste': typeof TesteRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
   '/_authenticated/cronogramas': typeof AuthenticatedCronogramasRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/teste'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/cronogramas'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/teste'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/cronogramas'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/teste'
     | '/_authenticated/assinatura-bloqueada'
     | '/_authenticated/concursos'
     | '/_authenticated/cronogramas'
@@ -406,6 +418,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TesteRoute: typeof TesteRoute
   ApiPublicHotmartWebhookRoute: typeof ApiPublicHotmartWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -413,6 +426,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/teste': {
+      id: '/teste'
+      path: '/teste'
+      fullPath: '/teste'
+      preLoaderRoute: typeof TesteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -692,6 +712,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TesteRoute: TesteRoute,
   ApiPublicHotmartWebhookRoute: ApiPublicHotmartWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
