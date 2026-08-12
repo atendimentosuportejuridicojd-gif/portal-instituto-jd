@@ -161,7 +161,13 @@ function Usuarios() {
 
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{r.email}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    <div>{r.email}</div>
+                    {r.telefone && <div className="text-xs tabular-nums">{r.telefone}</div>}
+                    {r.origem === "teste_gratis" && (
+                      <div className="text-xs text-muted-foreground/70">via página de teste</div>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <AssinaturaBadge status={r.assinatura_status} plano={r.assinatura_plano} />
                   </TableCell>
