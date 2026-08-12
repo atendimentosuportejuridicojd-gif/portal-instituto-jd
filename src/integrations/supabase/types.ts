@@ -187,6 +187,7 @@ export type Database = {
       }
       configuracoes_plataforma: {
         Row: {
+          dias_teste_gratis: number
           email_contato: string | null
           facebook_url: string | null
           favicon_url: string | null
@@ -206,6 +207,7 @@ export type Database = {
           youtube_url: string | null
         }
         Insert: {
+          dias_teste_gratis?: number
           email_contato?: string | null
           facebook_url?: string | null
           favicon_url?: string | null
@@ -225,6 +227,7 @@ export type Database = {
           youtube_url?: string | null
         }
         Update: {
+          dias_teste_gratis?: number
           email_contato?: string | null
           facebook_url?: string | null
           favicon_url?: string | null
@@ -773,6 +776,9 @@ export type Database = {
           email: string
           id: string
           nome_completo: string
+          origem: string | null
+          telefone: string | null
+          teste_solicitado_em: string | null
           ultimo_acesso_em: string | null
           updated_at: string
         }
@@ -784,6 +790,9 @@ export type Database = {
           email?: string
           id: string
           nome_completo?: string
+          origem?: string | null
+          telefone?: string | null
+          teste_solicitado_em?: string | null
           ultimo_acesso_em?: string | null
           updated_at?: string
         }
@@ -795,6 +804,9 @@ export type Database = {
           email?: string
           id?: string
           nome_completo?: string
+          origem?: string | null
+          telefone?: string | null
+          teste_solicitado_em?: string | null
           ultimo_acesso_em?: string | null
           updated_at?: string
         }

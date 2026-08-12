@@ -62,8 +62,11 @@ function Landing() {
               Materiais em PDF, sistema inteligente de questões, cronogramas e trilhas de estudo —
               tudo pensado para quem busca aprovação em Tribunais e MPs de todo o Brasil.
             </p>
-            <div className="mt-8 flex gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
+                <Link to="/teste">Testar gratuitamente</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
                 <Link to="/auth">Acessar o Portal</Link>
               </Button>
             </div>

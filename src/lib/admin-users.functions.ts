@@ -19,12 +19,14 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
 
     let query = supabase
       .from("profiles")
-      .select("id, nome_completo, email, created_at, ultimo_acesso_em, bloqueado, bloqueado_motivo")
+      .select(
+        "id, nome_completo, email, telefone, origem, created_at, ultimo_acesso_em, bloqueado, bloqueado_motivo",
+      )
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.q) {
       const q = data.q.replace(/[%_]/g, "");
-      query = query.or(`nome_completo.ilike.%${q}%,email.ilike.%${q}%`);
+      query = query.or(`nome_completo.ilike.%${q}%,email.ilike.%${q}%,telefone.ilike.%${q}%`);
     }
     const { data: profiles, error } = await query;
     if (error) throw new Error(error.message);

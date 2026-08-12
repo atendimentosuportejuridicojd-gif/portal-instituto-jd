@@ -121,6 +121,13 @@ function AuthPage() {
             Entre com sua conta ou crie uma nova.
           </p>
 
+          <div className="mt-4 rounded-md border border-border bg-muted/40 p-3 text-sm">
+            Ainda não é aluno?{" "}
+            <Link to="/teste" className="font-medium text-primary hover:underline">
+              Resgate seu período de teste
+            </Link>
+          </div>
+
           <Tabs defaultValue="entrar" className="mt-6">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="entrar">Entrar</TabsTrigger>
