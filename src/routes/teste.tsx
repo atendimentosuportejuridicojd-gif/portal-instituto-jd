@@ -78,7 +78,7 @@ function TestePage() {
         </Link>
         <div>
           <h2 className="text-3xl font-semibold leading-tight">
-            "É justo que muito custe, aquilo que muito vale."
+            "A aprovação é resultado de um estudo silencioso, disciplinado e constante."
           </h2>
           <ul className="mt-8 space-y-3 text-sm opacity-80">
             {[
