@@ -42,15 +42,27 @@ function CargoDisciplinas() {
   const materiais = (qMats.data ?? []).filter((m: any) => !m.especifica)
     .filter((m: any) => todos || permitidos.has(m.id));
 
-  const mapa = new Map<string, { id: string; nome: string; total: number; novos: number }>();
+  const mapa = new Map<
+    string,
+    { id: string; nome: string; total: number; novos: number; grupo: string }
+  >();
   materiais.forEach((m: any) => {
     const id = m.disciplina_id ?? "sem-disciplina";
-    const atual = mapa.get(id) ?? { id, nome: m.disciplina, total: 0, novos: 0 };
+    const atual =
+      mapa.get(id) ?? { id, nome: m.disciplina, total: 0, novos: 0, grupo: m.grupo ?? "gerais" };
     atual.total += 1;
     if (m.novo || m.atualizado) atual.novos += 1;
     mapa.set(id, atual);
   });
   const disciplinas = [...mapa.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  const grupos = [
+    { key: "gerais", titulo: "Conhecimentos Gerais", itens: disciplinas.filter((d) => d.grupo !== "especificos") },
+    {
+      key: "especificos",
+      titulo: "Conhecimentos Específicos",
+      itens: disciplinas.filter((d) => d.grupo === "especificos"),
+    },
+  ].filter((g) => g.itens.length > 0);
 
   const loading = qCargos.isLoading || qMats.isLoading;
   const titulo = todos ? "Acervo completo" : (cargo?.nome ?? "Cargo");
