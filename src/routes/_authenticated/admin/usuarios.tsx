@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Lock, Unlock, Mail, Pencil } from "lucide-react";
+import { Search, Lock, Unlock, Mail, Pencil, MessageCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
@@ -64,6 +64,8 @@ function Usuarios() {
   const qc = useQueryClient();
 
   const [q, setQ] = useState("");
+  const [filtro, setFiltro] = useState<"ativa" | "sem" | "todos">("todos");
+  const [detalhe, setDetalhe] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [blockDialog, setBlockDialog] = useState<any | null>(null);
   const [motivo, setMotivo] = useState("");
@@ -101,7 +103,14 @@ function Usuarios() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const rows = query.data ?? [];
+  const all = query.data ?? [];
+  const rows = all.filter((r: any) =>
+    filtro === "todos"
+      ? true
+      : filtro === "ativa"
+        ? r.assinatura_status === "ativa"
+        : r.assinatura_status !== "ativa",
+  );
 
   return (
     <>
@@ -109,14 +118,33 @@ function Usuarios() {
         title="Usuários"
         description="Alunos e administradores da plataforma."
         actions={
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="w-64 pl-8"
-              placeholder="Buscar por nome ou e-mail…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-md border border-border p-0.5">
+              {([
+                { key: "ativa", label: "Assinatura ativa" },
+                { key: "sem", label: "Sem assinatura" },
+                { key: "todos", label: "Todos" },
+              ] as const).map((f) => (
+                <Button
+                  key={f.key}
+                  size="sm"
+                  variant={filtro === f.key ? "secondary" : "ghost"}
+                  className="h-8"
+                  onClick={() => setFiltro(f.key)}
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="w-64 pl-8"
+                placeholder="Buscar por nome ou e-mail…"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </div>
           </div>
         }
       />
@@ -146,7 +174,13 @@ function Usuarios() {
                 <TableRow key={r.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{r.nome_completo || "—"}</span>
+                      <button
+                        type="button"
+                        className="font-medium underline-offset-4 hover:underline"
+                        onClick={() => setDetalhe(r)}
+                      >
+                        {r.nome_completo || "—"}
+                      </button>
                       {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
                       {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
                       {r.roles?.includes("aluno_teste") && (
@@ -220,6 +254,71 @@ function Usuarios() {
           </Table>
         </div>
       </PageContent>
+
+      {/* Detalhes do usuário */}
+      <Dialog open={!!detalhe} onOpenChange={(v) => !v && setDetalhe(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dados do usuário</DialogTitle>
+            <DialogDescription>
+              Informações do cadastro
+              {detalhe?.origem === "teste_gratis" ? " (página de teste)" : ""}.
+            </DialogDescription>
+          </DialogHeader>
+          {detalhe && (
+            <div className="space-y-4 text-sm">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Nome completo</p>
+                <p className="font-medium">{detalhe.nome_completo || "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">E-mail</p>
+                <p className="font-medium break-all">{detalhe.email}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Celular (WhatsApp)</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium tabular-nums">
+                    {detalhe.telefone ? formatarTelefone(detalhe.telefone) : "—"}
+                  </p>
+                  {detalhe.telefone && (
+                    <Button asChild size="sm" variant="outline" className="h-8 gap-1.5">
+                      <a
+                        href={linkWhatsApp(detalhe.telefone, detalhe.nome_completo)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Conversar no WhatsApp"
+                      >
+                        <MessageCircle className="h-4 w-4 text-green-600" />
+                        WhatsApp
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Assinatura</p>
+                  <div className="mt-1">
+                    <AssinaturaBadge status={detalhe.assinatura_status} plano={detalhe.assinatura_plano} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Cadastro</p>
+                  <p className="font-medium">
+                    {new Date(detalhe.created_at).toLocaleDateString("pt-BR")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDetalhe(null)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Editar */}
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
@@ -361,4 +460,30 @@ function AssinaturaBadge({ status, plano }: { status: string; plano: string | nu
   if (status === "cancelada") return <Badge variant="secondary">Cancelada</Badge>;
   if (status === "inativa") return <Badge variant="secondary">Inativa</Badge>;
   return <Badge variant="outline">Sem assinatura</Badge>;
+}
+
+/** Normaliza para o formato internacional usado pelo wa.me (Brasil = 55). */
+function telefoneInternacional(telefone: string) {
+  const d = (telefone ?? "").replace(/\D/g, "");
+  if (!d) return "";
+  return d.startsWith("55") ? d : `55${d}`;
+}
+
+function formatarTelefone(telefone: string) {
+  const d = (telefone ?? "").replace(/\D/g, "").replace(/^55/, "");
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return telefone;
+}
+
+const MENSAGEM_WHATSAPP =
+  "Olá, {nome}! Aqui é do Instituto J&D — Especialistas na Carreira Judiciária. " +
+  "Vimos que você já começou seus estudos no Portal do Aluno e não queremos que você perca o ritmo. " +
+  "Ao assinar, você mantém acesso completo ao acervo, às questões comentadas, ao seu cronograma e ao seu histórico de desempenho — tudo exatamente de onde você parou. " +
+  "Quer que eu te envie o link da assinatura e tire suas dúvidas?";
+
+function linkWhatsApp(telefone: string, nome?: string | null) {
+  const primeiro = (nome ?? "").trim().split(/\s+/)[0] || "tudo bem";
+  const texto = MENSAGEM_WHATSAPP.replace("{nome}", primeiro);
+  return `https://wa.me/${telefoneInternacional(telefone)}?text=${encodeURIComponent(texto)}`;
 }
