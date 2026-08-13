@@ -23,7 +23,7 @@ export const adminListAcervo = createServerFn({ method: "GET" })
       await Promise.all([
         supabase
           .from("disciplinas")
-          .select("id, nome, descricao, ordem")
+          .select("id, nome, descricao, ordem, grupo")
           .eq("especifica", false)
           .order("ordem"),
         supabase.from("modulos").select("id, nome, disciplina_id, ordem").order("ordem"),
@@ -60,12 +60,18 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
         nome: z.string().trim().min(1).max(200),
         descricao: z.string().trim().max(1000).optional().default(""),
         ordem: z.number().int().min(0).default(0),
+        grupo: z.enum(["gerais", "especificos"]).default("gerais"),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const payload = { nome: data.nome, descricao: data.descricao || null, ordem: data.ordem };
+    const payload = {
+      nome: data.nome,
+      descricao: data.descricao || null,
+      ordem: data.ordem,
+      grupo: data.grupo,
+    };
     if (data.id) {
       const { error } = await context.supabase.from("disciplinas").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);

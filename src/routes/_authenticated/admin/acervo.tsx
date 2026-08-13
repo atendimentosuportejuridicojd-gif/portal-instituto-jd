@@ -247,6 +247,7 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
   const [nome, setNome] = useState(disciplina?.nome ?? "");
   const [descricao, setDescricao] = useState(disciplina?.descricao ?? "");
   const [ordem, setOrdem] = useState(String(disciplina?.ordem ?? 0));
+  const [grupo, setGrupo] = useState<string>(disciplina?.grupo ?? "gerais");
   const fn = useServerFn(adminUpsertDisciplina);
 
   const mut = useMutation({
@@ -257,6 +258,7 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           nome,
           descricao,
           ordem: Number(ordem) || 0,
+          grupo: grupo as "gerais" | "especificos",
         },
       }),
     onSuccess: () => {
@@ -294,6 +296,18 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           <div className="space-y-1.5">
             <Label htmlFor="d-desc">Descrição</Label>
             <Textarea id="d-desc" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Grupo no acervo</Label>
+            <Select value={grupo} onValueChange={setGrupo}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gerais">Conhecimentos Gerais</SelectItem>
+                <SelectItem value="especificos">Conhecimentos Específicos</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="d-ordem">Ordem</Label>

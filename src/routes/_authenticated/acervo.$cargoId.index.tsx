@@ -42,15 +42,27 @@ function CargoDisciplinas() {
   const materiais = (qMats.data ?? []).filter((m: any) => !m.especifica)
     .filter((m: any) => todos || permitidos.has(m.id));
 
-  const mapa = new Map<string, { id: string; nome: string; total: number; novos: number }>();
+  const mapa = new Map<
+    string,
+    { id: string; nome: string; total: number; novos: number; grupo: string }
+  >();
   materiais.forEach((m: any) => {
     const id = m.disciplina_id ?? "sem-disciplina";
-    const atual = mapa.get(id) ?? { id, nome: m.disciplina, total: 0, novos: 0 };
+    const atual =
+      mapa.get(id) ?? { id, nome: m.disciplina, total: 0, novos: 0, grupo: m.grupo ?? "gerais" };
     atual.total += 1;
     if (m.novo || m.atualizado) atual.novos += 1;
     mapa.set(id, atual);
   });
   const disciplinas = [...mapa.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  const grupos = [
+    { key: "gerais", titulo: "Conhecimentos Gerais", itens: disciplinas.filter((d) => d.grupo !== "especificos") },
+    {
+      key: "especificos",
+      titulo: "Conhecimentos Específicos",
+      itens: disciplinas.filter((d) => d.grupo === "especificos"),
+    },
+  ].filter((g) => g.itens.length > 0);
 
   const loading = qCargos.isLoading || qMats.isLoading;
   const titulo = todos ? "Acervo completo" : (cargo?.nome ?? "Cargo");
@@ -79,26 +91,41 @@ function CargoDisciplinas() {
             description="Os materiais deste cargo serão liberados em breve."
           />
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {disciplinas.map((d) => (
-              <Link
-                key={d.id}
-                to="/acervo/$cargoId/$disciplinaId"
-                params={{ cargoId, disciplinaId: d.id }}
-                className="surface-card group flex items-center justify-between gap-4 p-5 transition-shadow hover:shadow-md"
-              >
-                <div className="min-w-0">
-                  <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
-                    <FolderOpen className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <h2 className="truncate text-sm font-semibold">{d.nome}</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {d.total} {d.total === 1 ? "material" : "materiais"}
-                    {d.novos > 0 ? ` · ${d.novos} novo(s)` : ""}
-                  </p>
+          <div className="space-y-8">
+            {grupos.map((g) => (
+              <section key={g.key}>
+                <div className="mb-3 flex items-center gap-3">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {g.titulo}
+                  </h2>
+                  <span className="text-xs text-muted-foreground">
+                    {g.itens.length} {g.itens.length === 1 ? "matéria" : "matérias"}
+                  </span>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-              </Link>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {g.itens.map((d) => (
+                    <Link
+                      key={d.id}
+                      to="/acervo/$cargoId/$disciplinaId"
+                      params={{ cargoId, disciplinaId: d.id }}
+                      className="surface-card group flex items-center justify-between gap-4 p-5 transition-shadow hover:shadow-md"
+                    >
+                      <div className="min-w-0">
+                        <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
+                          <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <h3 className="truncate text-sm font-semibold">{d.nome}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {d.total} {d.total === 1 ? "material" : "materiais"}
+                          {d.novos > 0 ? ` · ${d.novos} novo(s)` : ""}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         )}
