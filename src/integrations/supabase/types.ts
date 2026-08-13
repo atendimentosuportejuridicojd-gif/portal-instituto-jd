@@ -353,6 +353,7 @@ export type Database = {
           created_at: string
           descricao: string | null
           especifica: boolean
+          grupo: string
           id: string
           nome: string
           ordem: number
@@ -364,6 +365,7 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           especifica?: boolean
+          grupo?: string
           id?: string
           nome: string
           ordem?: number
@@ -375,6 +377,7 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           especifica?: boolean
+          grupo?: string
           id?: string
           nome?: string
           ordem?: number
