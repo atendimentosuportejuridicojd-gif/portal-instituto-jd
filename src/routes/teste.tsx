@@ -136,13 +136,13 @@ function TestePage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="telefone">Telefone</Label>
+              <Label htmlFor="telefone">Celular (WhatsApp)</Label>
               <Input
                 id="telefone"
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
-                placeholder="Digite seu telefone com DDD"
+                placeholder="(00) 00000-0000"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
                 maxLength={20}
