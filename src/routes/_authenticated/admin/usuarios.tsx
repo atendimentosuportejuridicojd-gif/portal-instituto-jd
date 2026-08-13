@@ -101,7 +101,14 @@ function Usuarios() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const rows = query.data ?? [];
+  const all = query.data ?? [];
+  const rows = all.filter((r: any) =>
+    filtro === "todos"
+      ? true
+      : filtro === "ativa"
+        ? r.assinatura_status === "ativa"
+        : r.assinatura_status !== "ativa",
+  );
 
   return (
     <>
@@ -109,14 +116,33 @@ function Usuarios() {
         title="Usuários"
         description="Alunos e administradores da plataforma."
         actions={
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="w-64 pl-8"
-              placeholder="Buscar por nome ou e-mail…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-md border border-border p-0.5">
+              {([
+                { key: "ativa", label: "Assinatura ativa" },
+                { key: "sem", label: "Sem assinatura" },
+                { key: "todos", label: "Todos" },
+              ] as const).map((f) => (
+                <Button
+                  key={f.key}
+                  size="sm"
+                  variant={filtro === f.key ? "secondary" : "ghost"}
+                  className="h-8"
+                  onClick={() => setFiltro(f.key)}
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="w-64 pl-8"
+                placeholder="Buscar por nome ou e-mail…"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </div>
           </div>
         }
       />
