@@ -174,7 +174,13 @@ function Usuarios() {
                 <TableRow key={r.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{r.nome_completo || "—"}</span>
+                      <button
+                        type="button"
+                        className="font-medium underline-offset-4 hover:underline"
+                        onClick={() => setDetalhe(r)}
+                      >
+                        {r.nome_completo || "—"}
+                      </button>
                       {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
                       {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
                       {r.roles?.includes("aluno_teste") && (
