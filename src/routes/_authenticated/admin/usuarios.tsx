@@ -461,3 +461,29 @@ function AssinaturaBadge({ status, plano }: { status: string; plano: string | nu
   if (status === "inativa") return <Badge variant="secondary">Inativa</Badge>;
   return <Badge variant="outline">Sem assinatura</Badge>;
 }
+
+/** Normaliza para o formato internacional usado pelo wa.me (Brasil = 55). */
+function telefoneInternacional(telefone: string) {
+  const d = (telefone ?? "").replace(/\D/g, "");
+  if (!d) return "";
+  return d.startsWith("55") ? d : `55${d}`;
+}
+
+function formatarTelefone(telefone: string) {
+  const d = (telefone ?? "").replace(/\D/g, "").replace(/^55/, "");
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return telefone;
+}
+
+const MENSAGEM_WHATSAPP =
+  "Olá, {nome}! Aqui é do Instituto J&D — Especialistas na Carreira Judiciária. " +
+  "Vimos que você já começou seus estudos no Portal do Aluno e não queremos que você perca o ritmo. " +
+  "Ao assinar, você mantém acesso completo ao acervo, às questões comentadas, ao seu cronograma e ao seu histórico de desempenho — tudo exatamente de onde você parou. " +
+  "Quer que eu te envie o link da assinatura e tire suas dúvidas?";
+
+function linkWhatsApp(telefone: string, nome?: string | null) {
+  const primeiro = (nome ?? "").trim().split(/\s+/)[0] || "tudo bem";
+  const texto = MENSAGEM_WHATSAPP.replace("{nome}", primeiro);
+  return `https://wa.me/${telefoneInternacional(telefone)}?text=${encodeURIComponent(texto)}`;
+}
