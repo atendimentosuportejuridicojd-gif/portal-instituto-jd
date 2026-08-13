@@ -298,6 +298,18 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
             <Textarea id="d-desc" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
           </div>
           <div className="space-y-1.5">
+            <Label>Grupo no acervo</Label>
+            <Select value={grupo} onValueChange={setGrupo}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gerais">Conhecimentos Gerais</SelectItem>
+                <SelectItem value="especificos">Conhecimentos Específicos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
             <Label htmlFor="d-ordem">Ordem</Label>
             <Input id="d-ordem" value={ordem} onChange={(e) => setOrdem(e.target.value)} />
           </div>
