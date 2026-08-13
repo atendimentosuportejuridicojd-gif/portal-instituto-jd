@@ -64,6 +64,8 @@ function Usuarios() {
   const qc = useQueryClient();
 
   const [q, setQ] = useState("");
+  const [filtro, setFiltro] = useState<"ativa" | "sem" | "todos">("todos");
+  const [detalhe, setDetalhe] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [blockDialog, setBlockDialog] = useState<any | null>(null);
   const [motivo, setMotivo] = useState("");
