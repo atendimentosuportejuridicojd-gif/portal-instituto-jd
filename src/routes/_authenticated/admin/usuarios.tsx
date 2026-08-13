@@ -255,6 +255,71 @@ function Usuarios() {
         </div>
       </PageContent>
 
+      {/* Detalhes do usuário */}
+      <Dialog open={!!detalhe} onOpenChange={(v) => !v && setDetalhe(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dados do usuário</DialogTitle>
+            <DialogDescription>
+              Informações do cadastro
+              {detalhe?.origem === "teste_gratis" ? " (página de teste)" : ""}.
+            </DialogDescription>
+          </DialogHeader>
+          {detalhe && (
+            <div className="space-y-4 text-sm">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Nome completo</p>
+                <p className="font-medium">{detalhe.nome_completo || "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">E-mail</p>
+                <p className="font-medium break-all">{detalhe.email}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Celular (WhatsApp)</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium tabular-nums">
+                    {detalhe.telefone ? formatarTelefone(detalhe.telefone) : "—"}
+                  </p>
+                  {detalhe.telefone && (
+                    <Button asChild size="sm" variant="outline" className="h-8 gap-1.5">
+                      <a
+                        href={linkWhatsApp(detalhe.telefone, detalhe.nome_completo)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Conversar no WhatsApp"
+                      >
+                        <MessageCircle className="h-4 w-4 text-green-600" />
+                        WhatsApp
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Assinatura</p>
+                  <div className="mt-1">
+                    <AssinaturaBadge status={detalhe.assinatura_status} plano={detalhe.assinatura_plano} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Cadastro</p>
+                  <p className="font-medium">
+                    {new Date(detalhe.created_at).toLocaleDateString("pt-BR")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDetalhe(null)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Editar */}
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
         <DialogContent>
