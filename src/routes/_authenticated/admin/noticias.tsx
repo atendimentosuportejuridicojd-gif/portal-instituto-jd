@@ -352,8 +352,7 @@ function FiquePorDentro() {
               ))}
             </div>
           </section>
-        </div>
-      </PageContent>
-    </>
+    </div>
   );
 }
+
