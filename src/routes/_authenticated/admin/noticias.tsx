@@ -217,7 +217,9 @@ function FiquePorDentro() {
   );
 }
 
+function AdminNotificacoes() {
   const listFn = useServerFn(adminListNotificacoes);
+
   const pubFn = useServerFn(adminPublicarNotificacao);
   const delFn = useServerFn(adminExcluirNotificacao);
   const qc = useQueryClient();
