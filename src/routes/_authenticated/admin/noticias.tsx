@@ -257,10 +257,8 @@ function FiquePorDentro() {
   });
 
   return (
-    <>
-      <PageHeader title="Notificações & Avisos" description="Publique avisos para todos os alunos." />
-      <PageContent>
-        <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid gap-6 lg:grid-cols-3">
+
           <section className="surface-card p-6 lg:col-span-1">
             <div className="mb-4 flex items-center gap-2">
               <Newspaper className="h-4 w-4 text-primary" />
