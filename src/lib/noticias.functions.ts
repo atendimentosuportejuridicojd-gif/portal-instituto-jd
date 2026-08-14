@@ -90,10 +90,11 @@ export const adminAtualizarNoticia = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const patch: Record<string, unknown> = {};
+    const patch: { fixado?: boolean; publicado?: boolean } = {};
     if (data.fixado !== undefined) patch.fixado = data.fixado;
     if (data.publicado !== undefined) patch.publicado = data.publicado;
     const { error } = await context.supabase.from("noticias").update(patch).eq("id", data.id);
+
     if (error) throw new Error(error.message);
     return { ok: true };
   });
