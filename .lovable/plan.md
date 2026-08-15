@@ -1,39 +1,37 @@
-# Acesso do Claude Code ao banco — sem a chave de serviço
+# Importar questões sem entregar credenciais
 
-## Por que não compartilhar a chave de serviço
+## O que o Claude Code pediu
 
-A chave de serviço interna não está acessível neste projeto: ela existe apenas como variável de ambiente no runtime do backend e não pode ser lida nem por mim nem por você. Isso é intencional — essa chave ignora todas as regras de segurança por linha (RLS), ou seja, quem a possui pode ler e alterar qualquer dado de qualquer aluno, incluindo e-mails e telefones. Colá-la em outra ferramenta ou no repositório é um risco que não se recupera sem rotacionar tudo.
+Ele desistiu da chave de serviço (correto — ela não existe neste projeto) e agora pede **e-mail e senha de um administrador** para autenticar num script local e inserir questões em `questoes` / `questao_alternativas`.
 
-A boa notícia: para ajudar nas tarefas do projeto, o Claude Code não precisa dela.
+Isso é melhor que a chave de serviço, mas ainda tem dois problemas:
+- A senha de admin dá acesso total ao painel: dados de alunos (nome, e-mail, celular), assinaturas, materiais, configurações. Não é um escopo "só inserir questões".
+- A senha ficaria em texto plano num script fora do repositório, num ambiente que você não controla totalmente.
 
-## O que será feito
+E, principalmente: **essa importação não precisa de ferramenta externa.** Eu já fiz exatamente isso aqui — as 40 questões da FGV em Língua Portuguesa → Interpretação de Texto foram inseridas por mim, com gabarito, alternativas e comentário, sem nenhuma credencial trocada.
 
-### 1. Contexto completo do banco no repositório
-Consolidar num único arquivo de referência (`docs/database.md`) o que a ferramenta precisa para escrever código correto:
-- lista de tabelas, colunas e relacionamentos
-- resumo das políticas de acesso (RLS) por tabela
-- funções do banco (`has_role`, `tem_acesso_conteudo`, `is_assinatura_ativa`, etc.) e quando usar cada uma
-- convenções do projeto: onde ficam as funções de servidor, qual cliente usar em cada caso
+## Caminho recomendado
 
-Isso, somado aos tipos já existentes e às migrações no repositório, cobre a maior parte do "melhor desempenho" que você busca.
+1. Você me envia o arquivo de questões (txt/docx/pdf, no mesmo formato dos anteriores) e diz a disciplina e o material de destino.
+2. Eu confirmo os materiais existentes em Língua Portuguesa (Tipos e Gêneros Textuais, Ortografia e Acentuação, Coesão Textual, Gramática Prática, Reescrita de Texto) e os IDs reais.
+3. Eu faço o parsing (enunciado, referência, alternativas A–E, gabarito, comentário) e insiro no banco, com verificação de contagem no final.
+4. Nenhuma senha, chave ou credencial sai daqui.
 
-### 2. Guia de acesso a dados reais (leitura)
-Documentar como consultar dados sem privilégio total:
-- **Leitura como aluno/admin autenticado**: usar as funções de servidor já existentes do projeto, que respeitam RLS e o papel de quem chamou.
-- **Leitura pontual para depuração**: consultas feitas por mim, aqui no chat, com as ferramentas de banco do Lovable — sem expor credencial nenhuma.
+## O que responder ao Claude Code
 
-### 3. Regras de segurança escritas no projeto
-Adicionar ao `AGENTS.md` instruções explícitas para qualquer ferramenta externa:
-- nunca pedir, gravar ou registrar em log a chave de serviço
-- operações privilegiadas só dentro de funções de servidor do projeto, que leem a chave do ambiente
-- toda função privilegiada precisa verificar o papel de administrador antes de agir
+> Não vou compartilhar senha de administrador. A importação de questões será feita direto pelo Lovable, que tem acesso gerenciado ao banco. Você pode continuar ajudando no código do projeto (componentes, funções de servidor, ajustes de interface) — para isso o repositório e os tipos do banco já são suficientes.
 
-### 4. Ajuste opcional (se você quiser leitura direta no banco)
-Se o Claude Code precisar consultar o banco por conta própria, o caminho seguro é um usuário de banco **somente leitura**, criado especificamente para isso, sem permissão de escrita e sem bypass de RLS. Isso exige uma alteração no banco e a criação de uma senha própria — me confirme se quer seguir por aí e eu incluo na execução.
+## Se você ainda quiser que o Claude Code faça a importação
+
+Aí o caminho seguro é um **usuário admin temporário e descartável**, criado só para essa tarefa:
+- conta separada, sem relação com a sua conta pessoal
+- papel de administrador concedido apenas durante a importação
+- papel removido e conta apagada assim que terminar
+
+Ainda assim, esse usuário temporário veria dados de alunos enquanto estivesse ativo. Só sigo por esse caminho se você confirmar explicitamente.
 
 ## Detalhes técnicos
 
-- Nenhuma chave nova é criada nem exposta; nada de `SUPABASE_SERVICE_ROLE_KEY` em arquivos do projeto.
-- `docs/database.md` é gerado a partir do schema atual e das políticas existentes (documentação, sem alterar o banco).
-- `AGENTS.md` ganha uma seção "Acesso ao banco e segredos".
-- Item 4 seria uma migração criando um role `readonly` com `GRANT SELECT` restrito às tabelas não sensíveis, `FORCE ROW LEVEL SECURITY` mantido, e a senha armazenada no cofre de segredos — só executo com sua confirmação.
+- Inserção via SQL direto nas tabelas `questoes` e `questao_alternativas`, respeitando `material_id`, `disciplina_id`, `ordem`, `letra`, `correta` e `comentario_professor` — mesmo padrão da importação anterior.
+- Nenhuma alteração de schema, nenhuma política de RLS afrouxada, nenhum segredo novo.
+- Opção do admin temporário exigiria uma migração pontual em `user_roles` (concessão e depois remoção do papel `administrador`).
