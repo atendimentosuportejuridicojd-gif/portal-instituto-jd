@@ -82,11 +82,28 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       descricao: data.descricao || null,
       ordem: data.ordem,
       grupo: data.grupo,
-      senha: data.senha || null,
     };
+    const senha = data.senha.trim();
+
+    const gravarSenha = async (disciplinaId: string) => {
+      if (senha) {
+        const { error } = await context.supabase
+          .from("disciplina_senhas")
+          .upsert({ disciplina_id: disciplinaId, senha, updated_at: new Date().toISOString() });
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await context.supabase
+          .from("disciplina_senhas")
+          .delete()
+          .eq("disciplina_id", disciplinaId);
+        if (error) throw new Error(error.message);
+      }
+    };
+
     if (data.id) {
       const { error } = await context.supabase.from("disciplinas").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
+      await gravarSenha(data.id);
       return { id: data.id };
     }
     const slug =
@@ -103,6 +120,7 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+    await gravarSenha(ins.id);
     return { id: ins.id };
   });
 
