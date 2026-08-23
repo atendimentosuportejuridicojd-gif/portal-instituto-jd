@@ -19,11 +19,16 @@ export const adminListAcervo = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
 
-    const [{ data: disciplinas }, { data: modulos }, { data: materiais }, contagem] =
-      await Promise.all([
+    const [
+      { data: disciplinas },
+      { data: modulos },
+      { data: materiais },
+      contagem,
+      { data: senhas },
+    ] = await Promise.all([
         supabase
           .from("disciplinas")
-          .select("id, nome, descricao, ordem, grupo, senha")
+          .select("id, nome, descricao, ordem, grupo, protegida")
           .eq("especifica", false)
           .order("ordem"),
         supabase.from("modulos").select("id, nome, disciplina_id, ordem").order("ordem"),
@@ -34,12 +39,17 @@ export const adminListAcervo = createServerFn({ method: "GET" })
           )
           .order("ordem"),
         contarQuestoesPorMaterial(supabase),
+        supabase.from("disciplina_senhas").select("disciplina_id, senha"),
       ]);
 
+    const senhaMap = new Map<string, string>(
+      (senhas ?? []).map((s: any) => [s.disciplina_id, s.senha]),
+    );
 
     return {
       disciplinas: (disciplinas ?? []).map((d: any) => ({
         ...d,
+        senha: senhaMap.get(d.id) ?? "",
         modulos: (modulos ?? []).filter((m: any) => m.disciplina_id === d.id),
         materiais: (materiais ?? [])
           .filter((m: any) => m.disciplina_id === d.id)
@@ -72,11 +82,28 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       descricao: data.descricao || null,
       ordem: data.ordem,
       grupo: data.grupo,
-      senha: data.senha || null,
     };
+    const senha = data.senha.trim();
+
+    const gravarSenha = async (disciplinaId: string) => {
+      if (senha) {
+        const { error } = await context.supabase
+          .from("disciplina_senhas")
+          .upsert({ disciplina_id: disciplinaId, senha, updated_at: new Date().toISOString() });
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await context.supabase
+          .from("disciplina_senhas")
+          .delete()
+          .eq("disciplina_id", disciplinaId);
+        if (error) throw new Error(error.message);
+      }
+    };
+
     if (data.id) {
       const { error } = await context.supabase.from("disciplinas").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
+      await gravarSenha(data.id);
       return { id: data.id };
     }
     const slug =
@@ -93,6 +120,7 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+    await gravarSenha(ins.id);
     return { id: ins.id };
   });
 
@@ -331,13 +359,12 @@ export const alunoVerificarSenhaDisciplina = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAcessoAluno(context);
-    const { data: disciplina, error } = await context.supabase
-      .from("disciplinas")
-      .select("senha")
-      .eq("id", data.disciplina_id)
-      .maybeSingle();
+    const { data: ok, error } = await context.supabase.rpc("verificar_senha_disciplina", {
+      _disciplina_id: data.disciplina_id,
+      _senha: data.senha,
+    });
     if (error) throw new Error(error.message);
-    return { ok: !disciplina?.senha || disciplina.senha === data.senha };
+    return { ok: !!ok };
   });
 
 /** Abre um material: metadados, progresso de leitura e link temporário do PDF. */
