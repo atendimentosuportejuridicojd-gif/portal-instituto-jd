@@ -359,13 +359,12 @@ export const alunoVerificarSenhaDisciplina = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAcessoAluno(context);
-    const { data: disciplina, error } = await context.supabase
-      .from("disciplinas")
-      .select("senha")
-      .eq("id", data.disciplina_id)
-      .maybeSingle();
+    const { data: ok, error } = await context.supabase.rpc("verificar_senha_disciplina", {
+      _disciplina_id: data.disciplina_id,
+      _senha: data.senha,
+    });
     if (error) throw new Error(error.message);
-    return { ok: !disciplina?.senha || disciplina.senha === data.senha };
+    return { ok: !!ok };
   });
 
 /** Abre um material: metadados, progresso de leitura e link temporário do PDF. */
