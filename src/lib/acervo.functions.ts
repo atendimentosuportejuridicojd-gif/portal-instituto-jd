@@ -39,12 +39,17 @@ export const adminListAcervo = createServerFn({ method: "GET" })
           )
           .order("ordem"),
         contarQuestoesPorMaterial(supabase),
+        supabase.from("disciplina_senhas").select("disciplina_id, senha"),
       ]);
 
+    const senhaMap = new Map<string, string>(
+      (senhas ?? []).map((s: any) => [s.disciplina_id, s.senha]),
+    );
 
     return {
       disciplinas: (disciplinas ?? []).map((d: any) => ({
         ...d,
+        senha: senhaMap.get(d.id) ?? "",
         modulos: (modulos ?? []).filter((m: any) => m.disciplina_id === d.id),
         materiais: (materiais ?? [])
           .filter((m: any) => m.disciplina_id === d.id)
