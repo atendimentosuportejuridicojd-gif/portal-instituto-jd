@@ -2,7 +2,7 @@
 
 A senha em si continua a mesma (1234). O problema apontado pelo scanner não é a força da senha, e sim que **qualquer usuário logado consegue ler a coluna de senha direto do banco**, mesmo sem assinatura — o que permite abrir uma disciplina protegida sem saber a senha pela tela.
 
-Verificado agora: a tabela `disciplinas` tem a política de leitura `disciplinas_read_all_auth` com condição `true` para usuários autenticados, ou seja, todas as colunas (inclusive `senha`) ficam legíveis. No código, a senha só é usada no servidor (painel do admin e conferência de senha), então dá para fechar o acesso sem mudar a experiência do aluno.
+Verificado agora: a tabela `disciplinas` tem a política de leitura `disciplinas_read_all_auth` com condição `true` para usuários autenticados, ou seja, todas as colunas (inclusive `senha`) ficam legíveis. Confirmado também que hoje **só "Técnico Legislativo" tem senha** (1234); as outras sete disciplinas continuam abertas e seguem assim. No código, a senha só é usada no servidor (painel do admin e conferência de senha), então dá para fechar o acesso sem mudar a experiência do aluno.
 
 ## O que será feito
 
