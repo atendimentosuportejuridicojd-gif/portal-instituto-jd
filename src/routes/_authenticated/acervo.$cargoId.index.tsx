@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, FolderOpen, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, FolderOpen, ChevronRight, Lock } from "lucide-react";
 import { alunoListTrilhas } from "@/lib/trilhas.functions";
 import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
 
@@ -44,14 +44,16 @@ function CargoDisciplinas() {
 
   const mapa = new Map<
     string,
-    { id: string; nome: string; total: number; novos: number; grupo: string }
+    { id: string; nome: string; total: number; novos: number; grupo: string; tem_senha: boolean }
   >();
   materiais.forEach((m: any) => {
     const id = m.disciplina_id ?? "sem-disciplina";
     const atual =
-      mapa.get(id) ?? { id, nome: m.disciplina, total: 0, novos: 0, grupo: m.grupo ?? "gerais" };
+      mapa.get(id) ??
+      { id, nome: m.disciplina, total: 0, novos: 0, grupo: m.grupo ?? "gerais", tem_senha: false };
     atual.total += 1;
     if (m.novo || m.atualizado) atual.novos += 1;
+    if (m.tem_senha) atual.tem_senha = true;
     mapa.set(id, atual);
   });
   const disciplinas = [...mapa.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
@@ -115,7 +117,10 @@ function CargoDisciplinas() {
                         <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
                           <FolderOpen className="h-5 w-5 text-muted-foreground" />
                         </div>
-                        <h3 className="truncate text-sm font-semibold">{d.nome}</h3>
+                        <h3 className="flex items-center gap-1.5 truncate text-sm font-semibold">
+                          {d.nome}
+                          {d.tem_senha && <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+                        </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {d.total} {d.total === 1 ? "material" : "materiais"}
                           {d.novos > 0 ? ` · ${d.novos} novo(s)` : ""}

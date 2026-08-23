@@ -33,6 +33,7 @@ import {
   History,
   Eye,
   Loader2,
+  Lock,
   PencilLine,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -92,7 +93,10 @@ function AdminAcervo() {
               <section key={d.id} className="surface-card p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="truncate text-base font-semibold">{d.nome}</h2>
+                    <h2 className="flex items-center gap-1.5 truncate text-base font-semibold">
+                      {d.nome}
+                      {d.senha && <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+                    </h2>
                     <p className="text-xs text-muted-foreground">
                       {d.materiais.length} material(is) · {d.modulos.length} módulo(s)
                     </p>
@@ -248,6 +252,7 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
   const [descricao, setDescricao] = useState(disciplina?.descricao ?? "");
   const [ordem, setOrdem] = useState(String(disciplina?.ordem ?? 0));
   const [grupo, setGrupo] = useState<string>(disciplina?.grupo ?? "gerais");
+  const [senha, setSenha] = useState(disciplina?.senha ?? "");
   const fn = useServerFn(adminUpsertDisciplina);
 
   const mut = useMutation({
@@ -259,6 +264,7 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           descricao,
           ordem: Number(ordem) || 0,
           grupo: grupo as "gerais" | "especificos",
+          senha,
         },
       }),
     onSuccess: () => {
@@ -312,6 +318,18 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           <div className="space-y-1.5">
             <Label htmlFor="d-ordem">Ordem</Label>
             <Input id="d-ordem" value={ordem} onChange={(e) => setOrdem(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="d-senha">Senha para abrir (opcional)</Label>
+            <Input
+              id="d-senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              placeholder="Deixe em branco para não exigir senha"
+            />
+            <p className="text-xs text-muted-foreground">
+              Se preenchida, o aluno precisa digitar essa senha para ver os materiais desta disciplina.
+            </p>
           </div>
         </div>
         <DialogFooter>

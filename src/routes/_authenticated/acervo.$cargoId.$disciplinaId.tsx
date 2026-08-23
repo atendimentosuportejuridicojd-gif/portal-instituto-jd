@@ -1,12 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, BookOpen, Lock, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { alunoListTrilhas } from "@/lib/trilhas.functions";
 import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
+import { alunoVerificarSenhaDisciplina } from "@/lib/acervo.functions";
 import { MaterialRow } from "@/components/material-row";
+
+function unlockKey(disciplinaId: string) {
+  return `acervo_desbloqueado_${disciplinaId}`;
+}
 
 export const Route = createFileRoute("/_authenticated/acervo/$cargoId/$disciplinaId")({
   head: () => ({
@@ -47,7 +55,28 @@ function CargoDisciplinaMateriais() {
     .filter((m: any) => (m.disciplina_id ?? "sem-disciplina") === disciplinaId);
 
   const nome = items[0]?.disciplina ?? "Matéria";
+  const temSenha = items.some((m: any) => m.tem_senha);
   const loading = qCargos.isLoading || qMats.isLoading;
+
+  const [desbloqueado, setDesbloqueado] = useState(
+    () => typeof window !== "undefined" && sessionStorage.getItem(unlockKey(disciplinaId)) === "1",
+  );
+  const [senha, setSenha] = useState("");
+  const verificarFn = useServerFn(alunoVerificarSenhaDisciplina);
+  const verificar = useMutation({
+    mutationFn: () => verificarFn({ data: { disciplina_id: disciplinaId, senha } }),
+    onSuccess: (r: any) => {
+      if (r.ok) {
+        sessionStorage.setItem(unlockKey(disciplinaId), "1");
+        setDesbloqueado(true);
+      } else {
+        toast.error("Senha incorreta.");
+      }
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const bloqueado = !loading && temSenha && !desbloqueado;
 
   return (
     <>
@@ -66,6 +95,35 @@ function CargoDisciplinaMateriais() {
       <PageContent>
         {loading ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
+        ) : bloqueado ? (
+          <div className="surface-card mx-auto max-w-sm p-6 text-center">
+            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
+              <Lock className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <h2 className="text-sm font-semibold">Matéria protegida</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Digite a senha para ver os materiais desta matéria.
+            </p>
+            <form
+              className="mt-4 flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (senha.trim()) verificar.mutate();
+              }}
+            >
+              <Input
+                type="password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="Senha"
+                autoFocus
+              />
+              <Button type="submit" disabled={verificar.isPending || !senha.trim()}>
+                {verificar.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Abrir
+              </Button>
+            </form>
+          </div>
         ) : items.length === 0 ? (
           <EmptyState
             icon={BookOpen}

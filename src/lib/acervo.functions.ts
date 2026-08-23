@@ -23,7 +23,7 @@ export const adminListAcervo = createServerFn({ method: "GET" })
       await Promise.all([
         supabase
           .from("disciplinas")
-          .select("id, nome, descricao, ordem, grupo")
+          .select("id, nome, descricao, ordem, grupo, senha")
           .eq("especifica", false)
           .order("ordem"),
         supabase.from("modulos").select("id, nome, disciplina_id, ordem").order("ordem"),
@@ -61,6 +61,7 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
         descricao: z.string().trim().max(1000).optional().default(""),
         ordem: z.number().int().min(0).default(0),
         grupo: z.enum(["gerais", "especificos"]).default("gerais"),
+        senha: z.string().trim().max(100).optional().default(""),
       })
       .parse(d),
   )
@@ -71,6 +72,7 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       descricao: data.descricao || null,
       ordem: data.ordem,
       grupo: data.grupo,
+      senha: data.senha || null,
     };
     if (data.id) {
       const { error } = await context.supabase.from("disciplinas").update(payload).eq("id", data.id);
@@ -318,6 +320,25 @@ export const adminUrlArquivo = createServerFn({ method: "POST" })
   });
 
 // ===================== ALUNO =====================
+
+/** Confere a senha de uma disciplina protegida. Nunca retorna a senha em si. */
+export const alunoVerificarSenhaDisciplina = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({ disciplina_id: z.string().uuid(), senha: z.string().trim().min(1).max(100) })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
+    const { data: disciplina, error } = await context.supabase
+      .from("disciplinas")
+      .select("senha")
+      .eq("id", data.disciplina_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { ok: !disciplina?.senha || disciplina.senha === data.senha };
+  });
 
 /** Abre um material: metadados, progresso de leitura e link temporário do PDF. */
 export const alunoAbrirMaterial = createServerFn({ method: "POST" })
