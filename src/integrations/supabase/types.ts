@@ -347,6 +347,32 @@ export type Database = {
           },
         ]
       }
+      disciplina_senhas: {
+        Row: {
+          disciplina_id: string
+          senha: string
+          updated_at: string
+        }
+        Insert: {
+          disciplina_id: string
+          senha: string
+          updated_at?: string
+        }
+        Update: {
+          disciplina_id?: string
+          senha?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disciplina_senhas_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: true
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disciplinas: {
         Row: {
           concurso_id: string | null
@@ -357,7 +383,7 @@ export type Database = {
           id: string
           nome: string
           ordem: number
-          senha: string | null
+          protegida: boolean
           slug: string
           updated_at: string
         }
@@ -370,7 +396,7 @@ export type Database = {
           id?: string
           nome: string
           ordem?: number
-          senha?: string | null
+          protegida?: boolean
           slug: string
           updated_at?: string
         }
@@ -383,7 +409,7 @@ export type Database = {
           id?: string
           nome?: string
           ordem?: number
-          senha?: string | null
+          protegida?: boolean
           slug?: string
           updated_at?: string
         }
@@ -1131,6 +1157,10 @@ export type Database = {
       is_assinatura_ativa: { Args: { _user_id: string }; Returns: boolean }
       registrar_ultimo_acesso: { Args: never; Returns: undefined }
       tem_acesso_conteudo: { Args: never; Returns: boolean }
+      verificar_senha_disciplina: {
+        Args: { _disciplina_id: string; _senha: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "administrador" | "aluno" | "aluno_teste"
