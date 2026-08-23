@@ -1143,6 +1143,13 @@ export type Database = {
     }
     Functions: {
       aluno_teste_ativo: { Args: { _user_id: string }; Returns: boolean }
+      contar_questoes_por_material: {
+        Args: { _somente_publicadas?: boolean }
+        Returns: {
+          material_id: string
+          total: number
+        }[]
+      }
       get_desempenho_material: {
         Args: { _material_id: string; _user_id: string }
         Returns: number

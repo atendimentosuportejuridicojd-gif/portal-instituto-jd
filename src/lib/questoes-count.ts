@@ -1,25 +1,20 @@
 /**
- * Conta questões por material sem sofrer o limite padrão de linhas do PostgREST
- * (1000 por requisição). Sem a paginação abaixo, materiais no fim da lista
- * apareciam com "0 questões" mesmo tendo questões cadastradas.
+ * Conta questões por material com uma única agregação no banco.
+ * Antes isso era feito baixando todas as questões em páginas de 1000 linhas,
+ * o que estourava o tempo limite da consulta quando o acervo cresceu.
  */
 export async function contarQuestoesPorMaterial(
   supabase: any,
   opts?: { somentePublicadas?: boolean },
 ): Promise<Map<string, number>> {
+  const { data, error } = await supabase.rpc("contar_questoes_por_material", {
+    _somente_publicadas: opts?.somentePublicadas ?? false,
+  });
+  if (error) throw new Error(error.message);
   const contagem = new Map<string, number>();
-  const tamanho = 1000;
-  for (let inicio = 0; ; inicio += tamanho) {
-    let query = supabase.from("questoes").select("material_id");
-    if (opts?.somentePublicadas) query = query.eq("publicado", true);
-    const { data, error } = await query.range(inicio, inicio + tamanho - 1);
-    if (error) throw new Error(error.message);
-    const linhas = data ?? [];
-    for (const linha of linhas) {
-      if (!linha.material_id) continue;
-      contagem.set(linha.material_id, (contagem.get(linha.material_id) ?? 0) + 1);
-    }
-    if (linhas.length < tamanho) break;
+  for (const linha of data ?? []) {
+    if (!linha.material_id) continue;
+    contagem.set(linha.material_id, Number(linha.total) || 0);
   }
   return contagem;
 }
