@@ -14,6 +14,8 @@ import {
 } from "@/lib/notificacoes.functions";
 
 export function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const listFn = useServerFn(listMinhasNotificacoes);
   const markFn = useServerFn(marcarNotificacaoLida);
   const markAllFn = useServerFn(marcarTodasNotificacoesLidas);
