@@ -70,7 +70,7 @@ export const adminListRecursos = createServerFn({ method: "GET" })
     let q = context.supabase
       .from("questao_recursos")
       .select(
-        "id, tipo, status, fundamentacao, resposta_admin, created_at, analisado_em, user_id, questao_id, material_id, questoes(enunciado, referencia), materiais(titulo)",
+        "id, tipo, status, fundamentacao, resposta_admin, acao_aplicada, alunos_afetados, created_at, analisado_em, user_id, questao_id, material_id, questoes(enunciado, referencia, anulada, questao_alternativas(id, letra, texto, correta, ordem)), materiais(titulo)",
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -91,7 +91,9 @@ export const adminListRecursos = createServerFn({ method: "GET" })
     }));
   });
 
-/** Administrador responde (defere ou indefere) o recurso. */
+/** Administrador responde (defere ou indefere) o recurso.
+ *  Ao deferir com ação, a questão é corrigida e o desempenho de TODOS os alunos
+ *  que já responderam (e dos futuros) é recalculado automaticamente. */
 export const adminResponderRecurso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -100,22 +102,62 @@ export const adminResponderRecurso = createServerFn({ method: "POST" })
         id: z.string().uuid(),
         status: z.enum(["deferido", "indeferido"]),
         resposta_admin: z.string().trim().max(3000).optional(),
+        acao: z.enum(["anular", "alterar_gabarito", "multiplas_respostas", "nenhuma"]).default("nenhuma"),
+        alternativas: z.array(z.string().uuid()).optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await garantirAdmin(context);
+
+    const { data: recurso, error: eRec } = await context.supabase
+      .from("questao_recursos")
+      .select("id, user_id, questao_id, tipo")
+      .eq("id", data.id)
+      .single();
+    if (eRec || !recurso) throw new Error("Recurso não encontrado.");
+
+    let afetados: number | null = null;
+
+    if (data.status === "deferido" && data.acao !== "nenhuma") {
+      const { data: qtd, error: eRpc } = await context.supabase.rpc("aplicar_recurso_questao", {
+        _questao_id: recurso.questao_id,
+        _acao: data.acao,
+        _alternativas: data.acao === "anular" ? null : (data.alternativas ?? []),
+      });
+      if (eRpc) throw new Error(eRpc.message);
+      afetados = (qtd as number) ?? 0;
+    }
+
     const { error } = await context.supabase
       .from("questao_recursos")
       .update({
         status: data.status,
         resposta_admin: data.resposta_admin ?? null,
+        acao_aplicada: data.status === "deferido" ? data.acao : null,
+        alunos_afetados: afetados,
         analisado_em: new Date().toISOString(),
         analisado_por: context.userId,
       })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+
+    // Avisa o aluno que abriu o recurso
+    await context.supabase.from("notificacoes").insert({
+      titulo: data.status === "deferido" ? "Recurso deferido" : "Recurso indeferido",
+      mensagem:
+        (data.resposta_admin?.trim() ||
+          (data.status === "deferido"
+            ? "Seu recurso foi acolhido e a questão foi atualizada."
+            : "Seu recurso foi analisado e não foi acolhido.")) +
+        (afetados !== null ? ` O desempenho foi recalculado para ${afetados} aluno(s).` : ""),
+      tipo: "info",
+      escopo: "usuario",
+      target_user_id: recurso.user_id,
+      created_by: context.userId,
+    });
+
+    return { ok: true, alunos_afetados: afetados };
   });
 
 /** Quantidade de recursos pendentes (usado nos avisos do admin). */
