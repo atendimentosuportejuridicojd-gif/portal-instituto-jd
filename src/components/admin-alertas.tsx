@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { UserPlus, BadgeCheck, Sparkles, X } from "lucide-react";
+import { UserPlus, BadgeCheck, Sparkles, Gavel, X } from "lucide-react";
 import { adminNovosCadastros } from "@/lib/admin-alertas.functions";
+import { adminRecursosPendentes } from "@/lib/recursos.functions";
 import { Button } from "@/components/ui/button";
 
 type Alerta = {
   id: string;
-  tipo: "teste" | "cadastro" | "assinatura";
+  tipo: "teste" | "cadastro" | "assinatura" | "recurso";
   nome: string;
   email: string;
   plano?: string | null;
@@ -18,11 +19,14 @@ const META = {
   teste: { label: "Novo cadastro de teste", Icon: Sparkles },
   cadastro: { label: "Novo cadastro de aluno", Icon: UserPlus },
   assinatura: { label: "Nova assinatura", Icon: BadgeCheck },
+  recurso: { label: "Novo recurso de questão", Icon: Gavel },
 } as const;
 
 /** Avisos sobrepostos no canto inferior direito da área administrativa. */
 export function AdminAlertas() {
   const fetchNovos = useServerFn(adminNovosCadastros);
+  const fetchPendentes = useServerFn(adminRecursosPendentes);
+  const pendentesRef = useRef<number | null>(null);
   const desde = useRef(new Date().toISOString());
   const vistos = useRef(new Set<string>());
   const [alertas, setAlertas] = useState<Alerta[]>([]);
@@ -38,6 +42,21 @@ export function AdminAlertas() {
         const novos = [...r.cadastros, ...r.assinaturas].filter((a) => !vistos.current.has(a.id));
         novos.forEach((a) => vistos.current.add(a.id));
         if (novos.length) setAlertas((prev) => [...novos as Alerta[], ...prev].slice(0, 4));
+
+        const { pendentes } = await fetchPendentes();
+        if (cancelado) return;
+        const anterior = pendentesRef.current;
+        pendentesRef.current = pendentes;
+        if (anterior !== null && pendentes > anterior) {
+          const alerta: Alerta = {
+            id: `recurso:${Date.now()}`,
+            tipo: "recurso",
+            nome: `${pendentes} recurso(s) aguardando análise`,
+            email: "",
+            created_at: new Date().toISOString(),
+          };
+          setAlertas((prev) => [alerta, ...prev].slice(0, 4));
+        }
       } catch {
         /* silencioso */
       }
@@ -49,7 +68,7 @@ export function AdminAlertas() {
       cancelado = true;
       clearInterval(t);
     };
-  }, [fetchNovos]);
+  }, [fetchNovos, fetchPendentes]);
 
   const fechar = (id: string) => setAlertas((prev) => prev.filter((a) => a.id !== id));
 
@@ -73,8 +92,11 @@ export function AdminAlertas() {
               {a.email && <p className="truncate text-xs text-muted-foreground">{a.email}</p>}
               {a.plano && <p className="mt-0.5 text-xs text-muted-foreground">Plano: {a.plano}</p>}
               <Button asChild size="sm" variant="link" className="h-auto p-0 text-xs">
-                <Link to="/admin/usuarios" onClick={() => fechar(a.id)}>
-                  Ver usuários
+                <Link
+                  to={a.tipo === "recurso" ? "/admin/recursos" : "/admin/usuarios"}
+                  onClick={() => fechar(a.id)}
+                >
+                  {a.tipo === "recurso" ? "Ver recursos" : "Ver usuários"}
                 </Link>
               </Button>
             </div>
