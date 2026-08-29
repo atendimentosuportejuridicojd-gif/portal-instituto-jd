@@ -122,9 +122,20 @@ function LeitorPdf() {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col">
       <div className="flex flex-wrap items-center gap-3 border-b border-border/60 px-4 py-3 sm:px-6">
-        <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/acervo" })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() =>
+            nav.disciplinaId
+              ? navigate({
+                  to: "/acervo/$cargoId/$disciplinaId",
+                  params: { cargoId: "todos", disciplinaId: nav.disciplinaId },
+                })
+              : navigate({ to: "/acervo" })
+          }
+        >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          Acervo
+          {nav.disciplinaId ? "Disciplina" : "Acervo"}
         </Button>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
