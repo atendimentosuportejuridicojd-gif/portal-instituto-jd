@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMaterialNavegacao } from "@/hooks/use-material-navegacao";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/materiais/$materialId/ques
 function Resolver() {
   const { materialId } = Route.useParams();
   const navigate = useNavigate();
+  const nav = useMaterialNavegacao(materialId);
   const iniciar = useServerFn(iniciarOuRetomarSessao);
   const carregar = useServerFn(getSessaoAtual);
   const responder = useServerFn(responderQuestao);
