@@ -2,12 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const TIPOS_RECURSO = {
-  multiplas_respostas: "Múltiplas respostas",
-  alteracao_gabarito: "Alteração de gabarito",
-  anular_questao: "Anular questão",
-} as const;
-
 /** Aluno abre um recurso sobre uma questão. */
 export const criarRecurso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

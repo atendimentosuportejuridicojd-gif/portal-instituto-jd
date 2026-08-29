@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Gavel } from "lucide-react";
 import { toast } from "sonner";
-import { adminListRecursos, adminResponderRecurso, TIPOS_RECURSO } from "@/lib/recursos.functions";
+import { adminListRecursos, adminResponderRecurso } from "@/lib/recursos.functions";
+import { TIPOS_RECURSO } from "@/lib/recursos";
 
 export const Route = createFileRoute("/_authenticated/admin/recursos")({
   head: () => ({
