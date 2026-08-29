@@ -58,6 +58,27 @@ function CargoDisciplinaMateriais() {
   const temSenha = items.some((m: any) => m.tem_senha);
   const loading = qCargos.isLoading || qMats.isLoading;
 
+  // Disciplinas com módulos (ex.: Técnico Judiciário): mostra módulos antes das matérias.
+  const mapaModulos = new Map<string, { id: string; nome: string; ordem: number; total: number }>();
+  items.forEach((m: any) => {
+    if (!m.modulo_id) return;
+    const atual = mapaModulos.get(m.modulo_id) ?? { id: m.modulo_id, nome: m.modulo ?? "Módulo", ordem: m.modulo_ordem ?? 0, total: 0 };
+    atual.total += 1;
+    mapaModulos.set(m.modulo_id, atual);
+  });
+  const modulos = [...mapaModulos.values()].sort((a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome, "pt-BR"));
+  const semModulo = items.filter((m: any) => !m.modulo_id).length;
+  const temModulos = modulos.length > 0;
+
+  const [moduloSel, setModuloSel] = useState<string | null>(null);
+  const itensVisiveis = !temModulos || !moduloSel
+    ? items
+    : moduloSel === "sem-modulo"
+      ? items.filter((m: any) => !m.modulo_id)
+      : items.filter((m: any) => m.modulo_id === moduloSel);
+  const moduloSelNome =
+    moduloSel === "sem-modulo" ? "Outros materiais" : modulos.find((m) => m.id === moduloSel)?.nome;
+
   const [desbloqueado, setDesbloqueado] = useState(
     () => typeof window !== "undefined" && sessionStorage.getItem(unlockKey(disciplinaId)) === "1",
   );
