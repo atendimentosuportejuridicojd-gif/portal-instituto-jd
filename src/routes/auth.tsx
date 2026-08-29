@@ -137,6 +137,13 @@ function AuthPage() {
             </Link>
           </div>
 
+          {sessaoEncerrada && (
+            <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm text-muted-foreground">
+              Sua sessão anterior foi encerrada porque esta conta foi acessada em outro dispositivo ou navegador.
+              O acesso é individual: apenas o último login permanece ativo.
+            </div>
+          )}
+
           <Tabs defaultValue="entrar" className="mt-6">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="entrar">Entrar</TabsTrigger>
