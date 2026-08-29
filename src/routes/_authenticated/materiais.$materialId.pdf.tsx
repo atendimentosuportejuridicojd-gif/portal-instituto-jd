@@ -42,6 +42,7 @@ export const Route = createFileRoute("/_authenticated/materiais/$materialId/pdf"
 function LeitorPdf() {
   const { materialId } = Route.useParams();
   const navigate = useNavigate();
+  const nav = useMaterialNavegacao(materialId);
   const abrirFn = useServerFn(alunoAbrirMaterial);
   const salvarFn = useServerFn(salvarLeituraMaterial);
 
