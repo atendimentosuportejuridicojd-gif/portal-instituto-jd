@@ -102,15 +102,28 @@ function CargoDisciplinaMateriais() {
   return (
     <>
       <PageHeader
-        title={loading ? "Carregando…" : nome}
-        description={todos ? "Materiais em PDF desta matéria." : `Materiais desta matéria em ${cargo?.nome ?? "cargo"}.`}
+        title={loading ? "Carregando…" : moduloSelNome ? `${nome} — ${moduloSelNome}` : nome}
+        description={
+          temModulos && !moduloSel
+            ? "Escolha um módulo para ver as matérias."
+            : todos
+              ? "Materiais em PDF desta matéria."
+              : `Materiais desta matéria em ${cargo?.nome ?? "cargo"}.`
+        }
         actions={
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/acervo/$cargoId" params={{ cargoId }}>
+          temModulos && moduloSel ? (
+            <Button variant="ghost" size="sm" onClick={() => setModuloSel(null)}>
               <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-              Matérias
-            </Link>
-          </Button>
+              Módulos
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/acervo/$cargoId" params={{ cargoId }}>
+                <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+                Matérias
+              </Link>
+            </Button>
+          )
         }
       />
       <PageContent>
