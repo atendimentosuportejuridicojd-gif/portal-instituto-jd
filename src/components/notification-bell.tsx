@@ -87,7 +87,7 @@ export function NotificationBell() {
                 <li
                   key={n.id}
                   className={cn(
-                    "flex items-start gap-3 px-4 py-3 text-sm",
+                    "flex items-start gap-3 px-4 py-3 text-sm transition-colors hover:bg-muted/50",
                     !n.lida && "bg-primary/5",
                   )}
                 >
