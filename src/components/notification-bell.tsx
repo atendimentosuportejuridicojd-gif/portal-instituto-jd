@@ -91,18 +91,27 @@ export function NotificationBell() {
                     !n.lida && "bg-primary/5",
                   )}
                 >
-                  <div className="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => abrir(n as any)}
+                    className="min-w-0 flex-1 text-left"
+                  >
                     <p className="font-medium leading-tight">{n.titulo}</p>
                     {n.mensagem && (
                       <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{n.mensagem}</p>
                     )}
-                    <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <span className="mt-1 flex items-center gap-1 text-[11px] uppercase tracking-wider text-muted-foreground">
                       {new Date(n.publicada_em).toLocaleString("pt-BR")}
-                    </p>
-                  </div>
+                      <ChevronRight className="h-3 w-3" />
+                      <span className="normal-case tracking-normal text-primary">Ver notícia</span>
+                    </span>
+                  </button>
                   {!n.lida && (
                     <button
-                      onClick={() => mark.mutate(n.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        mark.mutate(n.id);
+                      }}
                       className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground"
                       aria-label="Marcar como lida"
                     >
