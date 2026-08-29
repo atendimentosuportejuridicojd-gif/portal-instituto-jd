@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { HelpCircle, Check, X, ChevronRight } from "lucide-react";
+import { HelpCircle, Check, X, ChevronRight, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +32,7 @@ function Resolver() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [riscadas, setRiscadas] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<null | {
     acertou: boolean;
     correta_id: string | null;
@@ -111,6 +112,7 @@ function Resolver() {
   function proxima() {
     setFeedback(null);
     setSelected(null);
+    setRiscadas([]);
     if (finalizada) {
       navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } });
       return;
