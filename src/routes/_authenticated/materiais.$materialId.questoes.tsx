@@ -5,7 +5,19 @@ import { useEffect, useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { HelpCircle, Check, X, ChevronRight, Scissors } from "lucide-react";
+import { HelpCircle, Check, X, ChevronRight, Scissors, Gavel } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { criarRecurso, TIPOS_RECURSO } from "@/lib/recursos.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -26,6 +38,7 @@ function Resolver() {
   const iniciar = useServerFn(iniciarOuRetomarSessao);
   const carregar = useServerFn(getSessaoAtual);
   const responder = useServerFn(responderQuestao);
+  const enviarRecurso = useServerFn(criarRecurso);
 
   const [sessaoId, setSessaoId] = useState<string | null>(null);
   const [state, setState] = useState<any>(null);
@@ -41,6 +54,10 @@ function Resolver() {
   const [submitting, setSubmitting] = useState(false);
   const [idx, setIdx] = useState(0);
   const [finalizada, setFinalizada] = useState(false);
+  const [recursoOpen, setRecursoOpen] = useState(false);
+  const [recursoTipo, setRecursoTipo] = useState<keyof typeof TIPOS_RECURSO>("alteracao_gabarito");
+  const [recursoTexto, setRecursoTexto] = useState("");
+  const [enviandoRecurso, setEnviandoRecurso] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -198,11 +215,24 @@ function Resolver() {
       <PageContent>
         <div className="mx-auto max-w-3xl space-y-6">
           <div className="surface-card p-6">
-            {current.referencia && (
-              <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {current.referencia}
               </div>
-            )}
+              <Button
+                size="sm"
+                variant="outline"
+                className="shrink-0"
+                onClick={() => {
+                  setRecursoTipo("alteracao_gabarito");
+                  setRecursoTexto("");
+                  setRecursoOpen(true);
+                }}
+              >
+                <Gavel className="mr-2 h-4 w-4" />
+                Criar recurso
+              </Button>
+            </div>
             <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{current.enunciado}</p>
 
             <div className="mt-6 space-y-2">
@@ -317,6 +347,80 @@ function Resolver() {
           </div>
         </div>
       </PageContent>
+
+      <Dialog open={recursoOpen} onOpenChange={setRecursoOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Criar recurso</DialogTitle>
+            <DialogDescription>
+              Escolha o tipo de pedido e apresente os fundamentos. O administrador será avisado para avaliar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Tipo de recurso</Label>
+              <RadioGroup
+                value={recursoTipo}
+                onValueChange={(v) => setRecursoTipo(v as keyof typeof TIPOS_RECURSO)}
+                className="mt-2 space-y-2"
+              >
+                {(Object.keys(TIPOS_RECURSO) as Array<keyof typeof TIPOS_RECURSO>).map((k) => (
+                  <div key={k} className="flex items-center gap-2">
+                    <RadioGroupItem value={k} id={`recurso-${k}`} />
+                    <Label htmlFor={`recurso-${k}`} className="cursor-pointer font-normal">
+                      {TIPOS_RECURSO[k]}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+            <div>
+              <Label htmlFor="recurso-fund">Fundamentação</Label>
+              <Textarea
+                id="recurso-fund"
+                rows={6}
+                maxLength={3000}
+                className="mt-1"
+                placeholder="Explique, de forma objetiva, os fundamentos do seu pedido (mínimo de 20 caracteres)."
+                value={recursoTexto}
+                onChange={(e) => setRecursoTexto(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">{recursoTexto.trim().length}/3000</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRecursoOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={enviandoRecurso || recursoTexto.trim().length < 20}
+              onClick={async () => {
+                if (!current) return;
+                setEnviandoRecurso(true);
+                try {
+                  await enviarRecurso({
+                    data: {
+                      questao_id: current.id,
+                      material_id: materialId,
+                      tipo: recursoTipo,
+                      fundamentacao: recursoTexto.trim(),
+                    },
+                  });
+                  toast.success("Recurso enviado para análise.");
+                  setRecursoOpen(false);
+                  setRecursoTexto("");
+                } catch (e: any) {
+                  toast.error(e.message ?? "Erro ao enviar o recurso.");
+                } finally {
+                  setEnviandoRecurso(false);
+                }
+              }}
+            >
+              {enviandoRecurso ? "Enviando…" : "Enviar recurso"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
