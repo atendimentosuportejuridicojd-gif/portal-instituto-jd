@@ -140,14 +140,33 @@ function Resolver() {
         <PageContent>
           <div className="surface-card p-8 text-center">
             <p className="text-sm text-muted-foreground">Você respondeu todas as questões desta tentativa.</p>
-            <Button
-              className="mt-4"
-              onClick={() =>
-                navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } })
-              }
-            >
-              Ver desempenho
-            </Button>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <Button
+                onClick={() =>
+                  navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } })
+                }
+              >
+                Ver desempenho
+              </Button>
+              {nav.disciplinaId && (
+                <Button asChild variant="outline">
+                  <Link
+                    to="/acervo/$cargoId/$disciplinaId"
+                    params={{ cargoId: "todos", disciplinaId: nav.disciplinaId }}
+                  >
+                    Voltar para a disciplina
+                  </Link>
+                </Button>
+              )}
+              {nav.proxima && (
+                <Button asChild variant="secondary">
+                  <Link to="/materiais/$materialId/pdf" params={{ materialId: nav.proxima.id }}>
+                    Próxima matéria
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
         </PageContent>
       </>
