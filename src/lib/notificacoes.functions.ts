@@ -68,11 +68,30 @@ export const adminPublicarNotificacao = createServerFn({ method: "POST" })
       _role: "administrador",
     });
     if (!isAdmin) throw new Error("Acesso restrito ao administrador.");
+
+    // Notificações gerais também viram post no "Fique por Dentro",
+    // para que o aluno leia a mensagem na íntegra.
+    let link = data.link ?? null;
+    if (data.escopo === "todos") {
+      const { data: noticia } = await context.supabase
+        .from("noticias")
+        .insert({
+          titulo: data.titulo,
+          resumo: null,
+          conteudo: data.mensagem || null,
+          publicado: true,
+          published_at: new Date().toISOString(),
+        })
+        .select("id")
+        .maybeSingle();
+      if (!link && noticia?.id) link = `/noticias?n=${noticia.id}`;
+    }
+
     const { error } = await context.supabase.from("notificacoes").insert({
       titulo: data.titulo,
       mensagem: data.mensagem,
       tipo: data.tipo,
-      link: data.link ?? null,
+      link,
       escopo: data.escopo,
       target_user_id: data.escopo === "user" ? data.target_user_id ?? null : null,
       created_by: context.userId,
