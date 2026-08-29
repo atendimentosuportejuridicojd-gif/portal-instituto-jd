@@ -879,6 +879,66 @@ export type Database = {
           },
         ]
       }
+      questao_recursos: {
+        Row: {
+          analisado_em: string | null
+          analisado_por: string | null
+          created_at: string
+          fundamentacao: string
+          id: string
+          material_id: string | null
+          questao_id: string
+          resposta_admin: string | null
+          status: string
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analisado_em?: string | null
+          analisado_por?: string | null
+          created_at?: string
+          fundamentacao: string
+          id?: string
+          material_id?: string | null
+          questao_id: string
+          resposta_admin?: string | null
+          status?: string
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analisado_em?: string | null
+          analisado_por?: string | null
+          created_at?: string
+          fundamentacao?: string
+          id?: string
+          material_id?: string | null
+          questao_id?: string
+          resposta_admin?: string | null
+          status?: string
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questao_recursos_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questao_recursos_questao_id_fkey"
+            columns: ["questao_id"]
+            isOneToOne: false
+            referencedRelation: "questoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questao_sessoes: {
         Row: {
           acertos: number
