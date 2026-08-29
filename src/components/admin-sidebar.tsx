@@ -12,6 +12,7 @@ import {
   LogOut,
   ArrowLeft,
   BookMarked,
+  Gavel,
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,6 +37,7 @@ const items = [
   { title: "Concursos", url: "/admin/concursos", icon: FileText },
   { title: "Disciplinas Específicas", url: "/admin/disciplinas-especificas", icon: BookMarked },
   { title: "Questões", url: "/admin/questoes", icon: HelpCircle },
+  { title: "Recursos", url: "/admin/recursos", icon: Gavel },
   { title: "Cronogramas", url: "/admin/cronogramas", icon: CalendarDays },
   { title: "Notícias", url: "/admin/noticias", icon: Newspaper },
   { title: "Usuários", url: "/admin/usuarios", icon: Users },
