@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { HelpCircle, Check, X, ChevronRight } from "lucide-react";
+import { HelpCircle, Check, X, ChevronRight, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +32,7 @@ function Resolver() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [riscadas, setRiscadas] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<null | {
     acertou: boolean;
     correta_id: string | null;
@@ -111,6 +112,7 @@ function Resolver() {
   function proxima() {
     setFeedback(null);
     setSelected(null);
+    setRiscadas([]);
     if (finalizada) {
       navigate({ to: "/materiais/$materialId/desempenho", params: { materialId } });
       return;
@@ -208,35 +210,70 @@ function Resolver() {
                 const isSelected = selected === a.id;
                 const isCorrect = feedback && feedback.correta_id === a.id;
                 const isWrongPick = feedback && !feedback.acertou && isSelected;
+                const cortada = riscadas.includes(a.id);
                 return (
-                  <button
-                    key={a.id}
-                    type="button"
-                    disabled={!respondendo}
-                    onClick={() => setSelected(a.id)}
-                    className={cn(
-                      "flex w-full items-start gap-3 rounded-md border p-3 text-left text-sm transition-colors",
-                      respondendo && "hover:border-primary/50",
-                      !respondendo && "cursor-default opacity-90",
-                      isSelected && respondendo && "border-primary bg-primary/5",
-                      isCorrect && "border-green-500/60 bg-green-500/10",
-                      isWrongPick && "border-red-500/60 bg-red-500/10",
-                    )}
-                  >
-                    <div
+                  <div key={a.id} className="flex items-start gap-2">
+                    <button
+                      type="button"
+                      disabled={!respondendo}
+                      onClick={() => {
+                        if (cortada) return;
+                        setSelected(a.id);
+                      }}
                       className={cn(
-                        "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs font-semibold",
-                        isSelected && respondendo && "border-primary bg-primary text-primary-foreground",
-                        isCorrect && "border-green-500 bg-green-500 text-white",
-                        isWrongPick && "border-red-500 bg-red-500 text-white",
+                        "flex min-w-0 flex-1 items-start gap-3 rounded-md border p-3 text-left text-sm transition-colors",
+                        respondendo && !cortada && "hover:border-primary/50",
+                        !respondendo && "cursor-default opacity-90",
+                        cortada && "opacity-45",
+                        isSelected && respondendo && !cortada && "border-primary bg-primary/5",
+                        isCorrect && "border-green-500/60 bg-green-500/10",
+                        isWrongPick && "border-red-500/60 bg-red-500/10",
                       )}
                     >
-                      {a.letra}
-                    </div>
-                    <div className="min-w-0 flex-1 whitespace-pre-wrap">{a.texto}</div>
-                    {isCorrect && <Check className="h-4 w-4 shrink-0 text-green-600" />}
-                    {isWrongPick && <X className="h-4 w-4 shrink-0 text-red-600" />}
-                  </button>
+                      <div
+                        className={cn(
+                          "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs font-semibold",
+                          isSelected && respondendo && !cortada && "border-primary bg-primary text-primary-foreground",
+                          isCorrect && "border-green-500 bg-green-500 text-white",
+                          isWrongPick && "border-red-500 bg-red-500 text-white",
+                        )}
+                      >
+                        {a.letra}
+                      </div>
+                      <div
+                        className={cn(
+                          "min-w-0 flex-1 whitespace-pre-wrap",
+                          cortada && "line-through decoration-2",
+                        )}
+                      >
+                        {a.texto}
+                      </div>
+                      {isCorrect && <Check className="h-4 w-4 shrink-0 text-green-600" />}
+                      {isWrongPick && <X className="h-4 w-4 shrink-0 text-red-600" />}
+                    </button>
+                    {respondendo && (
+                      <button
+                        type="button"
+                        aria-label={cortada ? `Desfazer corte da alternativa ${a.letra}` : `Cortar alternativa ${a.letra}`}
+                        title={cortada ? "Desfazer corte" : "Cortar alternativa"}
+                        onClick={() =>
+                          setRiscadas((prev) => {
+                            const next = prev.includes(a.id)
+                              ? prev.filter((id) => id !== a.id)
+                              : [...prev, a.id];
+                            if (!prev.includes(a.id) && selected === a.id) setSelected(null);
+                            return next;
+                          })
+                        }
+                        className={cn(
+                          "mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-md border text-muted-foreground transition-colors hover:bg-muted",
+                          cortada && "border-primary/60 bg-primary/10 text-primary",
+                        )}
+                      >
+                        <Scissors className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
