@@ -123,7 +123,7 @@ export const adminResponderRecurso = createServerFn({ method: "POST" })
       const { data: qtd, error: eRpc } = await context.supabase.rpc("aplicar_recurso_questao", {
         _questao_id: recurso.questao_id,
         _acao: data.acao,
-        _alternativas: data.acao === "anular" ? null : (data.alternativas ?? []),
+        _alternativas: data.acao === "anular" ? undefined : (data.alternativas ?? []),
       });
       if (eRpc) throw new Error(eRpc.message);
       afetados = (qtd as number) ?? 0;
