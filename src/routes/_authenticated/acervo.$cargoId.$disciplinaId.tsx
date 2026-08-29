@@ -5,7 +5,7 @@ import { useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, BookOpen, Lock, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronRight, FolderOpen, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { alunoListTrilhas } from "@/lib/trilhas.functions";
 import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
@@ -58,6 +58,27 @@ function CargoDisciplinaMateriais() {
   const temSenha = items.some((m: any) => m.tem_senha);
   const loading = qCargos.isLoading || qMats.isLoading;
 
+  // Disciplinas com módulos (ex.: Técnico Judiciário): mostra módulos antes das matérias.
+  const mapaModulos = new Map<string, { id: string; nome: string; ordem: number; total: number }>();
+  items.forEach((m: any) => {
+    if (!m.modulo_id) return;
+    const atual = mapaModulos.get(m.modulo_id) ?? { id: m.modulo_id, nome: m.modulo ?? "Módulo", ordem: m.modulo_ordem ?? 0, total: 0 };
+    atual.total += 1;
+    mapaModulos.set(m.modulo_id, atual);
+  });
+  const modulos = [...mapaModulos.values()].sort((a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome, "pt-BR"));
+  const semModulo = items.filter((m: any) => !m.modulo_id).length;
+  const temModulos = modulos.length > 0;
+
+  const [moduloSel, setModuloSel] = useState<string | null>(null);
+  const itensVisiveis = !temModulos || !moduloSel
+    ? items
+    : moduloSel === "sem-modulo"
+      ? items.filter((m: any) => !m.modulo_id)
+      : items.filter((m: any) => m.modulo_id === moduloSel);
+  const moduloSelNome =
+    moduloSel === "sem-modulo" ? "Outros materiais" : modulos.find((m) => m.id === moduloSel)?.nome;
+
   const [desbloqueado, setDesbloqueado] = useState(
     () => typeof window !== "undefined" && sessionStorage.getItem(unlockKey(disciplinaId)) === "1",
   );
@@ -81,15 +102,28 @@ function CargoDisciplinaMateriais() {
   return (
     <>
       <PageHeader
-        title={loading ? "Carregando…" : nome}
-        description={todos ? "Materiais em PDF desta matéria." : `Materiais desta matéria em ${cargo?.nome ?? "cargo"}.`}
+        title={loading ? "Carregando…" : moduloSelNome ? `${nome} — ${moduloSelNome}` : nome}
+        description={
+          temModulos && !moduloSel
+            ? "Escolha um módulo para ver as matérias."
+            : todos
+              ? "Materiais em PDF desta matéria."
+              : `Materiais desta matéria em ${cargo?.nome ?? "cargo"}.`
+        }
         actions={
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/acervo/$cargoId" params={{ cargoId }}>
+          temModulos && moduloSel ? (
+            <Button variant="ghost" size="sm" onClick={() => setModuloSel(null)}>
               <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-              Matérias
-            </Link>
-          </Button>
+              Módulos
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/acervo/$cargoId" params={{ cargoId }}>
+                <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+                Matérias
+              </Link>
+            </Button>
+          )
         }
       />
       <PageContent>
@@ -130,11 +164,57 @@ function CargoDisciplinaMateriais() {
             title="Nenhum material nesta matéria"
             description="Os materiais serão publicados em breve."
           />
+        ) : temModulos && !moduloSel ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {modulos.map((mod) => (
+              <button
+                key={mod.id}
+                type="button"
+                onClick={() => setModuloSel(mod.id)}
+                className="surface-card group flex items-center justify-between gap-4 p-5 text-left transition-shadow hover:shadow-md"
+              >
+                <div className="min-w-0">
+                  <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
+                    <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <h3 className="truncate text-sm font-semibold">{mod.nome}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {mod.total} {mod.total === 1 ? "material" : "materiais"}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </button>
+            ))}
+            {semModulo > 0 && (
+              <button
+                type="button"
+                onClick={() => setModuloSel("sem-modulo")}
+                className="surface-card group flex items-center justify-between gap-4 p-5 text-left transition-shadow hover:shadow-md"
+              >
+                <div className="min-w-0">
+                  <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
+                    <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <h3 className="truncate text-sm font-semibold">Outros materiais</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {semModulo} {semModulo === 1 ? "material" : "materiais"}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </button>
+            )}
+          </div>
         ) : (
           <div className="space-y-2">
-            {items.map((m: any) => (
-              <MaterialRow key={m.id} m={m} />
-            ))}
+            {itensVisiveis.length === 0 ? (
+              <EmptyState
+                icon={BookOpen}
+                title="Nenhum material neste módulo"
+                description="Os materiais serão publicados em breve."
+              />
+            ) : (
+              itensVisiveis.map((m: any) => <MaterialRow key={m.id} m={m} />)
+            )}
           </div>
         )}
       </PageContent>
