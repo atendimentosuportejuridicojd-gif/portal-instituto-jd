@@ -164,11 +164,57 @@ function CargoDisciplinaMateriais() {
             title="Nenhum material nesta matéria"
             description="Os materiais serão publicados em breve."
           />
+        ) : temModulos && !moduloSel ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {modulos.map((mod) => (
+              <button
+                key={mod.id}
+                type="button"
+                onClick={() => setModuloSel(mod.id)}
+                className="surface-card group flex items-center justify-between gap-4 p-5 text-left transition-shadow hover:shadow-md"
+              >
+                <div className="min-w-0">
+                  <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
+                    <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <h3 className="truncate text-sm font-semibold">{mod.nome}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {mod.total} {mod.total === 1 ? "material" : "materiais"}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </button>
+            ))}
+            {semModulo > 0 && (
+              <button
+                type="button"
+                onClick={() => setModuloSel("sem-modulo")}
+                className="surface-card group flex items-center justify-between gap-4 p-5 text-left transition-shadow hover:shadow-md"
+              >
+                <div className="min-w-0">
+                  <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
+                    <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <h3 className="truncate text-sm font-semibold">Outros materiais</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {semModulo} {semModulo === 1 ? "material" : "materiais"}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </button>
+            )}
+          </div>
         ) : (
           <div className="space-y-2">
-            {items.map((m: any) => (
-              <MaterialRow key={m.id} m={m} />
-            ))}
+            {itensVisiveis.length === 0 ? (
+              <EmptyState
+                icon={BookOpen}
+                title="Nenhum material neste módulo"
+                description="Os materiais serão publicados em breve."
+              />
+            ) : (
+              itensVisiveis.map((m: any) => <MaterialRow key={m.id} m={m} />)
+            )}
           </div>
         )}
       </PageContent>
