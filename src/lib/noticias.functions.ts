@@ -68,16 +68,32 @@ export const adminCriarNoticia = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => noticiaSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("noticias").insert({
-      titulo: data.titulo,
-      resumo: data.resumo || null,
-      conteudo: data.conteudo || null,
-      imagem_url: data.imagem_url || null,
-      fixado: data.fixado,
-      publicado: data.publicado,
-      published_at: new Date().toISOString(),
-    });
+    const { data: nova, error } = await context.supabase
+      .from("noticias")
+      .insert({
+        titulo: data.titulo,
+        resumo: data.resumo || null,
+        conteudo: data.conteudo || null,
+        imagem_url: data.imagem_url || null,
+        fixado: data.fixado,
+        publicado: data.publicado,
+        published_at: new Date().toISOString(),
+      })
+      .select("id")
+      .maybeSingle();
     if (error) throw new Error(error.message);
+
+    // Toda notícia publicada também avisa os alunos pelo sino.
+    if (data.publicado) {
+      await context.supabase.from("notificacoes").insert({
+        titulo: data.titulo,
+        mensagem: data.resumo || data.conteudo || "",
+        tipo: "noticia",
+        link: nova?.id ? `/noticias?n=${nova.id}` : "/noticias",
+        escopo: "todos",
+        created_by: context.userId,
+      });
+    }
     return { ok: true };
   });
 
