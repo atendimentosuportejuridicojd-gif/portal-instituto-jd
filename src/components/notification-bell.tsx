@@ -38,8 +38,19 @@ export function NotificationBell() {
   const items = q.data ?? [];
   const naoLidas = items.filter((n) => !n.lida).length;
 
+  const abrir = (n: { id: string; lida: boolean; link?: string | null }) => {
+    if (!n.lida) mark.mutate(n.id);
+    setOpen(false);
+    const destino = n.link?.trim() || "/noticias";
+    if (/^https?:\/\//i.test(destino)) {
+      window.open(destino, "_blank", "noopener,noreferrer");
+    } else {
+      navigate({ to: destino });
+    }
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Notificações" className="relative">
           <Bell className="h-4 w-4" />
