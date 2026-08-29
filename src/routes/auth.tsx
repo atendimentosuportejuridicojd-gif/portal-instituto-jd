@@ -29,6 +29,15 @@ function AuthPage() {
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
 
+  const [sessaoEncerrada, setSessaoEncerrada] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("sessao") === "encerrada") {
+      setSessaoEncerrada(true);
+      toast.info("Sua sessão foi encerrada porque a conta foi acessada em outro dispositivo.");
+    }
+  }, []);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/dashboard", replace: true });
