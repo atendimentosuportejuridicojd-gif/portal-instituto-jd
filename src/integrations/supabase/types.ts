@@ -881,6 +881,8 @@ export type Database = {
       }
       questao_recursos: {
         Row: {
+          acao_aplicada: string | null
+          alunos_afetados: number | null
           analisado_em: string | null
           analisado_por: string | null
           created_at: string
@@ -895,6 +897,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          acao_aplicada?: string | null
+          alunos_afetados?: number | null
           analisado_em?: string | null
           analisado_por?: string | null
           created_at?: string
@@ -909,6 +913,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          acao_aplicada?: string | null
+          alunos_afetados?: number | null
           analisado_em?: string | null
           analisado_por?: string | null
           created_at?: string
@@ -1047,6 +1053,7 @@ export type Database = {
       questoes: {
         Row: {
           ano: number | null
+          anulada: boolean
           banca: string | null
           comentario_professor: string | null
           created_at: string
@@ -1063,6 +1070,7 @@ export type Database = {
         }
         Insert: {
           ano?: number | null
+          anulada?: boolean
           banca?: string | null
           comentario_professor?: string | null
           created_at?: string
@@ -1079,6 +1087,7 @@ export type Database = {
         }
         Update: {
           ano?: number | null
+          anulada?: boolean
           banca?: string | null
           comentario_professor?: string | null
           created_at?: string
@@ -1203,6 +1212,10 @@ export type Database = {
     }
     Functions: {
       aluno_teste_ativo: { Args: { _user_id: string }; Returns: boolean }
+      aplicar_recurso_questao: {
+        Args: { _acao: string; _alternativas?: string[]; _questao_id: string }
+        Returns: number
+      }
       contar_questoes_por_material: {
         Args: { _somente_publicadas?: boolean }
         Returns: {
