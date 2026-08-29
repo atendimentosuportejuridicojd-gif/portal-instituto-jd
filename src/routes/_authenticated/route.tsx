@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { NotificationBell } from "@/components/notification-bell";
 import { GlobalSearch } from "@/components/global-search";
+import { AdminAlertas } from "@/components/admin-alertas";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -73,6 +74,7 @@ function AuthenticatedLayout() {
           <main className="flex-1">
             <Outlet />
           </main>
+          {isAdmin && <AdminAlertas />}
         </SidebarInset>
       </div>
     </SidebarProvider>
