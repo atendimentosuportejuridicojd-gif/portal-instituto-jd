@@ -323,11 +323,22 @@ function Resolver() {
                   {feedback.acertou ? "Resposta correta" : "Resposta incorreta"}
                 </div>
                 {feedback.comentario && (
-                  <div className="rounded-md border border-border/60 bg-muted/30 p-4">
-                    <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <div
+                    className="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/20"
+                    style={{ boxShadow: "0 1px 6px 0 rgba(185,28,28,0.18)" }}
+                  >
+                    <div className="text-xs uppercase tracking-wider font-bold text-black">
                       Comentário do professor
                     </div>
-                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{feedback.comentario}</p>
+                    <p
+                      className="mt-2 whitespace-pre-wrap text-sm leading-relaxed italic"
+                      style={{
+                        fontFamily: '"Times New Roman", Times, serif',
+                        color: "#7f1d1d",
+                      }}
+                    >
+                      {feedback.comentario}
+                    </p>
                   </div>
                 )}
               </div>
