@@ -7,6 +7,7 @@ import {
   criarUrlAssinada,
   montarStoragePath,
   removerArquivo,
+  gerarSlug,
 } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 
@@ -207,7 +208,13 @@ export const adminUpsertMaterial = createServerFn({ method: "POST" })
     }
     const { data: ins, error } = await context.supabase
       .from("materiais")
-      .insert({ ...payload, versao: 1, publicado_em: new Date().toISOString() })
+      .insert({
+        ...payload,
+        slug: gerarSlug(data.titulo),
+        tipo: "pdf",
+        versao: 1,
+        publicado_em: new Date().toISOString(),
+      })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
