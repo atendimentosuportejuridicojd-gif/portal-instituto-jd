@@ -166,7 +166,7 @@ function ContinuarCard({
   rotulo: string;
   icon: React.ComponentType<{ className?: string }>;
   item: ContinuarItem;
-  to: "/materiais/$materialId/questoes" | "/materiais/$materialId/pdf";
+  to: "/materiais/$materialId/questoes" | "/materiais/$materialId/leitura";
   vazio: string;
 }) {
   return (
