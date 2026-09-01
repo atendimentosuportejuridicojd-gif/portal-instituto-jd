@@ -375,6 +375,7 @@ export type Database = {
       }
       disciplinas: {
         Row: {
+          codigo: string | null
           concurso_id: string | null
           created_at: string
           descricao: string | null
@@ -388,6 +389,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          codigo?: string | null
           concurso_id?: string | null
           created_at?: string
           descricao?: string | null
@@ -401,6 +403,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          codigo?: string | null
           concurso_id?: string | null
           created_at?: string
           descricao?: string | null
@@ -618,6 +621,7 @@ export type Database = {
           id: string
           nome: string
           ordem: number
+          slug: string | null
           updated_at: string
         }
         Insert: {
@@ -627,6 +631,7 @@ export type Database = {
           id?: string
           nome: string
           ordem?: number
+          slug?: string | null
           updated_at?: string
         }
         Update: {
@@ -636,6 +641,7 @@ export type Database = {
           id?: string
           nome?: string
           ordem?: number
+          slug?: string | null
           updated_at?: string
         }
         Relationships: [
