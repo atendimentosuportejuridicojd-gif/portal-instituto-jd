@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { property: "og:title", content: "Dashboard — Portal do Aluno J&D" },
       {
         property: "og:description",
-        content: "Continue de onde parou nas questões e na leitura dos PDFs.",
+        content: "Continue de onde parou nas questões e na leitura das matérias.",
       },
     ],
   }),

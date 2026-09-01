@@ -53,7 +53,7 @@ export const Route = createFileRoute("/_authenticated/admin/acervo")({
       { title: "Acervo Base — Admin J&D" },
       {
         name: "description",
-        content: "Gerencie disciplinas, módulos e materiais em PDF do acervo.",
+        content: "Gerencie disciplinas, módulos e matérias do acervo.",
       },
     ],
   }),
@@ -73,7 +73,7 @@ function AdminAcervo() {
     <>
       <PageHeader
         title="Acervo Base"
-        description="Disciplinas, módulos e materiais em PDF. O arquivo é único: ao substituir, a nova versão reflete em trilhas e concursos."
+        description="Disciplinas, módulos e matérias. O conteúdo é único: ao atualizar, a nova versão reflete em trilhas e concursos."
         actions={<DisciplinaDialog onDone={invalidate} />}
       />
       <PageContent>
