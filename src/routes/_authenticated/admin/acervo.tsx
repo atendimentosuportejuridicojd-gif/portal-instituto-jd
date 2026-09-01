@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -29,7 +29,6 @@ import {
   FileText,
   Plus,
   Trash2,
-  Upload,
   History,
   Eye,
   Loader2,
@@ -37,7 +36,6 @@ import {
   PencilLine,
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
   adminListAcervo,
   adminUpsertDisciplina,
@@ -46,10 +44,7 @@ import {
   adminDeleteModulo,
   adminUpsertMaterial,
   adminDeleteMaterial,
-  adminCriarUploadUrl,
-  adminRegistrarArquivo,
   adminListVersoesMaterial,
-  adminUrlArquivo,
 } from "@/lib/acervo.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/acervo")({
@@ -510,103 +505,6 @@ function MaterialDialog({
           <Button onClick={() => mut.mutate()} disabled={mut.isPending || !titulo.trim()}>
             {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function UploadDialog({ material, onDone }: { material: any; onDone: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [notas, setNotas] = useState("");
-  const [paginas, setPaginas] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const criarUrl = useServerFn(adminCriarUploadUrl);
-  const registrar = useServerFn(adminRegistrarArquivo);
-
-  const enviar = async () => {
-    const file = inputRef.current?.files?.[0];
-    if (!file) return toast.error("Selecione um arquivo PDF.");
-    if (file.type !== "application/pdf") return toast.error("O arquivo precisa ser um PDF.");
-    setEnviando(true);
-    try {
-      const { storage_path, token } = await criarUrl({
-        data: { material_id: material.id, nome_arquivo: file.name },
-      });
-      const { error } = await supabase.storage
-        .from("materiais")
-        .uploadToSignedUrl(storage_path, token, file, { contentType: "application/pdf" });
-      if (error) throw new Error(error.message);
-
-      await registrar({
-        data: {
-          material_id: material.id,
-          storage_path,
-          tamanho_bytes: file.size,
-          paginas: paginas ? Number(paginas) : undefined,
-          notas,
-        },
-      });
-      toast.success(material.storage_path ? "Nova versão publicada." : "Arquivo publicado.");
-      setOpen(false);
-      setNotas("");
-      setPaginas("");
-      onDone();
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha no envio.");
-    } finally {
-      setEnviando(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Upload className="mr-1 h-3.5 w-3.5" />
-          {material.storage_path ? "Substituir PDF" : "Enviar PDF"}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {material.storage_path ? "Substituir arquivo (nova versão)" : "Enviar arquivo PDF"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-xs text-muted-foreground">
-            O arquivo é único no sistema: trilhas e concursos que usam este material passam a exibir
-            automaticamente a versão mais recente.
-          </p>
-          <div className="space-y-1.5">
-            <Label htmlFor="arquivo">Arquivo PDF</Label>
-            <Input id="arquivo" type="file" accept="application/pdf" ref={inputRef} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="paginas">Número de páginas (opcional)</Label>
-            <Input
-              id="paginas"
-              value={paginas}
-              onChange={(e) => setPaginas(e.target.value.replace(/\D/g, ""))}
-              placeholder="Ex.: 120"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="notas">Notas da versão (opcional)</Label>
-            <Textarea
-              id="notas"
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              placeholder="Ex.: atualização da Lei 14.133/2021"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={enviar} disabled={enviando}>
-            {enviando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enviar
           </Button>
         </DialogFooter>
       </DialogContent>
