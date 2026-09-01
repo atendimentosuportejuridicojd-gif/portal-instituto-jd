@@ -215,7 +215,7 @@ function ErradaCard({ idx, d }: { idx: number; d: any }) {
             Comentário do professor
           </div>
           <p
-            className="mt-2 whitespace-pre-wrap text-base leading-relaxed italic"
+            className="mt-2 whitespace-pre-wrap text-xl leading-relaxed italic"
             style={{
               fontFamily: '"Times New Roman", Times, serif',
               color: "#7f1d1d",
