@@ -1,0 +1,123 @@
+{
+  "Princípios da Administração Pública": {
+    "materialId": "f49f1d19-3067-4bee-a622-bf02b6fec974",
+    "keepIds": [
+      "0f093779-4136-47d4-88ca-a0b7e58877c1",
+      "a17fbf22-0f18-4315-bad9-9c704d52f058",
+      "5a59aac7-f4a4-4704-a4ae-56159386f596",
+      "34b12b4c-0528-4901-a51a-577cb14c3b06",
+      "21b2ac70-187a-4a28-9799-8a421cd15db3",
+      "1af05c9f-01bb-4ce9-a28e-aaa46274edda"
+    ]
+  },
+  "Organização Administrativa": {
+    "materialId": "672f5273-85c3-4a94-8d38-e456af76976f",
+    "keepIds": [
+      "ab7dcea8-97b9-446c-90a4-09938925d516",
+      "749f1c3e-4d34-426e-ba4d-c62e29476ce8",
+      "3b0f8614-856f-4ef8-acfa-461279c1f869",
+      "909064f2-649e-4d5f-8d01-906ac361276a",
+      "d7e99aa2-7b9a-4ca5-95b8-272a019d8fd9",
+      "2cb1e8d2-9dc3-409f-98a6-09af45ecd669"
+    ]
+  },
+  "Atos Administrativos": {
+    "materialId": "2cfa53bf-2ad7-45fc-b91e-27ddab738dc1",
+    "keepIds": [
+      "dab18860-09f1-4d71-b564-1c6fede2fb8d",
+      "6cc4aacf-fc88-4d3a-a686-29aab86edb66",
+      "25d315ff-005b-4f2f-8616-f80c7cea1355",
+      "fa7e92ff-7e56-4c8c-a98e-f0ed323f76a5",
+      "ee7faf54-3a34-4983-9571-6a7a367d7234",
+      "bb04a1a3-773e-4690-a677-2c30b63ad124"
+    ]
+  },
+  "Poderes Administrativos": {
+    "materialId": "9d515b5e-ff78-4043-b326-73ca1327e048",
+    "keepIds": [
+      "73e25eec-a5db-4992-8632-bb062d127e90",
+      "800e4efb-0e4f-4e49-9626-3294e85b5200",
+      "565ce0a9-29ce-4067-b2f8-991885391074",
+      "3ac19fb3-ca59-4d3d-a823-435f30b86f5f",
+      "73b5bcf1-9dce-4dba-b412-c8ff19c10487",
+      "ae2d019c-4193-4124-860d-b9cb48fc7ab5"
+    ]
+  },
+  "Agentes Públicos": {
+    "materialId": "1cb4bcc7-f4d0-4ca2-a524-6c3f9f272f25",
+    "keepIds": [
+      "cf2c8b2f-f126-4d29-87a3-459f52086dd1",
+      "3e9ccdcd-5140-489f-84dc-f3a9f499bd10",
+      "eba80d9e-b19c-4ad6-90d4-22f3920bc5c0",
+      "8860c56d-b8f5-4221-a516-9eb44667cb89",
+      "8ba634bc-29d6-49f2-9ec9-f2ac48588d82",
+      "222fe1d9-cddd-4acf-b0e1-f0623dde5ed1"
+    ]
+  },
+  "Serviços Públicos": {
+    "materialId": "84ad06e1-adb7-4068-8a31-d350dff33b25",
+    "keepIds": [
+      "3013fc46-dc91-447e-aab7-e8be7f101298",
+      "762722ea-e2ff-4b79-b12e-02d185bb9db4",
+      "bdbc93f4-0dfd-45c6-895a-fbd33be281a0",
+      "33ab567e-6f14-4746-8a4b-935a4fb26afd",
+      "ee95a21f-1de6-4fcf-8f8b-4b0d43602c9d",
+      "da3167d4-c131-4c8c-b330-7eff624d3d1c"
+    ]
+  },
+  "Controle da Administração Pública": {
+    "materialId": "1682d249-31dd-4346-b0e6-fdbefb25395d",
+    "keepIds": [
+      "2421eb5e-bac1-455f-9080-e7af661019f6",
+      "e12b24a6-a8c0-48c1-8849-e40603702d75",
+      "ae1827e1-29c4-426b-b731-7760ad67d84b",
+      "dc196903-2616-483e-9b49-fe0182898a67",
+      "b4bfa0eb-7b49-47fb-b6ec-6d52256aebb2",
+      "245b2211-c60a-42cf-a62e-c1936ae8aaa5"
+    ]
+  },
+  "Processo Administrativo": {
+    "materialId": "a60d9909-4fea-4e5f-8edd-1d2584ffd0f7",
+    "keepIds": [
+      "987be07f-91b0-452f-be55-1eba99f1317d",
+      "180b3ba1-1b72-4af5-a2f4-71f676c37f6e",
+      "10f5f506-6ea7-49ec-9173-ccc8f1abda8b",
+      "eb3afd59-9f65-42da-bbf1-74e71b2c46ea",
+      "c7663b02-80c7-40ec-b88e-8a8635f1692e",
+      "49c22298-d4db-4427-89b7-1aab2f8545fd"
+    ]
+  },
+  "Improbidade/LGPD/LAI": {
+    "materialId": "ba92ad51-eaec-438f-b32b-5df9b40de651",
+    "keepIds": [
+      "25005e16-38c6-46de-b681-5e035db4fd67",
+      "0cf5198c-2a28-4858-b5e0-605a68b65b46",
+      "5e554f52-9294-4c04-9d45-a29391ae8fcd",
+      "70087e11-88a0-4d62-8dbd-3518adfed3eb",
+      "bf0dab79-59bb-4a37-aeb3-dfb0efd3cb7b",
+      "faaecd51-1a1d-4f37-aedd-0c4b697d1197",
+      "6e4958d7-e80a-43a3-a208-a4cdf27e94ff",
+      "6b29d1db-057f-4cc5-aaa8-027db2e00364",
+      "afb3a7a9-42e1-40bd-91a9-5c869ed39bc6",
+      "7e8f5f0a-3cd9-4297-8abb-7c1024adfc78",
+      "21c6d468-360b-48b7-82ca-3ca0d439108f",
+      "daa95205-5a33-417a-abe0-353eb1131bc4",
+      "01282104-37bf-4150-bd15-203a591c864b",
+      "eab935e8-9014-41b3-8230-ca28905eac63",
+      "9efbb5da-33a9-4358-b0e5-8d198711d704",
+      "3eb3b539-5d33-47bb-86e6-5325a03719d0",
+      "69453f3c-59cf-442e-82e3-72242c53649a",
+      "12a9c0ef-a042-44e9-8a1f-de5fcdd17893",
+      "36d609eb-cc64-4f49-aa5f-2ff267d9b270",
+      "76609fe6-ce24-4c94-868d-b8b9512e9102",
+      "d07e3072-38e7-4b45-b557-ad1914aaf697",
+      "054585ee-03c9-4b5c-8f00-cbee993bd72a",
+      "89b7597d-4946-4bd3-b1f4-ea1146d8d851",
+      "f287b1ce-a742-4382-9fff-43e53bdacc77",
+      "bb1470ff-8ab1-4ec9-8cc8-aed89bb7bdc2",
+      "3feb4018-6cfa-4b3a-9e1d-fb702201373e",
+      "954abe06-0806-4c3e-aab1-e4d2b7aa8037",
+      "b7664db7-8013-45e0-9061-b35698556e7a"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -136,6 +137,18 @@
   --sidebar-accent-foreground: oklch(0.96 0.006 90);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.78 0.13 82);
+}
+
+:root {
+  /* Tema das materias do Acervo Base (conteudo em markdown) — sempre
+     referenciar via var(--jd-*), nunca hardcodear a cor/fonte de novo
+     em componentes. */
+  --jd-titulo-h1: #4472c4;
+  --jd-titulo-h2: #b8860b;
+  --jd-acento: #ffc000; /* barras e filetes. NUNCA em texto. */
+  --jd-rotulo: #000000;
+  --jd-serif: Georgia, "Times New Roman", Tinos, serif;
+  --jd-sans: Arial, ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {

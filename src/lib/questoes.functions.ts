@@ -51,10 +51,7 @@ export const adminUpsertQuestao = createServerFn({ method: "POST" })
 
     let questaoId = data.id;
     if (questaoId) {
-      const { error } = await supabase
-        .from("questoes")
-        .update(payload)
-        .eq("id", questaoId);
+      const { error } = await supabase.from("questoes").update(payload).eq("id", questaoId);
       if (error) throw new Error(error.message);
       await supabase.from("questao_alternativas").delete().eq("questao_id", questaoId);
     } else {
@@ -98,7 +95,9 @@ export const adminListQuestoesPorMaterial = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { data: questoes, error } = await context.supabase
       .from("questoes")
-      .select("id, enunciado, referencia, ordem, publicado, comentario_professor, questao_alternativas(id, letra, texto, correta, ordem)")
+      .select(
+        "id, enunciado, referencia, ordem, publicado, comentario_professor, questao_alternativas(id, letra, texto, correta, ordem)",
+      )
       .eq("material_id", data.material_id)
       .order("ordem", { ascending: true });
     if (error) throw new Error(error.message);
@@ -116,7 +115,6 @@ export const adminListMateriaisComQuestoes = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     const countMap = await contarQuestoesPorMaterial(context.supabase);
-
 
     return (materiais ?? []).map((m: any) => ({
       id: m.id,
@@ -137,7 +135,7 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
     const { data: materiais, error } = await supabase
       .from("materiais")
       .select(
-        "id, titulo, descricao, disciplina_id, versao, publicado_em, atualizado_em, disciplinas(id, nome, especifica, grupo, senha)",
+        "id, titulo, tipo, descricao, disciplina_id, versao, publicado_em, atualizado_em, disciplinas(id, nome, especifica, grupo)",
       )
       .eq("publicado", true)
       .order("titulo");
@@ -160,7 +158,8 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
     const bestByMat = new Map<string, { percentual: number }>();
     (sessoes ?? []).forEach((s: any) => {
       if (s.status !== "concluida" || !s.material_id) return;
-      if (!bestByMat.has(s.material_id)) bestByMat.set(s.material_id, { percentual: Number(s.percentual) });
+      if (!bestByMat.has(s.material_id))
+        bestByMat.set(s.material_id, { percentual: Number(s.percentual) });
     });
 
     const favSet = new Set((favs ?? []).map((f: any) => f.item_id));
@@ -172,12 +171,12 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
       return {
         id: m.id,
         titulo: m.titulo,
+        tipo: m.tipo ?? "pdf",
         descricao: m.descricao,
         disciplina: m.disciplinas?.nome ?? "Sem disciplina",
         disciplina_id: m.disciplina_id,
         especifica: !!m.disciplinas?.especifica,
         grupo: (m.disciplinas?.grupo as string) ?? "gerais",
-        tem_senha: !!m.disciplinas?.senha,
         total_questoes: qcountMap.get(m.id) ?? 0,
         desempenho: bestByMat.get(m.id)?.percentual ?? null,
         favorito: favSet.has(m.id),
@@ -213,7 +212,8 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
       .eq("material_id", data.material_id)
       .eq("publicado", true);
 
-    if (!count || count === 0) throw new Error("Este material ainda não possui questões cadastradas.");
+    if (!count || count === 0)
+      throw new Error("Este material ainda não possui questões cadastradas.");
 
     const { data: nova, error } = await supabase
       .from("questao_sessoes")
@@ -237,7 +237,9 @@ export const getSessaoAtual = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: sessao, error } = await supabase
       .from("questao_sessoes")
-      .select("id, material_id, status, total_questoes, acertos, erros, percentual, iniciada_em, concluida_em, materiais(id, titulo, disciplinas(nome))")
+      .select(
+        "id, material_id, status, total_questoes, acertos, erros, percentual, iniciada_em, concluida_em, materiais(id, titulo, disciplinas(nome))",
+      )
       .eq("id", data.sessao_id)
       .eq("user_id", userId)
       .single();
@@ -344,11 +346,7 @@ export const responderQuestao = createServerFn({ method: "POST" })
         .eq("questao_id", data.questao_id)
         .eq("correta", true)
         .single(),
-      supabase
-        .from("questoes")
-        .select("comentario_professor")
-        .eq("id", data.questao_id)
-        .single(),
+      supabase.from("questoes").select("comentario_professor").eq("id", data.questao_id).single(),
     ]);
 
     // Contar respondidas e possivelmente finalizar
@@ -367,9 +365,8 @@ export const responderQuestao = createServerFn({ method: "POST" })
         .eq("sessao_id", data.sessao_id);
       const acertos = (allTent ?? []).filter((t: any) => t.acertou).length;
       const erros = (allTent?.length ?? 0) - acertos;
-      const percentual = sessao.total_questoes > 0
-        ? Math.round((acertos / sessao.total_questoes) * 10000) / 100
-        : 0;
+      const percentual =
+        sessao.total_questoes > 0 ? Math.round((acertos / sessao.total_questoes) * 10000) / 100 : 0;
       await supabase
         .from("questao_sessoes")
         .update({
@@ -421,7 +418,9 @@ export const getDesempenhoMaterial = createServerFn({ method: "GET" })
     if (ultima) {
       const { data: tent } = await supabase
         .from("questao_tentativas")
-        .select("questao_id, alternativa_id, acertou, questoes(id, enunciado, referencia, comentario_professor, questao_alternativas(id, letra, texto, correta))")
+        .select(
+          "questao_id, alternativa_id, acertou, questoes(id, enunciado, referencia, comentario_professor, questao_alternativas(id, letra, texto, correta))",
+        )
         .eq("sessao_id", ultima.id);
       detalhes = (tent ?? []).map((t: any) => {
         const alts = t.questoes?.questao_alternativas ?? [];

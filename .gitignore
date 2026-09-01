@@ -20,6 +20,12 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Backups locais de dados (podem conter dados de alunos/conteudo)
+scripts/backup/
+
+# Cache local do Supabase CLI
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, FolderOpen, ChevronRight, Lock } from "lucide-react";
+import { ArrowLeft, BookOpen, FolderOpen, ChevronRight } from "lucide-react";
 import { alunoListTrilhas } from "@/lib/trilhas.functions";
 import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
 
@@ -39,26 +39,34 @@ function CargoDisciplinas() {
   const todos = cargoId === "todos";
   const cargo = (qCargos.data ?? []).find((c: any) => c.id === cargoId);
   const permitidos = new Set<string>((cargo?.materiais ?? []).map((m: any) => m.id));
-  const materiais = (qMats.data ?? []).filter((m: any) => !m.especifica)
+  const materiais = (qMats.data ?? [])
+    .filter((m: any) => !m.especifica)
     .filter((m: any) => todos || permitidos.has(m.id));
 
   const mapa = new Map<
     string,
-    { id: string; nome: string; total: number; novos: number; grupo: string; tem_senha: boolean }
+    { id: string; nome: string; total: number; novos: number; grupo: string }
   >();
   materiais.forEach((m: any) => {
     const id = m.disciplina_id ?? "sem-disciplina";
-    const atual =
-      mapa.get(id) ??
-      { id, nome: m.disciplina, total: 0, novos: 0, grupo: m.grupo ?? "gerais", tem_senha: false };
+    const atual = mapa.get(id) ?? {
+      id,
+      nome: m.disciplina,
+      total: 0,
+      novos: 0,
+      grupo: m.grupo ?? "gerais",
+    };
     atual.total += 1;
     if (m.novo || m.atualizado) atual.novos += 1;
-    if (m.tem_senha) atual.tem_senha = true;
     mapa.set(id, atual);
   });
   const disciplinas = [...mapa.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   const grupos = [
-    { key: "gerais", titulo: "Conhecimentos Gerais", itens: disciplinas.filter((d) => d.grupo !== "especificos") },
+    {
+      key: "gerais",
+      titulo: "Conhecimentos Gerais",
+      itens: disciplinas.filter((d) => d.grupo !== "especificos"),
+    },
     {
       key: "especificos",
       titulo: "Conhecimentos Específicos",
@@ -119,7 +127,6 @@ function CargoDisciplinas() {
                         </div>
                         <h3 className="flex items-center gap-1.5 truncate text-sm font-semibold">
                           {d.nome}
-                          {d.tem_senha && <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
                         </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {d.total} {d.total === 1 ? "material" : "materiais"}

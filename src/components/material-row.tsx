@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText,
+  BookOpen,
   PencilLine,
   RefreshCw,
   BarChart3,
@@ -47,10 +48,16 @@ export function MaterialRow({ m }: { m: any }) {
 
   const jaFez = m.desempenho !== null;
   const temQuestoes = m.total_questoes > 0;
+  const isMarkdown = m.tipo === "markdown";
   const perf = m.desempenho as number | null;
   const perfColor =
-    perf === null ? "" : perf >= 85 ? "text-green-600" : perf >= 70 ? "text-yellow-600" : "text-red-600";
-
+    perf === null
+      ? ""
+      : perf >= 85
+        ? "text-green-600"
+        : perf >= 70
+          ? "text-yellow-600"
+          : "text-red-600";
 
   return (
     <div className="surface-card flex flex-col gap-3 p-4 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
@@ -104,10 +111,17 @@ export function MaterialRow({ m }: { m: any }) {
         </Button>
 
         <Button asChild variant="ghost" size="sm">
-          <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
-            <FileText className="mr-1 h-3.5 w-3.5" />
-            Visualizar PDF
-          </Link>
+          {isMarkdown ? (
+            <Link to="/materiais/$materialId/leitura" params={{ materialId: m.id }}>
+              <BookOpen className="mr-1 h-3.5 w-3.5" />
+              Ler matéria
+            </Link>
+          ) : (
+            <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
+              <FileText className="mr-1 h-3.5 w-3.5" />
+              Visualizar PDF
+            </Link>
+          )}
         </Button>
         {temQuestoes ? (
           <Button asChild variant="outline" size="sm">
@@ -126,7 +140,9 @@ export function MaterialRow({ m }: { m: any }) {
             </Link>
           </Button>
         ) : (
-          <Badge variant="secondary" className="text-xs">Sem questões</Badge>
+          <Badge variant="secondary" className="text-xs">
+            Sem questões
+          </Badge>
         )}
         {jaFez && (
           <Button asChild variant="ghost" size="sm">

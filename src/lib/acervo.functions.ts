@@ -5,11 +5,11 @@ import {
   assertAcessoAluno,
   assertAdmin,
   criarUrlAssinada,
+  gerarSlug,
   montarStoragePath,
   removerArquivo,
 } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
-
 
 // ===================== ADMIN =====================
 
@@ -23,7 +23,7 @@ export const adminListAcervo = createServerFn({ method: "GET" })
       await Promise.all([
         supabase
           .from("disciplinas")
-          .select("id, nome, descricao, ordem, grupo, senha")
+          .select("id, nome, descricao, ordem, grupo")
           .eq("especifica", false)
           .order("ordem"),
         supabase.from("modulos").select("id, nome, disciplina_id, ordem").order("ordem"),
@@ -35,7 +35,6 @@ export const adminListAcervo = createServerFn({ method: "GET" })
           .order("ordem"),
         contarQuestoesPorMaterial(supabase),
       ]);
-
 
     return {
       disciplinas: (disciplinas ?? []).map((d: any) => ({
@@ -61,7 +60,6 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
         descricao: z.string().trim().max(1000).optional().default(""),
         ordem: z.number().int().min(0).default(0),
         grupo: z.enum(["gerais", "especificos"]).default("gerais"),
-        senha: z.string().trim().max(100).optional().default(""),
       })
       .parse(d),
   )
@@ -72,10 +70,12 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       descricao: data.descricao || null,
       ordem: data.ordem,
       grupo: data.grupo,
-      senha: data.senha || null,
     };
     if (data.id) {
-      const { error } = await context.supabase.from("disciplinas").update(payload).eq("id", data.id);
+      const { error } = await context.supabase
+        .from("disciplinas")
+        .update(payload)
+        .eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
@@ -179,7 +179,13 @@ export const adminUpsertMaterial = createServerFn({ method: "POST" })
     }
     const { data: ins, error } = await context.supabase
       .from("materiais")
-      .insert({ ...payload, versao: 1, publicado_em: new Date().toISOString() })
+      .insert({
+        ...payload,
+        tipo: "pdf",
+        slug: `${gerarSlug(data.titulo)}-${Date.now().toString(36)}`,
+        versao: 1,
+        publicado_em: new Date().toISOString(),
+      })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -321,25 +327,6 @@ export const adminUrlArquivo = createServerFn({ method: "POST" })
 
 // ===================== ALUNO =====================
 
-/** Confere a senha de uma disciplina protegida. Nunca retorna a senha em si. */
-export const alunoVerificarSenhaDisciplina = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z
-      .object({ disciplina_id: z.string().uuid(), senha: z.string().trim().min(1).max(100) })
-      .parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    await assertAcessoAluno(context);
-    const { data: disciplina, error } = await context.supabase
-      .from("disciplinas")
-      .select("senha")
-      .eq("id", data.disciplina_id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return { ok: !disciplina?.senha || disciplina.senha === data.senha };
-  });
-
 /** Abre um material: metadados, progresso de leitura e link temporário do PDF. */
 export const alunoAbrirMaterial = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -388,6 +375,54 @@ export const alunoAbrirMaterial = createServerFn({ method: "POST" })
       },
       url,
       leitura: leitura ?? null,
+      total_questoes: totalQuestoes ?? 0,
+    };
+  });
+
+/**
+ * Abre uma materia em markdown para leitura. Usa `context.supabase`
+ * (client autenticado do proprio usuario, nao supabaseAdmin) para que a
+ * policy "materiais_read_auth" (publicado = true OR administrador) seja
+ * aplicada de verdade pelo Postgres via RLS — o mesmo padrao de
+ * alunoAbrirMaterial acima, so que sem storage/PDF.
+ */
+export const alunoAbrirMateriaLeitura = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ material_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
+    const { supabase } = context;
+
+    const { data: material, error } = await supabase
+      .from("materiais")
+      .select(
+        "id, titulo, tipo, conteudo_md, resumo, tempo_leitura, publicado, disciplina_id, disciplinas(nome)",
+      )
+      .eq("id", data.material_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!material || !material.publicado) throw new Error("Material indisponível.");
+    if (material.tipo !== "markdown")
+      throw new Error("Este material não é uma matéria em markdown.");
+
+    const [{ count: totalQuestoes }] = await Promise.all([
+      supabase
+        .from("questoes")
+        .select("id", { count: "exact", head: true })
+        .eq("material_id", data.material_id)
+        .eq("publicado", true),
+    ]);
+
+    return {
+      material: {
+        id: material.id,
+        titulo: material.titulo,
+        conteudo_md: material.conteudo_md,
+        resumo: material.resumo,
+        tempo_leitura: material.tempo_leitura,
+        disciplina: (material as any).disciplinas?.nome ?? "Sem disciplina",
+        disciplina_id: material.disciplina_id,
+      },
       total_questoes: totalQuestoes ?? 0,
     };
   });

@@ -33,7 +33,6 @@ import {
   History,
   Eye,
   Loader2,
-  Lock,
   PencilLine,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -56,7 +55,10 @@ export const Route = createFileRoute("/_authenticated/admin/acervo")({
   head: () => ({
     meta: [
       { title: "Acervo Base — Admin J&D" },
-      { name: "description", content: "Gerencie disciplinas, módulos e materiais em PDF do acervo." },
+      {
+        name: "description",
+        content: "Gerencie disciplinas, módulos e materiais em PDF do acervo.",
+      },
     ],
   }),
   component: AdminAcervo,
@@ -95,7 +97,6 @@ function AdminAcervo() {
                   <div className="min-w-0">
                     <h2 className="flex items-center gap-1.5 truncate text-base font-semibold">
                       {d.nome}
-                      {d.senha && <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
                     </h2>
                     <p className="text-xs text-muted-foreground">
                       {d.materiais.length} material(is) · {d.modulos.length} módulo(s)
@@ -136,7 +137,9 @@ function AdminAcervo() {
 
                 <div className="mt-4 space-y-2">
                   {d.materiais.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">Nenhum material nesta disciplina.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Nenhum material nesta disciplina.
+                    </p>
                   ) : (
                     d.materiais.map((m: any) => (
                       <MaterialRow key={m.id} m={m} disciplina={d} onDone={invalidate} />
@@ -177,10 +180,18 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="truncate text-sm font-medium">{m.titulo}</span>
-          <Badge variant="secondary" className="shrink-0">v{m.versao}</Badge>
-          {!m.publicado && <Badge variant="outline" className="shrink-0">Rascunho</Badge>}
+          <Badge variant="secondary" className="shrink-0">
+            v{m.versao}
+          </Badge>
+          {!m.publicado && (
+            <Badge variant="outline" className="shrink-0">
+              Rascunho
+            </Badge>
+          )}
           {!m.storage_path && (
-            <Badge variant="outline" className="shrink-0 text-destructive">Sem arquivo</Badge>
+            <Badge variant="outline" className="shrink-0 text-destructive">
+              Sem arquivo
+            </Badge>
           )}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -192,7 +203,12 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {m.storage_path && (
-          <Button variant="ghost" size="sm" onClick={() => abrir.mutate()} disabled={abrir.isPending}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => abrir.mutate()}
+            disabled={abrir.isPending}
+          >
             <Eye className="mr-1 h-3.5 w-3.5" />
             Ver
           </Button>
@@ -252,7 +268,6 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
   const [descricao, setDescricao] = useState(disciplina?.descricao ?? "");
   const [ordem, setOrdem] = useState(String(disciplina?.ordem ?? 0));
   const [grupo, setGrupo] = useState<string>(disciplina?.grupo ?? "gerais");
-  const [senha, setSenha] = useState(disciplina?.senha ?? "");
   const fn = useServerFn(adminUpsertDisciplina);
 
   const mut = useMutation({
@@ -264,7 +279,6 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           descricao,
           ordem: Number(ordem) || 0,
           grupo: grupo as "gerais" | "especificos",
-          senha,
         },
       }),
     onSuccess: () => {
@@ -301,7 +315,11 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="d-desc">Descrição</Label>
-            <Textarea id="d-desc" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+            <Textarea
+              id="d-desc"
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Grupo no acervo</Label>
@@ -318,18 +336,6 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           <div className="space-y-1.5">
             <Label htmlFor="d-ordem">Ordem</Label>
             <Input id="d-ordem" value={ordem} onChange={(e) => setOrdem(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="d-senha">Senha para abrir (opcional)</Label>
-            <Input
-              id="d-senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              placeholder="Deixe em branco para não exigir senha"
-            />
-            <p className="text-xs text-muted-foreground">
-              Se preenchida, o aluno precisa digitar essa senha para ver os materiais desta disciplina.
-            </p>
           </div>
         </div>
         <DialogFooter>
@@ -460,7 +466,11 @@ function MaterialDialog({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="m-desc">Descrição</Label>
-            <Textarea id="m-desc" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+            <Textarea
+              id="m-desc"
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+            />
           </div>
           {disciplina?.modulos?.length > 0 && (
             <div className="space-y-1.5">
