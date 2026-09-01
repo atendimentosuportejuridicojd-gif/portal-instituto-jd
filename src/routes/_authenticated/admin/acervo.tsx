@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,6 @@ import {
   FileText,
   Plus,
   Trash2,
-  Upload,
   History,
   Eye,
   Loader2,
@@ -37,7 +36,6 @@ import {
   PencilLine,
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
   adminListAcervo,
   adminUpsertDisciplina,
@@ -46,10 +44,7 @@ import {
   adminDeleteModulo,
   adminUpsertMaterial,
   adminDeleteMaterial,
-  adminCriarUploadUrl,
-  adminRegistrarArquivo,
   adminListVersoesMaterial,
-  adminUrlArquivo,
 } from "@/lib/acervo.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/acervo")({
@@ -58,7 +53,7 @@ export const Route = createFileRoute("/_authenticated/admin/acervo")({
       { title: "Acervo Base — Admin J&D" },
       {
         name: "description",
-        content: "Gerencie disciplinas, módulos e materiais em PDF do acervo.",
+        content: "Gerencie disciplinas, módulos e matérias do acervo.",
       },
     ],
   }),
@@ -78,7 +73,7 @@ function AdminAcervo() {
     <>
       <PageHeader
         title="Acervo Base"
-        description="Disciplinas, módulos e materiais em PDF. O arquivo é único: ao substituir, a nova versão reflete em trilhas e concursos."
+        description="Disciplinas, módulos e matérias. O conteúdo é único: ao atualizar, a nova versão reflete em trilhas e concursos."
         actions={<DisciplinaDialog onDone={invalidate} />}
       />
       <PageContent>
@@ -169,13 +164,6 @@ function AdminAcervo() {
 }
 
 function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDone: () => void }) {
-  const urlFn = useServerFn(adminUrlArquivo);
-  const abrir = useMutation({
-    mutationFn: () => urlFn({ data: { storage_path: m.storage_path } }),
-    onSuccess: (r: any) => window.open(r.url, "_blank", "noopener"),
-    onError: (e: any) => toast.error(e.message),
-  });
-
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
@@ -190,32 +178,19 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
               Rascunho
             </Badge>
           )}
-          {!m.storage_path && (
-            <Badge variant="outline" className="shrink-0 text-destructive">
-              Sem arquivo
-            </Badge>
-          )}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           {m.total_questoes} questão(ões)
-          {m.paginas ? ` · ${m.paginas} páginas` : ""}
-          {m.tamanho_bytes ? ` · ${(m.tamanho_bytes / 1024 / 1024).toFixed(1)} MB` : ""}
           {m.download_permitido ? " · download liberado" : ""}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {m.storage_path && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => abrir.mutate()}
-            disabled={abrir.isPending}
-          >
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/materiais/$materialId/leitura" params={{ materialId: m.id }}>
             <Eye className="mr-1 h-3.5 w-3.5" />
-            Ver
-          </Button>
-        )}
-        <UploadDialog material={m} onDone={onDone} />
+            Ver matéria
+          </Link>
+        </Button>
         <VersoesDialog material={m} />
         <MaterialDialog disciplina={disciplina} material={m} onDone={onDone} />
         <DeleteButton label="Excluir material" fn={adminDeleteMaterial} id={m.id} onDone={onDone} />
@@ -530,103 +505,6 @@ function MaterialDialog({
           <Button onClick={() => mut.mutate()} disabled={mut.isPending || !titulo.trim()}>
             {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function UploadDialog({ material, onDone }: { material: any; onDone: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [notas, setNotas] = useState("");
-  const [paginas, setPaginas] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const criarUrl = useServerFn(adminCriarUploadUrl);
-  const registrar = useServerFn(adminRegistrarArquivo);
-
-  const enviar = async () => {
-    const file = inputRef.current?.files?.[0];
-    if (!file) return toast.error("Selecione um arquivo PDF.");
-    if (file.type !== "application/pdf") return toast.error("O arquivo precisa ser um PDF.");
-    setEnviando(true);
-    try {
-      const { storage_path, token } = await criarUrl({
-        data: { material_id: material.id, nome_arquivo: file.name },
-      });
-      const { error } = await supabase.storage
-        .from("materiais")
-        .uploadToSignedUrl(storage_path, token, file, { contentType: "application/pdf" });
-      if (error) throw new Error(error.message);
-
-      await registrar({
-        data: {
-          material_id: material.id,
-          storage_path,
-          tamanho_bytes: file.size,
-          paginas: paginas ? Number(paginas) : undefined,
-          notas,
-        },
-      });
-      toast.success(material.storage_path ? "Nova versão publicada." : "Arquivo publicado.");
-      setOpen(false);
-      setNotas("");
-      setPaginas("");
-      onDone();
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha no envio.");
-    } finally {
-      setEnviando(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Upload className="mr-1 h-3.5 w-3.5" />
-          {material.storage_path ? "Substituir PDF" : "Enviar PDF"}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {material.storage_path ? "Substituir arquivo (nova versão)" : "Enviar arquivo PDF"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-xs text-muted-foreground">
-            O arquivo é único no sistema: trilhas e concursos que usam este material passam a exibir
-            automaticamente a versão mais recente.
-          </p>
-          <div className="space-y-1.5">
-            <Label htmlFor="arquivo">Arquivo PDF</Label>
-            <Input id="arquivo" type="file" accept="application/pdf" ref={inputRef} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="paginas">Número de páginas (opcional)</Label>
-            <Input
-              id="paginas"
-              value={paginas}
-              onChange={(e) => setPaginas(e.target.value.replace(/\D/g, ""))}
-              placeholder="Ex.: 120"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="notas">Notas da versão (opcional)</Label>
-            <Textarea
-              id="notas"
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              placeholder="Ex.: atualização da Lei 14.133/2021"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={enviar} disabled={enviando}>
-            {enviando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enviar
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -23,12 +23,12 @@ export const Route = createFileRoute("/_authenticated/acervo/$cargoId/$disciplin
       {
         name: "description",
         content:
-          "Materiais em PDF da matéria selecionada, com leitor in-app, marcação de leitura, questões e desempenho.",
+          "Matérias da disciplina selecionada, com leitura in-app, marcação de leitura, questões e desempenho.",
       },
       { property: "og:title", content: "Materiais da matéria — Acervo Base" },
       {
         property: "og:description",
-        content: "Abra o PDF, marque como lido, resolva as questões e acompanhe seu desempenho.",
+        content: "Leia a matéria, marque como lida, resolva as questões e acompanhe seu desempenho.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -107,7 +107,7 @@ function CargoDisciplinaMateriais() {
           temModulos && !moduloSel
             ? "Escolha um módulo para ver as matérias."
             : todos
-              ? "Materiais em PDF desta matéria."
+              ? "Matérias desta disciplina."
               : `Materiais desta matéria em ${cargo?.nome ?? "cargo"}.`
         }
         actions={
