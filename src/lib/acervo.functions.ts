@@ -21,9 +21,9 @@ export const adminListAcervo = createServerFn({ method: "GET" })
     const { supabase } = context;
 
     const [
-      { data: disciplinas },
-      { data: modulos },
-      { data: materiais },
+      { data: disciplinas, error: errDisc },
+      { data: modulos, error: errMod },
+      { data: materiais, error: errMat },
       contagem,
       { data: senhas },
     ] = await Promise.all([
@@ -43,9 +43,13 @@ export const adminListAcervo = createServerFn({ method: "GET" })
         supabase.from("disciplina_senhas").select("disciplina_id, senha"),
       ]);
 
+    const primeiroErro = errDisc ?? errMod ?? errMat;
+    if (primeiroErro) throw new Error(primeiroErro.message);
+
     const senhaMap = new Map<string, string>(
       (senhas ?? []).map((s: any) => [s.disciplina_id, s.senha]),
     );
+
 
     return {
       disciplinas: (disciplinas ?? []).map((d: any) => ({
