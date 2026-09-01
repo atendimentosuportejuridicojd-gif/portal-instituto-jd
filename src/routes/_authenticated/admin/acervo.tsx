@@ -169,13 +169,6 @@ function AdminAcervo() {
 }
 
 function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDone: () => void }) {
-  const urlFn = useServerFn(adminUrlArquivo);
-  const abrir = useMutation({
-    mutationFn: () => urlFn({ data: { storage_path: m.storage_path } }),
-    onSuccess: (r: any) => window.open(r.url, "_blank", "noopener"),
-    onError: (e: any) => toast.error(e.message),
-  });
-
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
