@@ -111,17 +111,10 @@ export function MaterialRow({ m }: { m: any }) {
         </Button>
 
         <Button asChild variant="ghost" size="sm">
-          {isMarkdown ? (
-            <Link to="/materiais/$materialId/leitura" params={{ materialId: m.id }}>
-              <BookOpen className="mr-1 h-3.5 w-3.5" />
-              Ler matéria
-            </Link>
-          ) : (
-            <Link to="/materiais/$materialId/pdf" params={{ materialId: m.id }}>
-              <FileText className="mr-1 h-3.5 w-3.5" />
-              Visualizar PDF
-            </Link>
-          )}
+          <Link to="/materiais/$materialId/leitura" params={{ materialId: m.id }}>
+            <BookOpen className="mr-1 h-3.5 w-3.5" />
+            Ler matéria
+          </Link>
         </Button>
         {temQuestoes ? (
           <Button asChild variant="outline" size="sm">
