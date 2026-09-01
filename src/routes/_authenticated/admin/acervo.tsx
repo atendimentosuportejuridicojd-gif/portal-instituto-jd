@@ -183,32 +183,19 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
               Rascunho
             </Badge>
           )}
-          {!m.storage_path && (
-            <Badge variant="outline" className="shrink-0 text-destructive">
-              Sem arquivo
-            </Badge>
-          )}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           {m.total_questoes} questão(ões)
-          {m.paginas ? ` · ${m.paginas} páginas` : ""}
-          {m.tamanho_bytes ? ` · ${(m.tamanho_bytes / 1024 / 1024).toFixed(1)} MB` : ""}
           {m.download_permitido ? " · download liberado" : ""}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {m.storage_path && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => abrir.mutate()}
-            disabled={abrir.isPending}
-          >
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/materiais/$materialId/leitura" params={{ materialId: m.id }}>
             <Eye className="mr-1 h-3.5 w-3.5" />
-            Ver
-          </Button>
-        )}
-        <UploadDialog material={m} onDone={onDone} />
+            Ver matéria
+          </Link>
+        </Button>
         <VersoesDialog material={m} />
         <MaterialDialog disciplina={disciplina} material={m} onDone={onDone} />
         <DeleteButton label="Excluir material" fn={adminDeleteMaterial} id={m.id} onDone={onDone} />
