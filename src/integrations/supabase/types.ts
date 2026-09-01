@@ -384,7 +384,6 @@ export type Database = {
           id: string
           nome: string
           ordem: number
-          protegida: boolean
           slug: string
           updated_at: string
         }
@@ -398,7 +397,6 @@ export type Database = {
           id?: string
           nome: string
           ordem?: number
-          protegida?: boolean
           slug: string
           updated_at?: string
         }
@@ -412,7 +410,6 @@ export type Database = {
           id?: string
           nome?: string
           ordem?: number
-          protegida?: boolean
           slug?: string
           updated_at?: string
         }
@@ -454,6 +451,7 @@ export type Database = {
         Row: {
           arquivo_url: string | null
           atualizado_em: string | null
+          conteudo_md: string | null
           created_at: string
           descricao: string | null
           disciplina_id: string | null
@@ -464,9 +462,13 @@ export type Database = {
           paginas: number | null
           publicado: boolean
           publicado_em: string
+          resumo: string | null
+          slug: string
           storage_path: string | null
           tags: string[] | null
           tamanho_bytes: number | null
+          tempo_leitura: number | null
+          tipo: string
           titulo: string
           updated_at: string
           versao: number
@@ -474,6 +476,7 @@ export type Database = {
         Insert: {
           arquivo_url?: string | null
           atualizado_em?: string | null
+          conteudo_md?: string | null
           created_at?: string
           descricao?: string | null
           disciplina_id?: string | null
@@ -484,9 +487,13 @@ export type Database = {
           paginas?: number | null
           publicado?: boolean
           publicado_em?: string
+          resumo?: string | null
+          slug: string
           storage_path?: string | null
           tags?: string[] | null
           tamanho_bytes?: number | null
+          tempo_leitura?: number | null
+          tipo: string
           titulo: string
           updated_at?: string
           versao?: number
@@ -494,6 +501,7 @@ export type Database = {
         Update: {
           arquivo_url?: string | null
           atualizado_em?: string | null
+          conteudo_md?: string | null
           created_at?: string
           descricao?: string | null
           disciplina_id?: string | null
@@ -504,9 +512,13 @@ export type Database = {
           paginas?: number | null
           publicado?: boolean
           publicado_em?: string
+          resumo?: string | null
+          slug?: string
           storage_path?: string | null
           tags?: string[] | null
           tamanho_bytes?: number | null
+          tempo_leitura?: number | null
+          tipo?: string
           titulo?: string
           updated_at?: string
           versao?: number
@@ -1072,6 +1084,7 @@ export type Database = {
           orgao: string | null
           publicado: boolean
           referencia: string | null
+          tema_origem: string | null
           updated_at: string
         }
         Insert: {
@@ -1089,6 +1102,7 @@ export type Database = {
           orgao?: string | null
           publicado?: boolean
           referencia?: string | null
+          tema_origem?: string | null
           updated_at?: string
         }
         Update: {
@@ -1106,6 +1120,7 @@ export type Database = {
           orgao?: string | null
           publicado?: boolean
           referencia?: string | null
+          tema_origem?: string | null
           updated_at?: string
         }
         Relationships: [
