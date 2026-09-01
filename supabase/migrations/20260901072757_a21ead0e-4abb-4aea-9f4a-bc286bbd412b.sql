@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.aplicar_recurso_questao(uuid, text, uuid[]) FROM anon, PUBLIC;
