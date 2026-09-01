@@ -48,7 +48,7 @@ export function MaterialRow({ m }: { m: any }) {
 
   const jaFez = m.desempenho !== null;
   const temQuestoes = m.total_questoes > 0;
-  const isMarkdown = m.tipo === "markdown";
+  
   const perf = m.desempenho as number | null;
   const perfColor =
     perf === null
