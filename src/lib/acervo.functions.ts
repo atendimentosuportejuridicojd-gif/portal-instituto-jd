@@ -7,6 +7,7 @@ import {
   criarUrlAssinada,
   montarStoragePath,
   removerArquivo,
+  gerarSlug,
 } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 
