@@ -45,6 +45,13 @@ export const adminListAcervo = createServerFn({ method: "GET" })
 
     const primeiroErro = errDisc ?? errMod ?? errMat;
     if (primeiroErro) throw new Error(primeiroErro.message);
+    console.log("[acervo debug]", {
+      disc: disciplinas?.length,
+      mod: modulos?.length,
+      mat: materiais?.length,
+      userId: context.userId,
+    });
+
 
     const senhaMap = new Map<string, string>(
       (senhas ?? []).map((s: any) => [s.disciplina_id, s.senha]),
