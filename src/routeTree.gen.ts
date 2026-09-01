@@ -29,6 +29,7 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminDisciplinasEspecificasRouteImport } from './routes/_authenticated/admin/disciplinas-especificas'
 import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
 import { Route as AuthenticatedAdminQuestoesRouteImport } from './routes/_authenticated/admin/questoes'
+import { Route as AuthenticatedAdminRecursosRouteImport } from './routes/_authenticated/admin/recursos'
 import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authenticated/admin/trilhas'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedConcursosEspecificosConcursoIdRouteImport } from './routes/_authenticated/concursos-especificos.$concursoId'
@@ -152,6 +153,12 @@ const AuthenticatedAdminQuestoesRoute =
     path: '/admin/questoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRecursosRoute =
+  AuthenticatedAdminRecursosRouteImport.update({
+    id: '/admin/recursos',
+    path: '/admin/recursos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTrilhasRoute =
   AuthenticatedAdminTrilhasRouteImport.update({
     id: '/admin/trilhas',
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/admin/disciplinas-especificas': typeof AuthenticatedAdminDisciplinasEspecificasRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
+  '/admin/recursos': typeof AuthenticatedAdminRecursosRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
@@ -274,6 +282,7 @@ export interface FileRoutesByTo {
   '/admin/disciplinas-especificas': typeof AuthenticatedAdminDisciplinasEspecificasRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
+  '/admin/recursos': typeof AuthenticatedAdminRecursosRoute
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
@@ -309,6 +318,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/disciplinas-especificas': typeof AuthenticatedAdminDisciplinasEspecificasRoute
   '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/admin/questoes': typeof AuthenticatedAdminQuestoesRoute
+  '/_authenticated/admin/recursos': typeof AuthenticatedAdminRecursosRoute
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/admin/disciplinas-especificas'
     | '/admin/noticias'
     | '/admin/questoes'
+    | '/admin/recursos'
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/concursos-especificos/$concursoId'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/admin/disciplinas-especificas'
     | '/admin/noticias'
     | '/admin/questoes'
+    | '/admin/recursos'
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/concursos-especificos/$concursoId'
@@ -411,6 +423,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/disciplinas-especificas'
     | '/_authenticated/admin/noticias'
     | '/_authenticated/admin/questoes'
+    | '/_authenticated/admin/recursos'
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/concursos-especificos/$concursoId'
@@ -579,6 +592,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminQuestoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/recursos': {
+      id: '/_authenticated/admin/recursos'
+      path: '/admin/recursos'
+      fullPath: '/admin/recursos'
+      preLoaderRoute: typeof AuthenticatedAdminRecursosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/trilhas': {
       id: '/_authenticated/admin/trilhas'
       path: '/admin/trilhas'
@@ -681,6 +701,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDisciplinasEspecificasRoute: typeof AuthenticatedAdminDisciplinasEspecificasRoute
   AuthenticatedAdminNoticiasRoute: typeof AuthenticatedAdminNoticiasRoute
   AuthenticatedAdminQuestoesRoute: typeof AuthenticatedAdminQuestoesRoute
+  AuthenticatedAdminRecursosRoute: typeof AuthenticatedAdminRecursosRoute
   AuthenticatedAdminTrilhasRoute: typeof AuthenticatedAdminTrilhasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedConcursosEspecificosConcursoIdRoute: typeof AuthenticatedConcursosEspecificosConcursoIdRoute
@@ -709,6 +730,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdminDisciplinasEspecificasRoute,
   AuthenticatedAdminNoticiasRoute: AuthenticatedAdminNoticiasRoute,
   AuthenticatedAdminQuestoesRoute: AuthenticatedAdminQuestoesRoute,
+  AuthenticatedAdminRecursosRoute: AuthenticatedAdminRecursosRoute,
   AuthenticatedAdminTrilhasRoute: AuthenticatedAdminTrilhasRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedConcursosEspecificosConcursoIdRoute:

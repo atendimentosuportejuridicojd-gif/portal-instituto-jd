@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, Check, CheckCheck, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,6 +14,8 @@ import {
 } from "@/lib/notificacoes.functions";
 
 export function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const listFn = useServerFn(listMinhasNotificacoes);
   const markFn = useServerFn(marcarNotificacaoLida);
   const markAllFn = useServerFn(marcarTodasNotificacoesLidas);
@@ -34,8 +38,19 @@ export function NotificationBell() {
   const items = q.data ?? [];
   const naoLidas = items.filter((n) => !n.lida).length;
 
+  const abrir = (n: { id: string; lida: boolean; link?: string | null }) => {
+    if (!n.lida) mark.mutate(n.id);
+    setOpen(false);
+    const destino = n.link?.trim() || "/noticias";
+    if (/^https?:\/\//i.test(destino)) {
+      window.open(destino, "_blank", "noopener,noreferrer");
+    } else {
+      navigate({ to: destino });
+    }
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Notificações" className="relative">
           <Bell className="h-4 w-4" />
@@ -72,22 +87,31 @@ export function NotificationBell() {
                 <li
                   key={n.id}
                   className={cn(
-                    "flex items-start gap-3 px-4 py-3 text-sm",
+                    "flex items-start gap-3 px-4 py-3 text-sm transition-colors hover:bg-muted/50",
                     !n.lida && "bg-primary/5",
                   )}
                 >
-                  <div className="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => abrir(n as any)}
+                    className="min-w-0 flex-1 text-left"
+                  >
                     <p className="font-medium leading-tight">{n.titulo}</p>
                     {n.mensagem && (
                       <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{n.mensagem}</p>
                     )}
-                    <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <span className="mt-1 flex items-center gap-1 text-[11px] uppercase tracking-wider text-muted-foreground">
                       {new Date(n.publicada_em).toLocaleString("pt-BR")}
-                    </p>
-                  </div>
+                      <ChevronRight className="h-3 w-3" />
+                      <span className="normal-case tracking-normal text-primary">Ver notícia</span>
+                    </span>
+                  </button>
                   {!n.lida && (
                     <button
-                      onClick={() => mark.mutate(n.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        mark.mutate(n.id);
+                      }}
                       className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground"
                       aria-label="Marcar como lida"
                     >

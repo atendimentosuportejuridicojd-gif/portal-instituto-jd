@@ -19,11 +19,16 @@ export const adminListAcervo = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
 
-    const [{ data: disciplinas }, { data: modulos }, { data: materiais }, contagem] =
-      await Promise.all([
+    const [
+      { data: disciplinas, error: errDisc },
+      { data: modulos, error: errMod },
+      { data: materiais, error: errMat },
+      contagem,
+      { data: senhas },
+    ] = await Promise.all([
         supabase
           .from("disciplinas")
-          .select("id, nome, descricao, ordem, grupo")
+          .select("id, nome, descricao, ordem, grupo, protegida")
           .eq("especifica", false)
           .order("ordem"),
         supabase.from("modulos").select("id, nome, disciplina_id, ordem").order("ordem"),
@@ -34,11 +39,20 @@ export const adminListAcervo = createServerFn({ method: "GET" })
           )
           .order("ordem"),
         contarQuestoesPorMaterial(supabase),
+        supabase.from("disciplina_senhas").select("disciplina_id, senha"),
       ]);
+
+    const primeiroErro = errDisc ?? errMod ?? errMat;
+    if (primeiroErro) throw new Error(primeiroErro.message);
+
+    const senhaMap = new Map<string, string>(
+      (senhas ?? []).map((s: any) => [s.disciplina_id, s.senha]),
+    );
 
     return {
       disciplinas: (disciplinas ?? []).map((d: any) => ({
         ...d,
+        senha: senhaMap.get(d.id) ?? "",
         modulos: (modulos ?? []).filter((m: any) => m.disciplina_id === d.id),
         materiais: (materiais ?? [])
           .filter((m: any) => m.disciplina_id === d.id)
@@ -60,6 +74,7 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
         descricao: z.string().trim().max(1000).optional().default(""),
         ordem: z.number().int().min(0).default(0),
         grupo: z.enum(["gerais", "especificos"]).default("gerais"),
+        senha: z.string().trim().max(100).optional().default(""),
       })
       .parse(d),
   )
@@ -71,12 +86,30 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       ordem: data.ordem,
       grupo: data.grupo,
     };
+    const senha = data.senha.trim();
+
+    const gravarSenha = async (disciplinaId: string) => {
+      if (senha) {
+        const { error } = await context.supabase
+          .from("disciplina_senhas")
+          .upsert({ disciplina_id: disciplinaId, senha, updated_at: new Date().toISOString() });
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await context.supabase
+          .from("disciplina_senhas")
+          .delete()
+          .eq("disciplina_id", disciplinaId);
+        if (error) throw new Error(error.message);
+      }
+    };
+
     if (data.id) {
       const { error } = await context.supabase
         .from("disciplinas")
         .update(payload)
         .eq("id", data.id);
       if (error) throw new Error(error.message);
+      await gravarSenha(data.id);
       return { id: data.id };
     }
     const slug =
@@ -93,6 +126,7 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+    await gravarSenha(ins.id);
     return { id: ins.id };
   });
 
@@ -181,6 +215,8 @@ export const adminUpsertMaterial = createServerFn({ method: "POST" })
       .from("materiais")
       .insert({
         ...payload,
+        // Sufixo para nao colidir com materiais_disciplina_id_slug_key
+        // (UNIQUE(disciplina_id, slug)) se dois PDFs tiverem o mesmo titulo.
         tipo: "pdf",
         slug: `${gerarSlug(data.titulo)}-${Date.now().toString(36)}`,
         versao: 1,
@@ -326,6 +362,24 @@ export const adminUrlArquivo = createServerFn({ method: "POST" })
   });
 
 // ===================== ALUNO =====================
+
+/** Confere a senha de uma disciplina protegida. Nunca retorna a senha em si. */
+export const alunoVerificarSenhaDisciplina = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({ disciplina_id: z.string().uuid(), senha: z.string().trim().min(1).max(100) })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAcessoAluno(context);
+    const { data: ok, error } = await context.supabase.rpc("verificar_senha_disciplina", {
+      _disciplina_id: data.disciplina_id,
+      _senha: data.senha,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: !!ok };
+  });
 
 /** Abre um material: metadados, progresso de leitura e link temporário do PDF. */
 export const alunoAbrirMaterial = createServerFn({ method: "POST" })

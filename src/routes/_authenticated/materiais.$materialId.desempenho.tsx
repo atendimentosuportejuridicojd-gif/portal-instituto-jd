@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, Check, X, RefreshCw, ArrowLeft } from "lucide-react";
+import { BarChart3, Check, X, RefreshCw, ArrowLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getDesempenhoMaterial } from "@/lib/questoes.functions";
+import { useMaterialNavegacao } from "@/hooks/use-material-navegacao";
 
 export const Route = createFileRoute("/_authenticated/materiais/$materialId/desempenho")({
   head: () => ({ meta: [{ title: "Desempenho — Portal J&D" }] }),
@@ -20,6 +21,7 @@ function Desempenho() {
     queryKey: ["desempenho", materialId],
     queryFn: () => fetchFn({ data: { material_id: materialId } }),
   });
+  const nav = useMaterialNavegacao(materialId);
 
   if (q.isLoading) {
     return <PageContent><div className="text-sm text-muted-foreground">Carregando…</div></PageContent>;
@@ -34,19 +36,37 @@ function Desempenho() {
         title={material.titulo ?? "Desempenho"}
         description={material.disciplina}
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button asChild variant="ghost">
-              <Link to="/acervo">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar
-              </Link>
+              {nav.disciplinaId ? (
+                <Link
+                  to="/acervo/$cargoId/$disciplinaId"
+                  params={{ cargoId: "todos", disciplinaId: nav.disciplinaId }}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar para a disciplina
+                </Link>
+              ) : (
+                <Link to="/acervo">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar
+                </Link>
+              )}
             </Button>
-            <Button asChild>
+            <Button asChild variant="outline">
               <Link to="/materiais/$materialId/questoes" params={{ materialId }}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refazer questões
               </Link>
             </Button>
+            {nav.proxima && (
+              <Button asChild>
+                <Link to="/materiais/$materialId/pdf" params={{ materialId: nav.proxima.id }}>
+                  Próxima matéria
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -187,11 +207,22 @@ function ErradaCard({ idx, d }: { idx: number; d: any }) {
         </div>
       </div>
       {d.comentario && (
-        <div className="mt-4 rounded-md border border-border/60 bg-muted/30 p-3">
-          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <div
+          className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-950/20"
+          style={{ boxShadow: "0 1px 6px 0 rgba(185,28,28,0.18)" }}
+        >
+          <div className="text-xs uppercase tracking-wider font-bold text-black">
             Comentário do professor
           </div>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{d.comentario}</p>
+          <p
+            className="mt-2 whitespace-pre-wrap text-xl leading-relaxed italic"
+            style={{
+              fontFamily: '"Times New Roman", Times, serif',
+              color: "#7f1d1d",
+            }}
+          >
+            {d.comentario}
+          </p>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
@@ -7,6 +8,9 @@ import { Newspaper, Pin } from "lucide-react";
 import { alunoListNoticias } from "@/lib/noticias.functions";
 
 export const Route = createFileRoute("/_authenticated/noticias")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    n: typeof search.n === "string" ? search.n : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Fique por Dentro — Notícias | Instituto J&D" },
@@ -31,6 +35,13 @@ function NoticiasAluno() {
   const fetchFn = useServerFn(alunoListNoticias);
   const q = useQuery({ queryKey: ["aluno", "noticias"], queryFn: () => fetchFn() });
   const itens = q.data ?? [];
+  const { n: destaqueId } = useSearch({ from: "/_authenticated/noticias" });
+
+  useEffect(() => {
+    if (!destaqueId || itens.length === 0) return;
+    const el = document.getElementById(`noticia-${destaqueId}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [destaqueId, itens.length]);
 
   return (
     <>
@@ -50,7 +61,13 @@ function NoticiasAluno() {
         ) : (
           <div className="space-y-4">
             {itens.map((n: any) => (
-              <article key={n.id} className="surface-card overflow-hidden">
+              <article
+                key={n.id}
+                id={`noticia-${n.id}`}
+                className={`surface-card overflow-hidden ${
+                  destaqueId === n.id ? "ring-2 ring-primary" : ""
+                }`}
+              >
                 {n.imagem_url && (
                   <img
                     src={n.imagem_url}

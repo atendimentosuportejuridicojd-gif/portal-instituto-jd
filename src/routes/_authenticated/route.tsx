@@ -5,10 +5,12 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { NotificationBell } from "@/components/notification-bell";
 import { GlobalSearch } from "@/components/global-search";
+import { AdminAlertas } from "@/components/admin-alertas";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getMinhaAssinatura, registrarUltimoAcesso } from "@/lib/assinaturas.functions";
+import { useSessaoUnica } from "@/hooks/use-sessao-unica";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -36,6 +38,9 @@ function AuthenticatedLayout() {
   }, [acessoFn]);
 
   const isAdmin = !!q.data?.isAdmin;
+
+  // Uma única sessão ativa por aluno (o último login encerra o anterior)
+  useSessaoUnica(!!user);
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
@@ -73,6 +78,7 @@ function AuthenticatedLayout() {
           <main className="flex-1">
             <Outlet />
           </main>
+          {isAdmin && <AdminAlertas />}
         </SidebarInset>
       </div>
     </SidebarProvider>

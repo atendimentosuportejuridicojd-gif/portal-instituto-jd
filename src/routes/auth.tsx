@@ -29,6 +29,15 @@ function AuthPage() {
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
 
+  const [sessaoEncerrada, setSessaoEncerrada] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("sessao") === "encerrada") {
+      setSessaoEncerrada(true);
+      toast.info("Sua sessão foi encerrada porque a conta foi acessada em outro dispositivo.");
+    }
+  }, []);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/dashboard", replace: true });
@@ -127,6 +136,13 @@ function AuthPage() {
               Resgate seu período de teste
             </Link>
           </div>
+
+          {sessaoEncerrada && (
+            <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm text-muted-foreground">
+              Sua sessão anterior foi encerrada porque esta conta foi acessada em outro dispositivo ou navegador.
+              O acesso é individual: apenas o último login permanece ativo.
+            </div>
+          )}
 
           <Tabs defaultValue="entrar" className="mt-6">
             <TabsList className="grid w-full grid-cols-2">

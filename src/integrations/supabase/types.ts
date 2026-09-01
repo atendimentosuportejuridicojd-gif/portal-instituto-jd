@@ -341,6 +341,32 @@ export type Database = {
           },
         ];
       };
+      disciplina_senhas: {
+        Row: {
+          disciplina_id: string;
+          senha: string;
+          updated_at: string;
+        };
+        Insert: {
+          disciplina_id: string;
+          senha: string;
+          updated_at?: string;
+        };
+        Update: {
+          disciplina_id?: string;
+          senha?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "disciplina_senhas_disciplina_id_fkey";
+            columns: ["disciplina_id"];
+            isOneToOne: true;
+            referencedRelation: "disciplinas";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       disciplinas: {
         Row: {
           codigo: string | null;
@@ -352,6 +378,7 @@ export type Database = {
           id: string;
           nome: string;
           ordem: number;
+          protegida: boolean;
           slug: string;
           updated_at: string;
         };
@@ -365,6 +392,7 @@ export type Database = {
           id?: string;
           nome: string;
           ordem?: number;
+          protegida?: boolean;
           slug: string;
           updated_at?: string;
         };
@@ -378,6 +406,7 @@ export type Database = {
           id?: string;
           nome?: string;
           ordem?: number;
+          protegida?: boolean;
           slug?: string;
           updated_at?: string;
         };
@@ -865,6 +894,72 @@ export type Database = {
           },
         ];
       };
+      questao_recursos: {
+        Row: {
+          acao_aplicada: string | null;
+          alunos_afetados: number | null;
+          analisado_em: string | null;
+          analisado_por: string | null;
+          created_at: string;
+          fundamentacao: string;
+          id: string;
+          material_id: string | null;
+          questao_id: string;
+          resposta_admin: string | null;
+          status: string;
+          tipo: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          acao_aplicada?: string | null;
+          alunos_afetados?: number | null;
+          analisado_em?: string | null;
+          analisado_por?: string | null;
+          created_at?: string;
+          fundamentacao: string;
+          id?: string;
+          material_id?: string | null;
+          questao_id: string;
+          resposta_admin?: string | null;
+          status?: string;
+          tipo: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          acao_aplicada?: string | null;
+          alunos_afetados?: number | null;
+          analisado_em?: string | null;
+          analisado_por?: string | null;
+          created_at?: string;
+          fundamentacao?: string;
+          id?: string;
+          material_id?: string | null;
+          questao_id?: string;
+          resposta_admin?: string | null;
+          status?: string;
+          tipo?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "questao_recursos_material_id_fkey";
+            columns: ["material_id"];
+            isOneToOne: false;
+            referencedRelation: "materiais";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "questao_recursos_questao_id_fkey";
+            columns: ["questao_id"];
+            isOneToOne: false;
+            referencedRelation: "questoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       questao_sessoes: {
         Row: {
           acertos: number;
@@ -973,6 +1068,7 @@ export type Database = {
       questoes: {
         Row: {
           ano: number | null;
+          anulada: boolean;
           banca: string | null;
           comentario_professor: string | null;
           created_at: string;
@@ -985,10 +1081,12 @@ export type Database = {
           orgao: string | null;
           publicado: boolean;
           referencia: string | null;
+          tema_origem: string | null;
           updated_at: string;
         };
         Insert: {
           ano?: number | null;
+          anulada?: boolean;
           banca?: string | null;
           comentario_professor?: string | null;
           created_at?: string;
@@ -1001,10 +1099,12 @@ export type Database = {
           orgao?: string | null;
           publicado?: boolean;
           referencia?: string | null;
+          tema_origem?: string | null;
           updated_at?: string;
         };
         Update: {
           ano?: number | null;
+          anulada?: boolean;
           banca?: string | null;
           comentario_professor?: string | null;
           created_at?: string;
@@ -1017,6 +1117,7 @@ export type Database = {
           orgao?: string | null;
           publicado?: boolean;
           referencia?: string | null;
+          tema_origem?: string | null;
           updated_at?: string;
         };
         Relationships: [
@@ -1035,6 +1136,30 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      sessoes_ativas: {
+        Row: {
+          created_at: string;
+          device_id: string;
+          updated_at: string;
+          user_agent: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          device_id: string;
+          updated_at?: string;
+          user_agent?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          device_id?: string;
+          updated_at?: string;
+          user_agent?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       trilha_materiais: {
         Row: {
@@ -1129,6 +1254,17 @@ export type Database = {
     };
     Functions: {
       aluno_teste_ativo: { Args: { _user_id: string }; Returns: boolean };
+      aplicar_recurso_questao: {
+        Args: { _acao: string; _alternativas?: string[]; _questao_id: string };
+        Returns: number;
+      };
+      contar_questoes_por_material: {
+        Args: { _somente_publicadas?: boolean };
+        Returns: {
+          material_id: string;
+          total: number;
+        }[];
+      };
       get_desempenho_material: {
         Args: { _material_id: string; _user_id: string };
         Returns: number;
@@ -1143,6 +1279,10 @@ export type Database = {
       is_assinatura_ativa: { Args: { _user_id: string }; Returns: boolean };
       registrar_ultimo_acesso: { Args: never; Returns: undefined };
       tem_acesso_conteudo: { Args: never; Returns: boolean };
+      verificar_senha_disciplina: {
+        Args: { _disciplina_id: string; _senha: string };
+        Returns: boolean;
+      };
     };
     Enums: {
       app_role: "administrador" | "aluno" | "aluno_teste";

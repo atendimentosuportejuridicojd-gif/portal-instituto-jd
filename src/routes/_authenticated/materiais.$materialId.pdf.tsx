@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMaterialNavegacao } from "@/hooks/use-material-navegacao";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/materiais/$materialId/pdf"
 function LeitorPdf() {
   const { materialId } = Route.useParams();
   const navigate = useNavigate();
+  const nav = useMaterialNavegacao(materialId);
   const abrirFn = useServerFn(alunoAbrirMaterial);
   const salvarFn = useServerFn(salvarLeituraMaterial);
 
@@ -122,9 +124,20 @@ function LeitorPdf() {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col">
       <div className="flex flex-wrap items-center gap-3 border-b border-border/60 px-4 py-3 sm:px-6">
-        <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/acervo" })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() =>
+            nav.disciplinaId
+              ? navigate({
+                  to: "/acervo/$cargoId/$disciplinaId",
+                  params: { cargoId: "todos", disciplinaId: nav.disciplinaId },
+                })
+              : navigate({ to: "/acervo" })
+          }
+        >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          Acervo
+          {nav.disciplinaId ? "Disciplina" : "Acervo"}
         </Button>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
