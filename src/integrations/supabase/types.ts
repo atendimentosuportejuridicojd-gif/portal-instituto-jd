@@ -384,6 +384,7 @@ export type Database = {
           id: string
           nome: string
           ordem: number
+          protegida: boolean
           slug: string
           updated_at: string
         }
@@ -397,6 +398,7 @@ export type Database = {
           id?: string
           nome: string
           ordem?: number
+          protegida?: boolean
           slug: string
           updated_at?: string
         }
@@ -410,6 +412,7 @@ export type Database = {
           id?: string
           nome?: string
           ordem?: number
+          protegida?: boolean
           slug?: string
           updated_at?: string
         }
