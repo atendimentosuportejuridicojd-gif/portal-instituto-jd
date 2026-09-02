@@ -487,3 +487,60 @@ export const alunoAbrirMateriaLeitura = createServerFn({ method: "POST" })
       lido: !!leitura?.concluido,
     };
   });
+
+/** Carrega o conteúdo de uma matéria para edição no painel administrativo. */
+export const adminGetMaterialConteudo = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ material_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: material, error } = await context.supabase
+      .from("materiais")
+      .select(
+        "id, titulo, descricao, conteudo_md, resumo, publicado, ordem, disciplina_id, disciplinas(nome)",
+      )
+      .eq("id", data.material_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!material) throw new Error("Matéria não encontrada.");
+    return {
+      id: material.id,
+      titulo: material.titulo,
+      descricao: material.descricao ?? "",
+      conteudo_md: material.conteudo_md ?? "",
+      resumo: material.resumo ?? "",
+      publicado: !!material.publicado,
+      disciplina: (material as any).disciplinas?.nome ?? "Sem disciplina",
+      disciplina_id: material.disciplina_id,
+    };
+  });
+
+/** Salva o texto da matéria (markdown) escrito no painel administrativo. */
+export const adminSalvarMaterialConteudo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        material_id: z.string().uuid(),
+        conteudo_md: z.string(),
+        resumo: z.string().trim().max(2000).optional().default(""),
+        publicado: z.boolean().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const payload = {
+      conteudo_md: data.conteudo_md,
+      resumo: data.resumo || null,
+      tipo: "markdown" as const,
+      atualizado_em: new Date().toISOString(),
+      ...(typeof data.publicado === "boolean" ? { publicado: data.publicado } : {}),
+    };
+    const { error } = await context.supabase
+      .from("materiais")
+      .update(payload)
+      .eq("id", data.material_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
