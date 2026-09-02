@@ -110,8 +110,9 @@ export const adminListMateriaisComQuestoes = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { data: materiais, error } = await context.supabase
       .from("materiais")
-      .select("id, titulo, disciplina_id, disciplinas(id, nome)")
-      .order("titulo");
+      .select("id, titulo, ordem, disciplina_id, disciplinas(id, nome)")
+      .order("ordem", { ascending: true })
+      .order("titulo", { ascending: true });
     if (error) throw new Error(error.message);
 
     const countMap = await contarQuestoesPorMaterial(context.supabase);
