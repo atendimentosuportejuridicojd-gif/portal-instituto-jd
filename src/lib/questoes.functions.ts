@@ -174,6 +174,7 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
         titulo: m.titulo,
         tipo: m.tipo ?? "pdf",
         descricao: m.descricao,
+        ordem: m.ordem ?? 0,
         disciplina: m.disciplinas?.nome ?? "Sem disciplina",
         disciplina_id: m.disciplina_id,
         modulo_id: m.modulo_id ?? null,
