@@ -320,7 +320,8 @@ function Resolver() {
                     )}
                   </div>
                 );
-              })}
+                });
+              })()}
             </div>
 
             {feedback && (
