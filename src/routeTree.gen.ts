@@ -42,6 +42,7 @@ import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './route
 import { Route as AuthenticatedMateriaisMaterialIdLeituraRouteImport } from './routes/_authenticated/materiais.$materialId.leitura'
 import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
 import { Route as AuthenticatedAcervoCargoIdDisciplinaIdRouteImport } from './routes/_authenticated/acervo.$cargoId.$disciplinaId'
+import { Route as AuthenticatedAdminMateriaisMaterialIdEditarRouteImport } from './routes/_authenticated/admin/materiais.$materialId.editar'
 
 const TesteRoute = TesteRouteImport.update({
   id: '/teste',
@@ -228,6 +229,12 @@ const AuthenticatedAcervoCargoIdDisciplinaIdRoute =
     path: '/acervo/$cargoId/$disciplinaId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMateriaisMaterialIdEditarRoute =
+  AuthenticatedAdminMateriaisMaterialIdEditarRouteImport.update({
+    id: '/admin/materiais/$materialId/editar',
+    path: '/admin/materiais/$materialId/editar',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/acervo/$cargoId/': typeof AuthenticatedAcervoCargoIdIndexRoute
+  '/admin/materiais/$materialId/editar': typeof AuthenticatedAdminMateriaisMaterialIdEditarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -296,6 +304,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/acervo/$cargoId': typeof AuthenticatedAcervoCargoIdIndexRoute
+  '/admin/materiais/$materialId/editar': typeof AuthenticatedAdminMateriaisMaterialIdEditarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -332,6 +341,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/_authenticated/acervo/$cargoId/': typeof AuthenticatedAcervoCargoIdIndexRoute
+  '/_authenticated/admin/materiais/$materialId/editar': typeof AuthenticatedAdminMateriaisMaterialIdEditarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/acervo/$cargoId/'
+    | '/admin/materiais/$materialId/editar'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/acervo/$cargoId'
+    | '/admin/materiais/$materialId/editar'
   id:
     | '__root__'
     | '/'
@@ -437,6 +449,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/_authenticated/acervo/$cargoId/'
+    | '/_authenticated/admin/materiais/$materialId/editar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -683,6 +696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAcervoCargoIdDisciplinaIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/materiais/$materialId/editar': {
+      id: '/_authenticated/admin/materiais/$materialId/editar'
+      path: '/admin/materiais/$materialId/editar'
+      fullPath: '/admin/materiais/$materialId/editar'
+      preLoaderRoute: typeof AuthenticatedAdminMateriaisMaterialIdEditarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -712,6 +732,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMateriaisMaterialIdPdfRoute: typeof AuthenticatedMateriaisMaterialIdPdfRoute
   AuthenticatedMateriaisMaterialIdQuestoesRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   AuthenticatedAcervoCargoIdIndexRoute: typeof AuthenticatedAcervoCargoIdIndexRoute
+  AuthenticatedAdminMateriaisMaterialIdEditarRoute: typeof AuthenticatedAdminMateriaisMaterialIdEditarRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -747,6 +768,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMateriaisMaterialIdQuestoesRoute:
     AuthenticatedMateriaisMaterialIdQuestoesRoute,
   AuthenticatedAcervoCargoIdIndexRoute: AuthenticatedAcervoCargoIdIndexRoute,
+  AuthenticatedAdminMateriaisMaterialIdEditarRoute:
+    AuthenticatedAdminMateriaisMaterialIdEditarRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

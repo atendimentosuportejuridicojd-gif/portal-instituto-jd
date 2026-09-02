@@ -530,13 +530,13 @@ export const adminSalvarMaterialConteudo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const payload: Record<string, unknown> = {
+    const payload = {
       conteudo_md: data.conteudo_md,
       resumo: data.resumo || null,
-      tipo: "markdown",
+      tipo: "markdown" as const,
       atualizado_em: new Date().toISOString(),
+      ...(typeof data.publicado === "boolean" ? { publicado: data.publicado } : {}),
     };
-    if (typeof data.publicado === "boolean") payload.publicado = data.publicado;
     const { error } = await context.supabase
       .from("materiais")
       .update(payload)
