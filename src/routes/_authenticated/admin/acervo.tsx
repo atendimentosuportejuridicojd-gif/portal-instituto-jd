@@ -29,7 +29,6 @@ import {
   FileText,
   Plus,
   Trash2,
-  History,
   Eye,
   Loader2,
   Lock,
@@ -44,7 +43,6 @@ import {
   adminDeleteModulo,
   adminUpsertMaterial,
   adminDeleteMaterial,
-  adminListVersoesMaterial,
 } from "@/lib/acervo.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/acervo")({
