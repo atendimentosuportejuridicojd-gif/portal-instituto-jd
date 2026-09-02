@@ -9,6 +9,15 @@ import { cn } from "@/lib/utils";
 import { getDesempenhoMaterial } from "@/lib/questoes.functions";
 import { useMaterialNavegacao } from "@/hooks/use-material-navegacao";
 
+/** Questões Certo/Errado nao usam letra: exibir "C) Certo" parece repetido. */
+function ehCertoErrado(texto?: string | null) {
+  const t = String(texto ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[.)]$/, "");
+  return t === "certo" || t === "errado";
+}
+
 export const Route = createFileRoute("/_authenticated/materiais/$materialId/desempenho")({
   head: () => ({ meta: [{ title: "Desempenho — Portal J&D" }] }),
   component: Desempenho,
@@ -193,8 +202,14 @@ function ErradaCard({ idx, d }: { idx: number; d: any }) {
             Sua resposta
           </div>
           <div className="mt-1">
-            <span className="font-semibold">{d.escolhida?.letra ?? "—"})</span>{" "}
-            {d.escolhida?.texto ?? "Não respondida"}
+            {ehCertoErrado(d.escolhida?.texto) ? (
+              <span className="font-semibold">{d.escolhida?.texto}</span>
+            ) : (
+              <>
+                <span className="font-semibold">{d.escolhida?.letra ?? "—"})</span>{" "}
+                {d.escolhida?.texto ?? "Não respondida"}
+              </>
+            )}
           </div>
         </div>
         <div className="rounded-md border border-green-500/40 bg-green-500/5 p-3 text-sm">
@@ -202,7 +217,14 @@ function ErradaCard({ idx, d }: { idx: number; d: any }) {
             Resposta correta
           </div>
           <div className="mt-1">
-            <span className="font-semibold">{d.correta?.letra ?? "—"})</span> {d.correta?.texto ?? "—"}
+            {ehCertoErrado(d.correta?.texto) ? (
+              <span className="font-semibold">{d.correta?.texto}</span>
+            ) : (
+              <>
+                <span className="font-semibold">{d.correta?.letra ?? "—"})</span>{" "}
+                {d.correta?.texto ?? "—"}
+              </>
+            )}
           </div>
         </div>
       </div>
