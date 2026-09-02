@@ -237,7 +237,19 @@ function Resolver() {
             <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{current.enunciado}</p>
 
             <div className="mt-6 space-y-2">
-              {current.alternativas.map((a: any) => {
+              {(() => {
+                const alts = current.alternativas as any[];
+                const certoErrado =
+                  alts.length === 2 &&
+                  alts.every((a: any) =>
+                    ["certo", "errado"].includes(
+                      String(a.texto ?? "")
+                        .trim()
+                        .toLowerCase()
+                        .replace(/[.)]$/, ""),
+                    ),
+                  );
+                return alts.map((a: any) => {
                 const isSelected = selected === a.id;
                 const isCorrect = feedback && feedback.correta_id === a.id;
                 const isWrongPick = feedback && !feedback.acertou && isSelected;
@@ -261,6 +273,7 @@ function Resolver() {
                         isWrongPick && "border-red-500/60 bg-red-500/10",
                       )}
                     >
+                      {!certoErrado && (
                       <div
                         className={cn(
                           "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs font-semibold",
@@ -271,6 +284,7 @@ function Resolver() {
                       >
                         {a.letra}
                       </div>
+                      )}
                       <div
                         className={cn(
                           "min-w-0 flex-1 whitespace-pre-wrap",
