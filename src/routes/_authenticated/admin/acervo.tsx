@@ -29,7 +29,6 @@ import {
   FileText,
   Plus,
   Trash2,
-  History,
   Eye,
   Loader2,
   Lock,
@@ -44,7 +43,6 @@ import {
   adminDeleteModulo,
   adminUpsertMaterial,
   adminDeleteMaterial,
-  adminListVersoesMaterial,
 } from "@/lib/acervo.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/acervo")({
@@ -170,9 +168,6 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="truncate text-sm font-medium">{m.titulo}</span>
-          <Badge variant="secondary" className="shrink-0">
-            v{m.versao}
-          </Badge>
           {!m.publicado && (
             <Badge variant="outline" className="shrink-0">
               Rascunho
@@ -181,7 +176,6 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           {m.total_questoes} questão(ões)
-          {m.download_permitido ? " · download liberado" : ""}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -191,7 +185,6 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
             Ver matéria
           </Link>
         </Button>
-        <VersoesDialog material={m} />
         <MaterialDialog disciplina={disciplina} material={m} onDone={onDone} />
         <DeleteButton label="Excluir material" fn={adminDeleteMaterial} id={m.id} onDone={onDone} />
       </div>
@@ -407,7 +400,6 @@ function MaterialDialog({
   const [moduloId, setModuloId] = useState<string>(material?.modulo_id ?? "none");
   const [ordem, setOrdem] = useState(String(material?.ordem ?? 0));
   const [publicado, setPublicado] = useState(material?.publicado ?? true);
-  const [download, setDownload] = useState(material?.download_permitido ?? false);
   const fn = useServerFn(adminUpsertMaterial);
 
   const mut = useMutation({
@@ -421,7 +413,6 @@ function MaterialDialog({
           modulo_id: moduloId === "none" ? null : moduloId,
           ordem: Number(ordem) || 0,
           publicado,
-          download_permitido: download,
         },
       }),
     onSuccess: () => {
@@ -493,13 +484,6 @@ function MaterialDialog({
             </div>
             <Switch checked={publicado} onCheckedChange={setPublicado} />
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
-            <div>
-              <p className="text-sm font-medium">Permitir download</p>
-              <p className="text-xs text-muted-foreground">Por padrão, leitura apenas no portal.</p>
-            </div>
-            <Switch checked={download} onCheckedChange={setDownload} />
-          </div>
         </div>
         <DialogFooter>
           <Button onClick={() => mut.mutate()} disabled={mut.isPending || !titulo.trim()}>
@@ -507,51 +491,6 @@ function MaterialDialog({
             Salvar
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function VersoesDialog({ material }: { material: any }) {
-  const [open, setOpen] = useState(false);
-  const listFn = useServerFn(adminListVersoesMaterial);
-  const q = useQuery({
-    queryKey: ["admin", "material-versoes", material.id],
-    queryFn: () => listFn({ data: { material_id: material.id } }),
-    enabled: open,
-  });
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <History className="mr-1 h-3.5 w-3.5" />
-          Versões
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Histórico de versões</DialogTitle>
-        </DialogHeader>
-        {q.isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando…</p>
-        ) : (q.data ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma versão registrada.</p>
-        ) : (
-          <ul className="space-y-2">
-            {(q.data ?? []).map((v: any) => (
-              <li key={v.id} className="rounded-lg border border-border/60 p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Versão {v.versao}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(v.created_at).toLocaleDateString("pt-BR")}
-                  </span>
-                </div>
-                {v.notas && <p className="mt-1 text-xs text-muted-foreground">{v.notas}</p>}
-              </li>
-            ))}
-          </ul>
-        )}
       </DialogContent>
     </Dialog>
   );

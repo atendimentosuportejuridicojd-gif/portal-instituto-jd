@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -12,11 +12,15 @@ import {
   List,
   ChevronDown,
   BookOpen,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import { alunoAbrirMateriaLeitura } from "@/lib/acervo.functions";
 import { EmptyState } from "@/components/page";
 import { MateriaMarkdown, extractHeadings } from "@/lib/materia-markdown";
 import { cn } from "@/lib/utils";
+import { toggleMaterialLido } from "@/lib/aluno.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/materiais/$materialId/leitura")({
   head: () => ({
@@ -32,11 +36,26 @@ function LeitorMateria() {
   const { materialId } = Route.useParams();
   const navigate = useNavigate();
   const abrirFn = useServerFn(alunoAbrirMateriaLeitura);
+  const lidoFn = useServerFn(toggleMaterialLido);
+  const qc = useQueryClient();
 
   const q = useQuery({
     queryKey: ["materia-leitura", materialId],
     queryFn: () => abrirFn({ data: { material_id: materialId } }),
     refetchOnWindowFocus: false,
+  });
+
+  const lido = !!q.data?.lido;
+
+  const marcarLido = useMutation({
+    mutationFn: () => lidoFn({ data: { material_id: materialId, lido: !lido } }),
+    onSuccess: (r: any) => {
+      qc.invalidateQueries({ queryKey: ["materia-leitura", materialId] });
+      qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success(r?.lido ? "Material marcado como lido." : "Marcação de leitura removida.");
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const conteudo = q.data?.material.conteudo_md ?? "";
@@ -218,7 +237,29 @@ function LeitorMateria() {
         <article className="min-w-0">
           {m.resumo && <p className="mb-6 text-sm text-muted-foreground">{m.resumo}</p>}
           {conteudo ? (
-            <MateriaMarkdown markdown={conteudo} />
+            <>
+              <MateriaMarkdown markdown={conteudo} />
+              <div className="mt-10 flex flex-col items-center gap-2 border-t border-border/60 pt-6">
+                <p className="text-sm text-muted-foreground">
+                  {lido ? "Você já concluiu esta matéria." : "Terminou a leitura desta matéria?"}
+                </p>
+                <Button
+                  variant={lido ? "secondary" : "default"}
+                  onClick={() => marcarLido.mutate()}
+                  disabled={marcarLido.isPending}
+                  aria-pressed={lido}
+                >
+                  {marcarLido.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : lido ? (
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
+                  ) : (
+                    <Circle className="mr-2 h-4 w-4" />
+                  )}
+                  {lido ? "Já li" : "Marcar como lido"}
+                </Button>
+              </div>
+            </>
           ) : (
             <EmptyState
               icon={BookOpen}
