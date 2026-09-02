@@ -179,10 +179,16 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin/materiais/$materialId/editar" params={{ materialId: m.id }}>
+            <PencilLine className="mr-1 h-3.5 w-3.5" />
+            Escrever matéria
+          </Link>
+        </Button>
         <Button asChild variant="ghost" size="sm">
           <Link to="/materiais/$materialId/leitura" params={{ materialId: m.id }}>
             <Eye className="mr-1 h-3.5 w-3.5" />
-            Ver matéria
+            Ver como aluno
           </Link>
         </Button>
         <MaterialDialog disciplina={disciplina} material={m} onDone={onDone} />
