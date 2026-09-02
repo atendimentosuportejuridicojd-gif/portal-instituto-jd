@@ -459,12 +459,18 @@ export const alunoAbrirMateriaLeitura = createServerFn({ method: "POST" })
     if (material.tipo !== "markdown")
       throw new Error("Este material não é uma matéria em markdown.");
 
-    const [{ count: totalQuestoes }] = await Promise.all([
+    const [{ count: totalQuestoes }, { data: leitura }] = await Promise.all([
       supabase
         .from("questoes")
         .select("id", { count: "exact", head: true })
         .eq("material_id", data.material_id)
         .eq("publicado", true),
+      supabase
+        .from("material_leitura")
+        .select("concluido")
+        .eq("user_id", context.userId)
+        .eq("material_id", data.material_id)
+        .maybeSingle(),
     ]);
 
     return {
@@ -478,5 +484,6 @@ export const alunoAbrirMateriaLeitura = createServerFn({ method: "POST" })
         disciplina_id: material.disciplina_id,
       },
       total_questoes: totalQuestoes ?? 0,
+      lido: !!leitura?.concluido,
     };
   });
