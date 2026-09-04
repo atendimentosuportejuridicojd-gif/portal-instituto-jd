@@ -226,13 +226,20 @@ function TableBlock({ node, children }: any) {
   );
 }
 
+function Td({ node, children, ...rest }: any) {
+  return <td {...rest}>{children}</td>;
+}
+
+function Th({ node, children, ...rest }: any) {
+  return <th {...rest}>{children}</th>;
+}
+
 function TableRow({ children }: any) {
   const headers = useContext(HeadersTabelaContext);
   let coluna = -1;
   const celulas = Children.map(children, (child) => {
     if (!isValidElement(child)) return child;
-    const props: any = child.props ?? {};
-    if (props.node?.tagName !== "td") return child;
+    if (child.type !== Td) return child;
     coluna += 1;
     const label = coluna > 0 ? (headers[coluna] ?? "") : "";
     return cloneElement(child as any, label ? { "data-label": label } : {});
@@ -345,6 +352,10 @@ export function MateriaMarkdown({ markdown }: { markdown: string }) {
           h6: HeadingInvalidaFallback,
           em: Citacao,
           div: DirectiveBlock,
+          table: TableBlock,
+          tr: TableRow,
+          td: Td,
+          th: Th,
         }}
       >
         {markdown}
