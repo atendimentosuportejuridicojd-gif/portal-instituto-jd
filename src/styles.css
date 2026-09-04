@@ -215,8 +215,9 @@
 }
 .jd-table em,
 .jd-table i {
-  font-family: var(--jd-sans);
-  font-style: normal;
+  font-family: var(--jd-sans) !important;
+  font-style: normal !important;
+  font-size: 15px !important;
   font-weight: 700;
 }
 
