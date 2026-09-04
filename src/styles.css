@@ -192,16 +192,17 @@
   font-style: normal;
   font-size: 15px;
   line-height: 1.45;
-  text-align: left;
+  text-align: center;
 }
 .jd-table th,
 .jd-table td {
-  border: 1px solid color-mix(in srgb, var(--jd-acento) 30%, transparent);
+  /* 2 1/4 pt = ~3px; mantida a tonalidade âmbar a 30% */
+  border: 2.25pt solid color-mix(in srgb, var(--jd-acento) 30%, transparent);
   padding: 0.5rem 0.625rem;
-  vertical-align: top;
+  vertical-align: middle;
   font-family: var(--jd-sans);
   font-style: normal;
-  text-align: left;
+  text-align: center;
 }
 .jd-table thead th {
   background-color: color-mix(in srgb, var(--jd-titulo-h2) 8%, transparent);
