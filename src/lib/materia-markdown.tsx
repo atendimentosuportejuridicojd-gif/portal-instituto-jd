@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from "react";
+import { Children, cloneElement, createContext, isValidElement, useContext, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkDirective from "remark-directive";
@@ -199,6 +199,68 @@ function Citacao({ children }: any) {
   );
 }
 
+/* ------------------------- Tabelas (remark-gfm) -------------------------
+ * No mobile a tabela vira blocos empilhados (CSS em styles.css). Para isso
+ * cada <td> precisa saber o nome da sua coluna: lemos os <th> do hast da
+ * <table> e injetamos data-label em cada celula, por posicao de coluna.
+ * A 1a coluna (rotulo da linha: "Instrumento", "Capital"...) nao recebe
+ * label — ela e o titulo do bloco. */
+const HeadersTabelaContext = createContext<string[]>([]);
+
+function textoDoNode(node: any): string {
+  if (!node) return "";
+  if (node.type === "text") return node.value ?? "";
+  if (Array.isArray(node.children)) return node.children.map(textoDoNode).join("");
+  return "";
+}
+
+function coletarHeaders(node: any): string[] {
+  const headers: string[] = [];
+  const walk = (n: any) => {
+    if (!n) return;
+    if (n.tagName === "th") {
+      headers.push(textoDoNode(n).trim());
+      return;
+    }
+    if (Array.isArray(n.children)) n.children.forEach(walk);
+  };
+  const thead = (node?.children ?? []).find((c: any) => c.tagName === "thead");
+  walk(thead ?? node);
+  return headers;
+}
+
+function TableBlock({ node, children }: any) {
+  const headers = useMemo(() => coletarHeaders(node), [node]);
+  return (
+    <HeadersTabelaContext.Provider value={headers}>
+      <div className="jd-table-wrap">
+        <table className="jd-table">{children}</table>
+      </div>
+    </HeadersTabelaContext.Provider>
+  );
+}
+
+function Td({ node, children, ...rest }: any) {
+  return <td {...rest}>{children}</td>;
+}
+
+function Th({ node, children, ...rest }: any) {
+  return <th {...rest}>{children}</th>;
+}
+
+function TableRow({ children }: any) {
+  const headers = useContext(HeadersTabelaContext);
+  let coluna = -1;
+  const celulas = Children.map(children, (child) => {
+    if (!isValidElement(child)) return child;
+    if (child.type !== Td) return child;
+    coluna += 1;
+    const label = coluna > 0 ? (headers[coluna] ?? "") : "";
+    return cloneElement(child as any, label ? { "data-label": label } : {});
+  });
+  return <tr>{celulas}</tr>;
+}
+
 export function MateriaMarkdown({ markdown }: { markdown: string }) {
   const headings = useMemo(() => extractHeadings(markdown), [markdown]);
   let hIndex = 0;
@@ -305,6 +367,10 @@ export function MateriaMarkdown({ markdown }: { markdown: string }) {
           em: Citacao,
           p: Paragrafo,
           div: DirectiveBlock,
+          table: TableBlock,
+          tr: TableRow,
+          td: Td,
+          th: Th,
         }}
       >
         {markdown}

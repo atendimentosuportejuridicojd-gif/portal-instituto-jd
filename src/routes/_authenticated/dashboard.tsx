@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { property: "og:title", content: "Dashboard — Portal do Aluno J&D" },
       {
         property: "og:description",
-        content: "Continue de onde parou nas questões e na leitura dos PDFs.",
+        content: "Continue de onde parou nas questões e na leitura das matérias.",
       },
     ],
   }),
@@ -79,11 +79,11 @@ function Dashboard() {
                   vazio="Você ainda não resolveu questões. Escolha um material e comece a prática dirigida."
                 />
                 <ContinuarCard
-                  rotulo="Leitura do PDF"
+                  rotulo="Leitura da matéria"
                   icon={BookOpen}
                   item={continuarLeitura}
-                  to="/materiais/$materialId/pdf"
-                  vazio="Você ainda não abriu nenhum PDF. Comece pelo Acervo Base."
+                  to="/materiais/$materialId/leitura"
+                  vazio="Você ainda não abriu nenhuma matéria. Comece pelo Acervo Base."
                 />
               </div>
             )}
@@ -166,7 +166,7 @@ function ContinuarCard({
   rotulo: string;
   icon: React.ComponentType<{ className?: string }>;
   item: ContinuarItem;
-  to: "/materiais/$materialId/questoes" | "/materiais/$materialId/pdf";
+  to: "/materiais/$materialId/questoes" | "/materiais/$materialId/leitura";
   vazio: string;
 }) {
   return (
