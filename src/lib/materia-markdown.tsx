@@ -98,15 +98,15 @@ const DIRETIVA_CONFIG: Record<
   string,
   { emoji: string; rotulo: string; serifCorpo: boolean; semRecuo: boolean }
 > = {
-  legislacao: { emoji: "", rotulo: "", serifCorpo: true, semRecuo: false },
+  legislacao: { emoji: "", rotulo: "", serifCorpo: true, semRecuo: true },
   atencao: { emoji: "🧠", rotulo: "ATENÇÃO", serifCorpo: false, semRecuo: true },
   exemplo: { emoji: "📌", rotulo: "EXEMPLO PRÁTICO", serifCorpo: false, semRecuo: true },
 };
 
-/** Recuo de primeira linha (1,5cm) e regra do corpo comum, ligado por
- * padrao. :::atencao e :::exemplo desligam via este contexto porque sao
- * caixas de destaque (lista/callout), nao texto corrido; :::legislacao
- * mantem ligado por citar a lei na integra como corpo comum. */
+/** Recuo de primeira linha (1,5cm), ligado por padrao em todo paragrafo do
+ * corpo comum. As tres diretivas (:::legislacao, :::atencao, :::exemplo)
+ * desligam via este contexto — mantem o espacamento/alinhamento proprio de
+ * caixa de destaque, sem recuo. */
 const SemRecuoContext = createContext(false);
 
 function Paragrafo({ children }: any) {
@@ -280,6 +280,7 @@ export function MateriaMarkdown({ markdown }: { markdown: string }) {
           paddingBottom: "0.375rem",
           marginTop: "2rem",
           marginBottom: "1rem",
+          marginLeft: "1.5cm",
         }}
       >
         {h && <span className="mr-2 tabular-nums opacity-70">{h.numero}</span>}
@@ -301,6 +302,7 @@ export function MateriaMarkdown({ markdown }: { markdown: string }) {
           color: "var(--jd-titulo-h2)",
           marginTop: "1.5rem",
           marginBottom: "0.75rem",
+          marginLeft: "1.5cm",
         }}
       >
         {h && <span className="mr-2 tabular-nums opacity-70">{h.numero}</span>}
@@ -323,6 +325,7 @@ export function MateriaMarkdown({ markdown }: { markdown: string }) {
           color: "var(--jd-titulo-h2)",
           marginTop: "1.25rem",
           marginBottom: "0.5rem",
+          marginLeft: "1.5cm",
         }}
       >
         {h && <span className="mr-2 tabular-nums not-italic opacity-70">{h.numero}</span>}
