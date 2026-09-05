@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkDirective from "remark-directive";
@@ -94,11 +94,25 @@ function remarkDirectiveToHast() {
   };
 }
 
-const DIRETIVA_CONFIG: Record<string, { emoji: string; rotulo: string; serifCorpo: boolean }> = {
-  legislacao: { emoji: "", rotulo: "", serifCorpo: true },
-  atencao: { emoji: "🧠", rotulo: "ATENÇÃO", serifCorpo: false },
-  exemplo: { emoji: "📌", rotulo: "EXEMPLO PRÁTICO", serifCorpo: false },
+const DIRETIVA_CONFIG: Record<
+  string,
+  { emoji: string; rotulo: string; serifCorpo: boolean; semRecuo: boolean }
+> = {
+  legislacao: { emoji: "", rotulo: "", serifCorpo: true, semRecuo: false },
+  atencao: { emoji: "🧠", rotulo: "ATENÇÃO", serifCorpo: false, semRecuo: true },
+  exemplo: { emoji: "📌", rotulo: "EXEMPLO PRÁTICO", serifCorpo: false, semRecuo: true },
 };
+
+/** Recuo de primeira linha (1,5cm) e regra do corpo comum, ligado por
+ * padrao. :::atencao e :::exemplo desligam via este contexto porque sao
+ * caixas de destaque (lista/callout), nao texto corrido; :::legislacao
+ * mantem ligado por citar a lei na integra como corpo comum. */
+const SemRecuoContext = createContext(false);
+
+function Paragrafo({ children }: any) {
+  const semRecuo = useContext(SemRecuoContext);
+  return <p style={semRecuo ? undefined : { textIndent: "1.5cm" }}>{children}</p>;
+}
 
 function DirectiveBlock({ node, ...props }: any) {
   const directive = props["data-directive"] as string | undefined;
@@ -152,7 +166,7 @@ function DirectiveBlock({ node, ...props }: any) {
             : { fontSize: "1rem" }
         }
       >
-        {children}
+        <SemRecuoContext.Provider value={cfg.semRecuo}>{children}</SemRecuoContext.Provider>
       </div>
       {url && (
         <a
@@ -289,6 +303,7 @@ export function MateriaMarkdown({ markdown }: { markdown: string }) {
           h5: HeadingInvalidaFallback,
           h6: HeadingInvalidaFallback,
           em: Citacao,
+          p: Paragrafo,
           div: DirectiveBlock,
         }}
       >
