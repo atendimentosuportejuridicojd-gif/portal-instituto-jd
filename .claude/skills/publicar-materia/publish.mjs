@@ -40,6 +40,21 @@ function parseFrontMatter(raw) {
   return { fm, body: body.replace(/^\r?\n/, "") };
 }
 
+function removerNotaDeChecagem(body) {
+  const linhas = body.split(/\r?\n/);
+  const notaRegex = /^\s*(?:#{1,6}\s+)?(?:>\s*)?\*{0,2}Nota de checagem\*{0,2}\s*:?/i;
+  const idx = linhas.findIndex((linha) => notaRegex.test(linha));
+  if (idx === -1) return body;
+
+  const corte = linhas.slice(0, idx);
+  while (corte.length && corte[corte.length - 1].trim() === "") corte.pop();
+  if (corte.length && /^-{3,}$/.test(corte[corte.length - 1].trim())) {
+    corte.pop();
+    while (corte.length && corte[corte.length - 1].trim() === "") corte.pop();
+  }
+  return corte.join("\n");
+}
+
 function validarCamposObrigatorios(fm) {
   const faltando = CAMPOS_OBRIGATORIOS.filter((c) => fm[c] === undefined || fm[c] === "");
   if (faltando.length > 0) erro(`campos obrigatorios ausentes no front-matter: ${faltando.join(", ")}`);
@@ -98,6 +113,11 @@ function validarDiretivas(body) {
     if (!DIRETIVAS_VALIDAS.has(nome)) {
       erro(`diretiva desconhecida ":::${nome}" na linha ${i + 1} (validas: legislacao, atencao, exemplo)`);
     }
+    if (abertura[2] && abertura[2].includes('\\"')) {
+      erro(
+        `":::${nome}" na linha ${i + 1} tem aspas escapadas (\\") dentro dos atributos — o remark-directive nao entende esse escape e renderiza a diretiva inteira como texto cru na pagina. Para citar uma alinea entre aspas dentro de fonte="...", use aspas simples: fonte="Lei X, art. Y, 'a'".`
+      );
+    }
     if (DIRETIVAS_COM_FONTE_OBRIGATORIA.has(nome)) {
       const attrs = parseAtributos(abertura[2] || "");
       if (!attrs.fonte || !attrs.url) {
@@ -115,7 +135,8 @@ const filePath = process.argv[2];
 if (!filePath) erro("uso: node publish.mjs <caminho-do-markdown>");
 
 const raw = readFileSync(filePath, "utf8");
-const { fm, body } = parseFrontMatter(raw);
+const { fm, body: bodyComNota } = parseFrontMatter(raw);
+const body = removerNotaDeChecagem(bodyComNota);
 
 validarCamposObrigatorios(fm);
 validarTitulos(body);

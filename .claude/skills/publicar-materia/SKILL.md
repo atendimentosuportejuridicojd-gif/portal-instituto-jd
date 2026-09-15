@@ -40,6 +40,17 @@ Não existe distinção de camada (Técnico/Analista) no texto — o acervo base
 tem uma única versão de cada matéria, escrita em profundidade máxima. Essa
 distinção acontece na alocação por certame, não no conteúdo.
 
+## Nota de checagem final
+
+Muitos textos terminam com uma seção "Nota de checagem" (às vezes como
+`**Nota de checagem**`, às vezes como citação `> **Nota de checagem:**`,
+às vezes só `Nota de checagem: ...`), usada para registrar como as fontes
+foram conferidas na produção do texto. Essa seção é uso interno e **nunca
+deve aparecer para o usuário final**: o `publish.mjs` remove
+automaticamente essa seção (e o `---` que a precede, se houver) antes de
+validar e gravar `conteudo_md`. Não é preciso tirar essa parte manualmente
+do texto antes de publicar.
+
 ## Como executar
 
 1. Salve o markdown colado pelo usuário em um arquivo temporário **fora do
@@ -86,6 +97,12 @@ distinção acontece na alocação por certame, não no conteúdo.
 7. Toda diretiva aberta precisa ter um `:::` de fechamento correspondente
    (pilha balanceada) — nenhuma pode ficar aberta, nenhum fechamento pode
    sobrar sem abertura.
+8. Atributos de diretiva não podem conter aspas escapadas (`\"`). O
+   `remark-directive` (parser real da página) não entende esse escape e
+   renderiza a diretiva inteira como texto cru para o aluno — já aconteceu
+   com citação de alínea entre aspas dentro de `fonte="..."` (ex.: `art. 5º,
+   XXXIV, \"a\"`). Para citar uma alínea, use aspas simples:
+   `fonte="Lei X, art. Y, 'a'"`.
 
 Qualquer falha: aborta, relata o erro exato (regra + linha, quando
 aplicável), não escreve nada no banco.
