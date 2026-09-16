@@ -37,7 +37,12 @@ navegador, etc.) apenas para:
 - Títulos: H1 (matéria), H2 (subitem do programático) e H3 (seção).
   H4 ou mais profundo é rejeitado. Numeração em três níveis, gerada
   pelo componente.
-- Texto entra como veio. Valida estrutura, nunca mérito jurídico.
+- O validador do `publish.mjs` valida estrutura, nunca mérito jurídico —
+  mas antes de rodá-lo é obrigatório passar pela auditoria de conteúdo
+  de 4 camadas descrita em `.claude/skills/publicar-materia/SKILL.md`
+  (estrutura, negrito de termo-chave, pesquisa jurídica real e checagem
+  de link), que corrige mérito quando encontra citação desatualizada.
+  Isso vale sempre, para qualquer matéria publicada, não é opcional.
 - Nunca criar arquivo .md no repositório.
 - Antes de DELETE ou UPDATE em cadeia: consultar FKs e relatar o
   alcance antes de executar.

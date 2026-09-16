@@ -64,25 +64,162 @@ do texto antes de publicar.
    duplicada de verdade neste projeto (com um placeholder que tinha 30
    questões vinculadas quase perdidas na limpeza) — esse passo manual não é
    opcional.
-1. Salve o markdown colado pelo usuário em um arquivo temporário **fora do
-   repositório** — use o diretório de scratchpad da sessão. Nunca em
-   `src/`, `scripts/`, nem em qualquer pasta versionada.
-2. Rode o validador/gravador, reaproveitando as mesmas credenciais que os
+1. **Rode a auditoria de conteúdo obrigatória de 4 camadas** (seção
+   "Auditoria de conteúdo obrigatória", abaixo) no arquivo `.md` de
+   origem. Isto é fluxo padrão desde 16/09/2026 — não é uma tarefa à
+   parte que precisa ser pedida, roda sempre, para qualquer matéria que
+   for publicada, arquivo avulso ou lote inteiro.
+2. Salve o markdown (já corrigido pela auditoria) em um arquivo temporário
+   **fora do repositório** — use o diretório de scratchpad da sessão, a
+   menos que já esteja lendo direto de um arquivo fora do repositório
+   (ex.: pasta de Downloads do usuário), caso em que pode editar e rodar
+   direto nele. Nunca em `src/`, `scripts/`, nem em qualquer pasta
+   versionada.
+3. Rode o validador/gravador, reaproveitando as mesmas credenciais que os
    utilitários em `scripts/` já usam (não crie credencial nova, não
    versione chave):
 
    ```bash
    set -a && source .env && source .env.local && set +a
-   node .claude/skills/publicar-materia/publish.mjs "<caminho-do-arquivo-temporario>"
+   node .claude/skills/publicar-materia/publish.mjs "<caminho-do-arquivo>"
    ```
 
-3. O script (`publish.mjs`) faz toda a validação **antes** de tocar no
-   banco e aborta com `ERRO: ...` (exit code 1) sem escrever nada se
-   qualquer regra falhar. Repasse o erro ao usuário tal como veio —
-   não tente adivinhar ou corrigir o texto por conta própria.
-4. Se o script terminar com sucesso, repasse o relatório que ele imprime
-   (ação, id do material, disciplina, link) — ver formato abaixo.
-5. Apague o arquivo temporário do scratchpad depois de usar.
+4. O script (`publish.mjs`) faz toda a validação **estrutural** (front-matter,
+   títulos, diretivas — ver lista abaixo) antes de tocar no banco e aborta
+   com `ERRO: ...` (exit code 1) sem escrever nada se qualquer regra
+   falhar. Essa validação nunca reavalia mérito jurídico — isso já foi
+   feito na Camada 3 da auditoria do passo 1.
+5. Se o script terminar com sucesso, repasse o relatório que ele imprime
+   (ação, id do material, disciplina, link) — ver formato abaixo — junto
+   com o relatório da Camada 4 da auditoria.
+6. Apague o arquivo temporário do scratchpad depois de usar, se tiver
+   criado um.
+
+## Auditoria de conteúdo obrigatória (4 camadas)
+
+Fluxo padrão desde 16/09/2026, para toda matéria publicada — arquivo
+avulso ou lote inteiro, não precisa ser pedido. Rodar nesta ordem, para
+cada arquivo `.md`, **antes** de chamar `publish.mjs`. Autonomia total nas
+decisões: não pausar pedindo aprovação em nenhuma camada — encontrar um
+problema, decidir a correção, aplicar e documentar no relatório final
+(Camada 4). Decisão silenciosa não é aceitável; decisão sem pausa é o
+objetivo. Isto é a exceção deliberada à regra de "não avaliar mérito
+jurídico" das Regras fixas, mais abaixo — aquela regra vale para o
+validador mecânico do `publish.mjs`, não para esta auditoria.
+
+**Camada 1 — Estrutura (mecânica, sem exceção)**
+- Contar H2 e H3 do corpo e comparar com o número de subitens que
+  `acervo-base-conteudo-programatico.md` prevê para aquela matéria. O
+  arquivo de referência correto é
+  `C:\Users\User\Downloads\ACERVO BASE INSTITUTO J&D\acervo-base-conteudo-programatico.md`
+  — existe uma cópia mais antiga e divergente em
+  `C:\Users\User\Downloads\temporario\acervo-base-conteudo-programatico.md`,
+  que não deve ser usada como referência. Se houver H2 a mais e o
+  conteúdo for uma síntese/fechamento genuinamente útil (quadro-resumo,
+  roteiro de decisão), manter e documentar a decisão de manter; se
+  parecer redundante ou fora de lugar, rebaixar para dentro do último H3
+  existente e documentar essa decisão também — sempre decidir e seguir,
+  nunca deixar em aberto.
+- H4 ou mais profundo: erro sempre, sem exceção — corrigir rebaixando
+  para H3 ou integrando ao parágrafo.
+- Diretivas `:::exemplo`, `:::atencao`, `:::legislacao`: abertura e
+  fechamento balanceados como pilha — um `:::` de abertura sem fechamento
+  correspondente é erro mesmo que a contagem total bata.
+- Todo `:::legislacao{...}` precisa ter `fonte=` e `url=` dentro das
+  chaves; nenhuma citação de lei ou jurisprudência solta em prosa sem
+  essas duas informações.
+- "Nota de checagem" nunca pode ser heading (`## Nota de checagem`) —
+  sempre texto em negrito (`**Nota de checagem**`) depois de um separador
+  `---`. Se vier como H2, corrigir sempre. Se o arquivo não tiver Nota de
+  checagem nenhuma, criar uma ao final documentando o que esta auditoria
+  verificou.
+- Checar caracteres escapados indevidos no front-matter e nas URLs
+  (`\_`, `\~`, `\[`, `\-`, `\&amp;` fora de lugar, inclusive no próprio
+  delimitador `\---` do front-matter) — sintoma recorrente de exportação
+  problemática neste lote de conteúdo; o `publish.mjs` rejeitaria o
+  arquivo por causa disso, mas corrigir aqui antes é mais rápido que
+  descobrir pelo erro do script.
+
+**Camada 2 — Negrito de termo-chave**
+- Contar quantos `**termo**` existem no corpo. Um arquivo com zero ou
+  quase zero (1, tipicamente só a própria "Nota de checagem") precisa de
+  negrito adicionado.
+- Negritar o termo exatamente como já aparece no texto, na frase em que é
+  definido pela primeira vez — nunca reescrever a frase nem acrescentar
+  palavra para "caber" o negrito.
+- Depois de aplicar, remover todos os `**` do arquivo original e do
+  corrigido e comparar se ficam idênticos. Se não ficarem, alguma palavra
+  foi alterada além do negrito — desfazer e refazer só com negrito puro.
+
+**Camada 3 — Verificação de conteúdo (pesquisa real, obrigatória)**
+- Extrair todo bloco `:::legislacao{fonte=...}` e todo
+  `:::atencao{fonte=...}` que cite dispositivo legal ou julgado.
+- Verificar cada um na fonte oficial correspondente, com WebSearch/WebFetch
+  — é uma segunda conferência independente, feita do zero, e não uma
+  auditoria do que a "Nota de checagem" do próprio arquivo já diz ter
+  verificado. Nunca presumir que a nota está certa só porque ela existe.
+  - Lei federal ou Constituição → planalto.gov.br, texto compilado
+    vigente (não o de promulgação original, salvo quando o texto já
+    avisa que é "redação anterior"). Ver nota técnica abaixo: esse
+    domínio está bloqueado neste ambiente — usar WebSearch cruzando
+    fontes independentes (Câmara dos Deputados/legin, LexML, JusBrasil
+    etc.) em vez de tentar o fetch direto.
+  - Jurisprudência do STF ou STJ → portal de jurisprudência do
+    respectivo tribunal, confirmando número do processo, relator, órgão
+    julgador, data e teor da ementa ou tese.
+  - Resolução do CNJ → atos.cnj.jus.br.
+- Priorizar por risco: dispositivos com data de vigência, prazo,
+  percentual ou marco temporal são os que mais viram alvo de emenda ou
+  lei superveniente — são o alvo principal. Definição doutrinária estável
+  tem risco baixo e pode ser conferida com menos intensidade.
+- Se achar dispositivo alterado depois da data em que o arquivo foi
+  escrito: corrigir a citação para a redação vigente, acrescentar um
+  `:::atencao` contando a redação anterior e o que mudou (quando a
+  mudança em si for relevante para prova), e registrar a correção na
+  Nota de checagem, com a fonte que a confirmou — corrigir e documentar,
+  não pausar esperando aprovação para isso.
+- Nunca "consertar" um dado incerto inventando precisão que a pesquisa
+  não confirmou. Se a data exata de um julgado divergir entre fontes
+  secundárias sem uma fonte primária que resolva, preferir remover a
+  especificidade (tirar a data, manter só processo e relator) a manter
+  um número que pode estar errado — isso vale mesmo com autonomia total:
+  autonomia não é licença para inventar certeza que a pesquisa não deu.
+- Se a auditoria revelar uma lacuna de conteúdo relevante para prova (não
+  um erro de citação, mas um tópico atual que falta) e a mudança exigir
+  redigir texto substancioso novo (não só um `:::atencao` curto), sinalizar
+  no relatório em vez de escrever por conta própria — exceto quando o
+  usuário já pedir explicitamente para complementar.
+
+**Camada 3-B — checagem do link em si (reachability), além do teor**
+Além de verificar o teor jurídico citado (obrigatório, ver acima), também
+tentar verificar se cada `url="..."` carrega de fato e se o fragmento
+`#:~:text=...` aponta pro trecho certo. Quando o domínio estiver
+bloqueado neste ambiente (lista abaixo), **pular silenciosamente, sem
+reportar isso como problema/achado** — é bloqueio de rede conhecido, o
+usuário trata disso com estratégia própria depois. Só reportar (e
+corrigir, quando possível) links de domínios que respondem normalmente e
+que, ao testar, se mostrarem realmente quebrados ou com fragmento
+desatualizado.
+
+Nota técnica (lista cumulativa — atualizar aqui a cada novo achado, em
+vez de cada auditoria redescobrir do zero): `planalto.gov.br` está
+inacessível a partir deste ambiente no nível de rede (confirmado via
+`WebFetch` e via `curl` direto pelo shell — timeout puro). Também
+confirmados bloqueados com 403 (mesmo tratamento): `portal.stf.jus.br`,
+`www.stf.jus.br`, `jurisprudencia.stf.jus.br`, `scon.stj.jus.br`, e o
+endpoint específico `processo.stj.jus.br/processo/pesquisa/...` (o resto
+de `processo.stj.jus.br`, como `/SCON/`, responde normalmente). Domínios
+confirmados funcionando e que devem ser testados de verdade: `stj.jus.br`
+e demais subdomínios (exceto os listados), `lexml.gov.br`,
+`camara.leg.br` (`www2.camara.leg.br/legin`), `dizerodireito.com.br`,
+`buscadordizerodireito.com.br`, `migalhas.com.br`,
+`arquivocidadao.stj.jus.br`.
+
+**Camada 4 — Relatório**
+Para cada arquivo, reportar: o que foi verificado, o que foi corrigido
+(antes/depois), toda decisão autônoma tomada nas Camadas 1 e 3 (com a
+razão), e o que ficou sinalizado como incerto sem solução ou como lacuna
+de conteúdo.
 
 ## Validação (o script já faz isto — não reimplemente na mão)
 
@@ -153,9 +290,11 @@ existe mais no acervo base).
 
 - Inserir/atualizar direto, como já é feito com as questões — sem etapa
   de revisão ou aprovação.
-- **Não avaliar, corrigir, resumir ou reescrever o conteúdo.** O texto
-  entra exatamente como veio. A validação é de **estrutura** (front-matter,
-  títulos, diretivas), nunca de mérito jurídico ou qualidade do texto.
+- **O validador do `publish.mjs` não avalia, corrige, resume ou reescreve
+  o conteúdo** — só estrutura (front-matter, títulos, diretivas). A
+  verificação e correção de mérito jurídico acontece antes, na auditoria
+  de 4 camadas obrigatória (seção própria acima) — não é o script que faz
+  isso, é o passo manual que vem antes dele.
 - Não rodar deploy. O conteúdo vive no Supabase e aparece no app sem
   precisar de push/build — é dado, não código.
 - Não criar arquivo `.md` em lugar nenhum do repositório, nem
