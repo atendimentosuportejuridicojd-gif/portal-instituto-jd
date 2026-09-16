@@ -34,6 +34,7 @@ import {
   Lock,
   PencilLine,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   adminListAcervo,
