@@ -197,6 +197,25 @@ if (materiaExistente) {
   materialId = data.id;
   acao = "atualizado";
 } else {
+  // Nao encontrou pelo slug exato — antes de criar, verifica se ja existe
+  // uma materia com o MESMO titulo (case-insensitive) na mesma disciplina,
+  // sob um slug diferente. Isso indica que o slug do front-matter nao bate
+  // com o slug do placeholder do seed, e criar aqui geraria uma duplicata
+  // orfa (ja aconteceu de verdade neste projeto, com placeholder que tinha
+  // 30 questoes vinculadas que quase foram perdidas).
+  const { data: possivelDuplicata } = await supabase
+    .from("materiais")
+    .select("id, slug, titulo")
+    .eq("disciplina_id", disciplina.id)
+    .ilike("titulo", fm.titulo.trim());
+  if (possivelDuplicata && possivelDuplicata.length > 0) {
+    const outros = possivelDuplicata.map((m) => `slug="${m.slug}" (id=${m.id})`).join(", ");
+    erro(
+      `nao encontrei materia com slug="${fm.materia}" nesta disciplina, mas ja existe materia com o MESMO titulo "${fm.titulo}" sob slug diferente: ${outros}. ` +
+      `Provavel mismatch de slug entre o front-matter e o placeholder do seed — confirme o slug correto antes de publicar (nao criar duplicata as cegas).`
+    );
+  }
+
   const { data: maxOrdemRow } = await supabase
     .from("materiais")
     .select("ordem")

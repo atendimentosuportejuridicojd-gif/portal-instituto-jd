@@ -53,6 +53,17 @@ do texto antes de publicar.
 
 ## Como executar
 
+0. **Antes de publicar, confira se a matéria já existe na disciplina** —
+   liste as matérias já cadastradas (`slug`, `titulo`, `ordem`) naquela
+   disciplina e compare visualmente com o título/matéria que vai publicar.
+   O `publish.mjs` só barra título **idêntico** (case-insensitive); uma
+   duplicata pode ter título com poucas palavras diferentes ("Editores de
+   Texto" vs. "Editor de Textos", "Apresentações" vs. "Apresentações
+   Eletrônicas") e passar despercebida pela checagem automática. Publicar
+   sob um slug que não bate com o placeholder do seed já criou matéria
+   duplicada de verdade neste projeto (com um placeholder que tinha 30
+   questões vinculadas quase perdidas na limpeza) — esse passo manual não é
+   opcional.
 1. Salve o markdown colado pelo usuário em um arquivo temporário **fora do
    repositório** — use o diretório de scratchpad da sessão. Nunca em
    `src/`, `scripts/`, nem em qualquer pasta versionada.
@@ -119,7 +130,14 @@ A skill **localiza e completa**, nunca recria do zero por padrão.
   sem o front-matter), `resumo`, `tempo_leitura`, `tags`,
   `publicado = true`. **Não** altera `titulo` nem `ordem` — esses vieram
   do seed e são a fonte da verdade para a ordem de exibição.
-- **Não encontrou** → cria o registro completo (`tipo='markdown'`,
+- **Não encontrou** → antes de criar, o script confere se já existe matéria
+  com o **mesmo título** (case-insensitive) na mesma disciplina sob outro
+  slug — se achar, aborta com erro em vez de criar duplicata (já aconteceu
+  de verdade: um placeholder do seed com slug ligeiramente diferente do
+  front-matter ficou órfão e vazio enquanto uma matéria nova era criada por
+  engano, e esse placeholder tinha 30 questões vinculadas que quase foram
+  perdidas ao tentar "limpar" a duplicata vazia). Se não achar título
+  parecido, aí sim cria o registro completo (`tipo='markdown'`,
   `modulo_id=NULL`, `ordem` = último da disciplina + 1) e avisa
   explicitamente que era uma matéria fora da lista original do seed.
 
