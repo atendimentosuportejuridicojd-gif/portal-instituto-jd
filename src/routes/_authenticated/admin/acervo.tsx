@@ -59,14 +59,85 @@ export const Route = createFileRoute("/_authenticated/admin/acervo")({
   component: AdminAcervo,
 });
 
+type FiltroGrupo = "todos" | "gerais" | "especificos";
+
 function AdminAcervo() {
   const qc = useQueryClient();
   const listFn = useServerFn(adminListAcervo);
   const q = useQuery({ queryKey: ["admin", "acervo"], queryFn: () => listFn() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "acervo"] });
+  const [filtro, setFiltro] = useState<FiltroGrupo>("todos");
 
   const disciplinas = q.data?.disciplinas ?? [];
   const semDisciplina = q.data?.sem_disciplina ?? [];
+
+  const gerais = disciplinas.filter((d: any) => (d.grupo ?? "gerais") !== "especificos");
+  const especificos = disciplinas.filter((d: any) => d.grupo === "especificos");
+
+  const visiveis =
+    filtro === "todos" ? disciplinas : filtro === "gerais" ? gerais : especificos;
+
+  const totalGerais = gerais.length;
+  const totalEspecificos = especificos.length;
+
+  const renderDisciplina = (d: any) => (
+    <section key={d.id} className="surface-card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-1.5 truncate text-base font-semibold">
+            {d.nome}
+            {d.senha && <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {d.materiais.length} material(is) · {d.modulos.length} módulo(s)
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <ModuloDialog disciplinaId={d.id} onDone={invalidate} />
+          <MaterialDialog disciplina={d} onDone={invalidate} />
+          <DisciplinaDialog disciplina={d} onDone={invalidate} />
+          <DeleteButton
+            label="Excluir disciplina"
+            fn={adminDeleteDisciplina}
+            id={d.id}
+            onDone={invalidate}
+          />
+        </div>
+      </div>
+
+      {d.modulos.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {d.modulos.map((mo: any) => (
+            <span
+              key={mo.id}
+              className="inline-flex items-center gap-1 rounded-full border border-border/60 px-2.5 py-1 text-xs text-muted-foreground"
+            >
+              {mo.nome}
+              <DeleteButton
+                label="Excluir módulo"
+                fn={adminDeleteModulo}
+                id={mo.id}
+                onDone={invalidate}
+                compact
+              />
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 space-y-2">
+        {d.materiais.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Nenhum material nesta disciplina.
+          </p>
+        ) : (
+          d.materiais.map((m: any) => (
+            <MaterialRow key={m.id} m={m} disciplina={d} onDone={invalidate} />
+          ))
+        )}
+      </div>
+    </section>
+  );
 
   return (
     <>
@@ -85,65 +156,50 @@ function AdminAcervo() {
             description="Crie a primeira disciplina para começar a organizar o acervo."
           />
         ) : (
-          <div className="space-y-8">
-            {disciplinas.map((d: any) => (
-              <section key={d.id} className="surface-card p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="flex items-center gap-1.5 truncate text-base font-semibold">
-                      {d.nome}
-                      {d.senha && <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      {d.materiais.length} material(is) · {d.modulos.length} módulo(s)
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <ModuloDialog disciplinaId={d.id} onDone={invalidate} />
-                    <MaterialDialog disciplina={d} onDone={invalidate} />
-                    <DisciplinaDialog disciplina={d} onDone={invalidate} />
-                    <DeleteButton
-                      label="Excluir disciplina"
-                      fn={adminDeleteDisciplina}
-                      id={d.id}
-                      onDone={invalidate}
-                    />
-                  </div>
-                </div>
+          <div className="space-y-6">
+            <Tabs value={filtro} onValueChange={(v) => setFiltro(v as FiltroGrupo)}>
+              <TabsList>
+                <TabsTrigger value="todos">
+                  Todos ({disciplinas.length})
+                </TabsTrigger>
+                <TabsTrigger value="gerais">
+                  Conhecimentos Gerais ({totalGerais})
+                </TabsTrigger>
+                <TabsTrigger value="especificos">
+                  Conhecimentos Específicos ({totalEspecificos})
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-                {d.modulos.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {d.modulos.map((mo: any) => (
-                      <span
-                        key={mo.id}
-                        className="inline-flex items-center gap-1 rounded-full border border-border/60 px-2.5 py-1 text-xs text-muted-foreground"
-                      >
-                        {mo.nome}
-                        <DeleteButton
-                          label="Excluir módulo"
-                          fn={adminDeleteModulo}
-                          id={mo.id}
-                          onDone={invalidate}
-                          compact
-                        />
-                      </span>
-                    ))}
+            {filtro === "todos" ? (
+              <div className="space-y-8">
+                {totalGerais > 0 && (
+                  <div className="space-y-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Conhecimentos Gerais · {totalGerais}
+                    </h2>
+                    {gerais.map(renderDisciplina)}
                   </div>
                 )}
-
-                <div className="mt-4 space-y-2">
-                  {d.materiais.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Nenhum material nesta disciplina.
-                    </p>
-                  ) : (
-                    d.materiais.map((m: any) => (
-                      <MaterialRow key={m.id} m={m} disciplina={d} onDone={invalidate} />
-                    ))
-                  )}
-                </div>
-              </section>
-            ))}
+                {totalEspecificos > 0 && (
+                  <div className="space-y-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Conhecimentos Específicos · {totalEspecificos}
+                    </h2>
+                    {especificos.map(renderDisciplina)}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {visiveis.map(renderDisciplina)}
+                {visiveis.length === 0 && (
+                  <div className="surface-card p-5 text-sm text-muted-foreground">
+                    Nenhuma disciplina neste grupo.
+                  </div>
+                )}
+              </div>
+            )}
 
             {semDisciplina.length > 0 && (
               <section className="surface-card p-5">
