@@ -11,6 +11,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getMinhaAssinatura, registrarUltimoAcesso } from "@/lib/assinaturas.functions";
 import { useSessaoUnica } from "@/hooks/use-sessao-unica";
+import { TrialRibbon } from "@/components/trial-ribbon";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -49,6 +50,12 @@ function AuthenticatedLayout() {
   }, [acessoFn]);
 
   const isAdmin = !!q.data?.isAdmin;
+  const mostrarFita =
+    !isBlockedPage &&
+    !isAdmin &&
+    !!q.data?.alunoTeste &&
+    !q.data?.ativa &&
+    q.data?.trialDiasRestantes != null;
 
   // Uma única sessão ativa por aluno (o último login encerra o anterior)
   useSessaoUnica(!!user);
