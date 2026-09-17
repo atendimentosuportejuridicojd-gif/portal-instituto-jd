@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -32,17 +31,27 @@ export function TrialRibbon({ dias, expiraEm }: { dias: number; expiraEm?: strin
         : `Você tem mais ${dias} dias de acesso ao teste gratuito.`;
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 bg-gold px-4 py-2 text-center text-xs font-medium text-gold-foreground">
-      <Clock className="h-3.5 w-3.5 shrink-0" />
-      <span>{texto}</span>
+    <div className="relative flex items-center justify-between gap-x-3 bg-gold px-4 py-2 text-xs font-medium text-gold-foreground">
+      {/* Cronômetro — canto esquerdo superior */}
       {tempo && (
-        <span className="rounded bg-gold-foreground/10 px-2 py-0.5 font-semibold tabular-nums tracking-wider">
+        <span className="flex min-w-[96px] items-center gap-1.5 rounded-lg bg-gold-foreground/10 px-2.5 py-1 font-semibold tabular-nums tracking-wider">
+          <Clock className="h-3.5 w-3.5 shrink-0" />
           {tempo}
         </span>
       )}
-      <Link to="/perfil" className="underline underline-offset-2">
+
+      {/* Mensagem — centralizada */}
+      <span className="absolute left-1/2 -translate-x-1/2 text-center">{texto}</span>
+
+      {/* Botão de assinatura — canto direito */}
+      <a
+        href="https://carreira360.institutojd.ia.br"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-full bg-gold-foreground px-3.5 py-1 font-semibold text-gold shadow-sm transition hover:opacity-90"
+      >
         Quero assinar
-      </Link>
+      </a>
     </div>
   );
 }
