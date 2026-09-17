@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Lock, Unlock, Mail, Pencil, MessageCircle } from "lucide-react";
+import { Search, Lock, Unlock, Mail, Pencil, MessageCircle, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
@@ -32,6 +32,7 @@ import {
   adminBloquearUsuario,
   adminResetSenhaUsuario,
   adminDefinirRoles,
+  adminExcluirUsuario,
 } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
@@ -68,6 +69,8 @@ function Usuarios() {
   const [detalhe, setDetalhe] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [blockDialog, setBlockDialog] = useState<any | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<any | null>(null);
+  const [confirmacao, setConfirmacao] = useState("");
   const [motivo, setMotivo] = useState("");
 
   const query = useQuery({
