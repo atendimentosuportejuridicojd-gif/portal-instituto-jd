@@ -45,13 +45,22 @@ function CargoDisciplinas() {
 
   const mapa = new Map<
     string,
-    { id: string; nome: string; total: number; novos: number; grupo: string; tem_senha: boolean }
+    {
+      id: string;
+      nome: string;
+      ordem: number;
+      total: number;
+      novos: number;
+      grupo: string;
+      tem_senha: boolean;
+    }
   >();
   materiais.forEach((m: any) => {
     const id = m.disciplina_id ?? "sem-disciplina";
     const atual = mapa.get(id) ?? {
       id,
       nome: m.disciplina,
+      ordem: m.disciplina_id ? (m.disciplina_ordem ?? 0) : Number.MAX_SAFE_INTEGER,
       total: 0,
       novos: 0,
       grupo: m.grupo ?? "gerais",
@@ -62,7 +71,9 @@ function CargoDisciplinas() {
     if (m.tem_senha) atual.tem_senha = true;
     mapa.set(id, atual);
   });
-  const disciplinas = [...mapa.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  const disciplinas = [...mapa.values()].sort(
+    (a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome, "pt-BR"),
+  );
   const grupos = [
     {
       key: "gerais",
