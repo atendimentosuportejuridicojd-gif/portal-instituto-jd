@@ -46,6 +46,7 @@ function Usuarios() {
   const blockFn = useServerFn(adminBloquearUsuario);
   const resetFn = useServerFn(adminResetSenhaUsuario);
   const rolesFn = useServerFn(adminDefinirRoles);
+  const excluirFn = useServerFn(adminExcluirUsuario);
 
   const roleMut = useMutation({
     mutationFn: (v: {
@@ -105,6 +106,19 @@ function Usuarios() {
     onSuccess: () => toast.success("E-mail de redefinição de senha enviado ao aluno."),
     onError: (e: any) => toast.error(e.message),
   });
+
+  const excluir = useMutation({
+    mutationFn: (id: string) => excluirFn({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setDeleteDialog(null);
+      setConfirmacao("");
+      toast.success("Conta excluída permanentemente.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
 
   const all = query.data ?? [];
   const rows = all.filter((r: any) =>
