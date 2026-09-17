@@ -136,7 +136,7 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
     const { data: materiais, error } = await supabase
       .from("materiais")
       .select(
-        "id, titulo, tipo, descricao, ordem, disciplina_id, modulo_id, versao, publicado_em, atualizado_em, disciplinas(id, nome, especifica, grupo, protegida), modulos(id, nome, ordem)",
+        "id, titulo, tipo, descricao, ordem, disciplina_id, modulo_id, versao, publicado_em, atualizado_em, disciplinas(id, nome, ordem, especifica, grupo, protegida), modulos(id, nome, ordem)",
       )
       .eq("publicado", true)
       .order("ordem", { ascending: true })
@@ -178,6 +178,7 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
         ordem: m.ordem ?? 0,
         disciplina: m.disciplinas?.nome ?? "Sem disciplina",
         disciplina_id: m.disciplina_id,
+        disciplina_ordem: m.disciplinas?.ordem ?? 0,
         modulo_id: m.modulo_id ?? null,
         modulo: m.modulos?.nome ?? null,
         modulo_ordem: m.modulos?.ordem ?? 0,
