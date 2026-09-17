@@ -15,7 +15,7 @@ export const Route = createFileRoute("/simulado/")({
       {
         property: "og:description",
         content:
-          "80 questões de Tribunal e Ministério Público. Receba seu percentual de acerto no final. 100% gratuito, sem cartão de crédito.",
+          "80 questões de Tribunal e Ministério Público. Receba seu percentual de acerto no final. 100% gratuito.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -70,7 +70,7 @@ function SimuladoLanding() {
             <div className="jd-landing-glass-soft rounded-2xl px-5 py-4 text-left">
               <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">Grátis</div>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">
-                100% gratuito, sem cartão de crédito
+                100% gratuito
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@ function SimuladoLanding() {
             <div className="flex flex-col items-center justify-center gap-5 rounded-2xl border border-white/70 bg-gradient-to-br from-white/60 to-white/30 px-8 py-10">
               <div className="text-5xl font-bold text-[oklch(0.28_0.07_260)]">100%</div>
               <div className="text-sm font-semibold uppercase tracking-[0.16em] text-[oklch(0.28_0.07_260/60%)]">
-                Gratuito, sem cartão
+                Gratuito
               </div>
               <Link
                 to="/simulado/cadastro"
@@ -123,8 +123,7 @@ function SimuladoLanding() {
         </section>
 
         <p className="mt-8 text-center text-xs text-[oklch(0.28_0.07_260/50%)]">
-          Um único passo até o seu resultado. Sem cadastro complicado, sem cartão de
-          crédito.
+          Um único passo até o seu resultado. Sem cadastro complicado.
         </p>
       </div>
     </div>
