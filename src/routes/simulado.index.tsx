@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import simuladoLibraryBackground from "@/assets/simulado-library-background.jpg";
+import lockupAsset from "@/assets/lockup-jd.png.asset.json";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/simulado/")({
   head: () => ({
@@ -40,7 +42,33 @@ function SimuladoLanding() {
       <div className="jd-landing-orb ld-orb-2 right-[-4rem] top-24 size-80 bg-[oklch(0.72_0.13_82/35%)]" aria-hidden="true" />
       <div className="jd-landing-orb ld-orb-3 bottom-10 left-1/3 size-64 bg-[oklch(0.28_0.07_260/18%)]" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto max-w-5xl px-5 py-10 sm:py-16">
+      <header className="jd-landing-header relative z-10">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
+          <a href="https://carreira360.institutojd.ia.br/#top" aria-label="Carreira Judiciária 360">
+            <img
+              src={lockupAsset.url}
+              alt="Instituto J&D — Carreira Judiciária 360"
+              width={280}
+              height={92}
+              className="h-12 w-auto object-contain sm:h-14"
+            />
+          </a>
+
+          <nav className="hidden items-center gap-7 text-sm md:flex" aria-label="Navegação principal">
+            <a href="https://carreira360.institutojd.ia.br/#metodo">O Método</a>
+            <a href="https://carreira360.institutojd.ia.br/#biblioteca">Biblioteca</a>
+            <Link to="/auth">Portal</Link>
+            <a href="https://carreira360.institutojd.ia.br/#investimento">Investimento</a>
+            <a href="https://carreira360.institutojd.ia.br/#faq">FAQ</a>
+          </nav>
+
+          <Button asChild size="sm" className="jd-landing-header-cta rounded-full px-5 font-bold uppercase">
+            <a href="https://pay.hotmart.com/W105831049I">Assinar</a>
+          </Button>
+        </div>
+      </header>
+
+      <div className="relative z-10 mx-auto max-w-5xl px-5 pb-10 pt-5 sm:pb-16 sm:pt-8">
         {/* Seção 1 — Headline */}
         <section className="ld-rise jd-landing-glass rounded-[2rem] px-6 py-10 text-center sm:px-12 sm:py-16" style={{ animationDelay: "0.05s" }}>
           <div className="jd-landing-glass-soft inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[oklch(0.28_0.07_260)]">
