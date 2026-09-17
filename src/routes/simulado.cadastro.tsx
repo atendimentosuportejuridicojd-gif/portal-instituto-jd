@@ -83,7 +83,7 @@ function SimuladoCadastro() {
             {[
               "80 questões de Tribunal e Ministério Público",
               "Percentual de acerto geral e por área do conhecimento",
-              "Gratuito, sem cartão de crédito",
+              "100% gratuito",
             ].map((t) => (
               <li key={t} className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
