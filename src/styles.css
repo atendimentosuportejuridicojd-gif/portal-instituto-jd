@@ -330,65 +330,73 @@
   .ld-rise { animation: none; }
 }
 .jd-landing-glass {
-  background: oklch(0.12 0.045 258 / 78%);
-  backdrop-filter: blur(18px) saturate(115%);
-  border: 1px solid oklch(0.76 0.145 82 / 22%);
-  box-shadow: 0 1px 0 oklch(1 0 0 / 7%) inset, 0 30px 70px -34px oklch(0 0 0 / 72%);
+  background: #ffffff;
+  border: 1px solid oklch(0 0 0 / 6%);
+  box-shadow: 0 30px 60px -34px oklch(0 0 0 / 48%);
 }
 .jd-landing-glass-soft {
-  background: oklch(0.17 0.045 258 / 76%);
-  backdrop-filter: blur(12px) saturate(110%);
-  border: 1px solid oklch(1 0 0 / 10%);
-  box-shadow: 0 16px 34px -26px oklch(0 0 0 / 82%);
+  background: #ffffff;
+  border: 1px solid oklch(0 0 0 / 6%);
+  box-shadow: 0 16px 34px -26px oklch(0 0 0 / 42%);
 }
 .jd-landing-cta {
-  background: linear-gradient(135deg, var(--ld-gold) 0%, var(--ld-gold-deep) 58%, var(--ld-gold) 120%);
+  background: #C49126;
   color: oklch(0.16 0.045 258);
-  box-shadow: 0 18px 38px -14px oklch(0.76 0.145 82 / 45%), 0 1px 0 oklch(1 0 0 / 30%) inset;
+  box-shadow: 0 18px 38px -16px oklch(0.6 0.13 78 / 55%);
+}
+.jd-landing-cta:hover {
+  background: oklch(0.58 0.135 78);
 }
 .jd-landing h1,
 .jd-landing h2 {
-  font-family: Georgia, "Times New Roman", serif;
-  letter-spacing: 0;
+  color: var(--ld-primary);
+  letter-spacing: -0.01em;
 }
 .jd-landing h1 {
-  color: var(--ld-ink);
   text-wrap: balance;
 }
-.jd-landing h1 span,
-.jd-landing .jd-landing-glass-soft > div:first-child {
-  color: var(--ld-gold) !important;
+.jd-landing h1 span {
+  color: var(--ld-primary);
 }
 .jd-landing p,
-.jd-landing li > span:last-child,
-.jd-landing-glass-soft > div:last-child {
-  color: var(--ld-ink-soft) !important;
+.jd-landing li > span:last-child {
+  color: oklch(0.28 0.04 258 / 80%);
 }
 .jd-landing li strong {
-  color: var(--ld-ink) !important;
+  color: var(--ld-primary);
 }
+/* Badge "Instituto J&D" — pílula branca com ponto dourado */
 .jd-landing section:first-of-type > div:first-child {
-  color: var(--ld-gold) !important;
-  border-color: oklch(0.76 0.145 82 / 35%);
-  background: oklch(0.08 0.035 258 / 68%);
+  color: var(--ld-primary);
+  border-color: oklch(0 0 0 / 8%);
+  background: #ffffff;
 }
 .jd-landing section:first-of-type > div:first-child span {
-  background: var(--ld-gold) !important;
+  background: var(--ld-gold);
 }
+/* Credibilidade — números navy, rótulos cinza */
+.jd-landing .jd-landing-glass-soft > div:first-child {
+  color: var(--ld-primary);
+}
+.jd-landing .jd-landing-glass-soft > div:last-child {
+  color: oklch(0.28 0.04 258 / 70%);
+}
+/* Marcadores numerados */
 .jd-landing li > span:first-child {
-  background: oklch(0.76 0.145 82 / 16%) !important;
-  color: var(--ld-gold) !important;
-  border: 1px solid oklch(0.76 0.145 82 / 28%);
+  background: var(--ld-gold) !important;
+  color: var(--ld-primary) !important;
+  border: 1px solid oklch(0.62 0.13 78 / 40%);
 }
+/* Caixa "100%" à direita */
 .jd-landing section:nth-of-type(2) > div > div:last-child {
-  background: oklch(0.16 0.045 258 / 70%) !important;
-  border-color: oklch(0.76 0.145 82 / 22%) !important;
+  background: #ffffff !important;
+  border-color: oklch(0 0 0 / 8%) !important;
 }
 .jd-landing section:nth-of-type(2) > div > div:last-child > div:first-child {
-  color: var(--ld-gold) !important;
+  color: var(--ld-primary) !important;
 }
 .jd-landing section:nth-of-type(2) > div > div:last-child > div:nth-child(2) {
-  color: var(--ld-ink-soft) !important;
+  color: oklch(0.28 0.04 258 / 60%) !important;
 }
 
 @media (max-width: 639px) {
