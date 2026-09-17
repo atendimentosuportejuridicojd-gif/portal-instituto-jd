@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Loader2, Scale, CheckCircle2, XCircle } from "lucide-react";
-import ebookCapa from "@/assets/ebook-guia-carreira-judiciaria.png";
+import ebookCapaAsset from "@/assets/ebook-guia-carreira-judiciaria.png.asset.json";
 
-const EBOOK_URL = "https://institutojd.ia.br";
+const ebookCapa = ebookCapaAsset.url;
+const EBOOK_URL = "https://e-book.institutojd.ia.br/";
 
 export const Route = createFileRoute("/simulado/resultado")({
   ssr: false,
