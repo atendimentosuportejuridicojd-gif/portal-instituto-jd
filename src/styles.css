@@ -288,6 +288,26 @@
   object-position: center;
   z-index: 0;
 }
+.jd-landing-header {
+  border-bottom: 1px solid oklch(1 0 0 / 8%);
+  background: oklch(0.105 0.045 258 / 44%);
+  backdrop-filter: blur(12px);
+}
+.jd-landing-header nav a {
+  color: var(--ld-ink-soft);
+  transition: color 180ms ease;
+}
+.jd-landing-header nav a:hover {
+  color: var(--ld-gold);
+}
+.jd-landing-header-cta {
+  background: var(--ld-gold);
+  color: oklch(0.16 0.045 258);
+  box-shadow: none;
+}
+.jd-landing-header-cta:hover {
+  background: var(--ld-gold-deep);
+}
 .jd-landing-orb {
   display: none;
 }
