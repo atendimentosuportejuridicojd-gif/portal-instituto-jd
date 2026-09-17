@@ -27,13 +27,13 @@ export const Route = createFileRoute("/simulado/")({
 function SimuladoLanding() {
   return (
     <div className="jd-landing relative min-h-screen w-full overflow-hidden font-sans">
-      <div className="jd-landing-orb size-72 -left-16 -top-10 bg-[oklch(0.28_0.07_260/25%)]" aria-hidden="true" />
-      <div className="jd-landing-orb right-[-4rem] top-24 size-80 bg-[oklch(0.72_0.13_82/35%)]" aria-hidden="true" />
-      <div className="jd-landing-orb bottom-10 left-1/3 size-64 bg-[oklch(0.28_0.07_260/18%)]" aria-hidden="true" />
+      <div className="jd-landing-orb ld-orb-1 size-72 -left-16 -top-10 bg-[oklch(0.28_0.07_260/25%)]" aria-hidden="true" />
+      <div className="jd-landing-orb ld-orb-2 right-[-4rem] top-24 size-80 bg-[oklch(0.72_0.13_82/35%)]" aria-hidden="true" />
+      <div className="jd-landing-orb ld-orb-3 bottom-10 left-1/3 size-64 bg-[oklch(0.28_0.07_260/18%)]" aria-hidden="true" />
 
       <div className="relative z-10 mx-auto max-w-5xl px-5 py-10 sm:py-16">
         {/* Seção 1 — Headline */}
-        <section className="jd-landing-glass rounded-[2rem] px-6 py-10 text-center sm:px-12 sm:py-16">
+        <section className="ld-rise jd-landing-glass rounded-[2rem] px-6 py-10 text-center sm:px-12 sm:py-16" style={{ animationDelay: "0.05s" }}>
           <div className="jd-landing-glass-soft inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[oklch(0.28_0.07_260)]">
             <span className="size-1.5 rounded-full bg-[oklch(0.72_0.13_82)]" aria-hidden="true" />
             Instituto J&amp;D
@@ -59,15 +59,15 @@ function SimuladoLanding() {
 
           {/* Seção 2 — Credibilidade */}
           <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-            <div className="jd-landing-glass-soft rounded-2xl px-5 py-4 text-left">
+            <div className="ld-rise jd-landing-glass-soft rounded-2xl px-5 py-4 text-left" style={{ animationDelay: "0.25s" }}>
               <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">80</div>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">questões</div>
             </div>
-            <div className="jd-landing-glass-soft rounded-2xl px-5 py-4 text-left">
+            <div className="ld-rise jd-landing-glass-soft rounded-2xl px-5 py-4 text-left" style={{ animationDelay: "0.35s" }}>
               <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">90 min</div>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">tempo estimado</div>
             </div>
-            <div className="jd-landing-glass-soft rounded-2xl px-5 py-4 text-left">
+            <div className="ld-rise jd-landing-glass-soft rounded-2xl px-5 py-4 text-left" style={{ animationDelay: "0.45s" }}>
               <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">Grátis</div>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">
                 100% gratuito
@@ -77,7 +77,7 @@ function SimuladoLanding() {
         </section>
 
         {/* Seção 3 — Explicação breve */}
-        <section className="jd-landing-glass mt-6 rounded-[2rem] px-6 py-10 sm:px-12 sm:py-12">
+        <section className="ld-rise jd-landing-glass mt-6 rounded-[2rem] px-6 py-10 sm:px-12 sm:py-12" style={{ animationDelay: "0.2s" }}>
           <div className="grid gap-8 sm:grid-cols-2 sm:items-center">
             <div>
               <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">

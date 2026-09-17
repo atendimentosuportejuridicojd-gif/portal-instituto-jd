@@ -278,6 +278,33 @@
   filter: blur(60px);
   z-index: 0;
   pointer-events: none;
+  animation: ld-float 14s ease-in-out infinite;
+}
+.jd-landing-orb.ld-orb-2 { animation-duration: 18s; animation-delay: -3s; }
+.jd-landing-orb.ld-orb-3 { animation-duration: 16s; animation-delay: -6s; }
+
+@keyframes ld-float {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -26px, 0) scale(1.06); }
+}
+
+/* Entrada escalonada das seções */
+@keyframes ld-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ld-rise { animation: ld-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes ld-cta-glow {
+  0%, 100% { box-shadow: 0 20px 45px -12px oklch(0.72 0.13 82 / 55%), 0 2px 0 oklch(1 0 0 / 35%) inset; }
+  50% { box-shadow: 0 24px 55px -10px oklch(0.72 0.13 82 / 75%), 0 2px 0 oklch(1 0 0 / 45%) inset; }
+}
+.jd-landing-cta { animation: ld-cta-glow 3.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .jd-landing-orb,
+  .jd-landing-cta,
+  .ld-rise { animation: none; }
 }
 .jd-landing-glass {
   background: oklch(1 0 0 / 55%);
