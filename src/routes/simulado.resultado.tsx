@@ -34,7 +34,7 @@ export const Route = createFileRoute("/simulado/resultado")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: SimuladoResultado;
+  component: SimuladoResultado,
 });
 
 function SimuladoResultado() {
