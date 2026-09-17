@@ -64,9 +64,11 @@ function SimuladoLanding() {
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">questões</div>
             </div>
             <div className="ld-rise jd-landing-glass-soft rounded-2xl px-5 py-4 text-left" style={{ animationDelay: "0.35s" }}>
+              <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">90 min</div>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">tempo estimado</div>
             </div>
             <div className="ld-rise jd-landing-glass-soft rounded-2xl px-5 py-4 text-left" style={{ animationDelay: "0.45s" }}>
+              <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">Grátis</div>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">
                 100% gratuito
               </div>
