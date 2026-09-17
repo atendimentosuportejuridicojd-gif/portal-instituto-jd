@@ -74,7 +74,9 @@ function AuthenticatedLayout() {
       <div className="flex min-h-screen w-full bg-background">
         {!isBlockedPage && (inAdmin && isAdmin ? <AdminSidebar /> : <AppSidebar isAdmin={isAdmin} />)}
         <SidebarInset>
-          {mostrarFita && <TrialRibbon dias={q.data!.trialDiasRestantes!} />}
+          {mostrarFita && (
+            <TrialRibbon dias={q.data!.trialDiasRestantes!} expiraEm={q.data!.trialExpiraEm} />
+          )}
           <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             {!isBlockedPage && <SidebarTrigger />}
             {!isBlockedPage && (
