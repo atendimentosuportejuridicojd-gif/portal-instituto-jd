@@ -146,7 +146,7 @@ function SimuladoLanding() {
           </div>
         </section>
 
-        <p className="mt-8 text-center text-xs text-white/50">
+        <p className="mt-8 text-center text-xs" style={{ color: "oklch(0.88 0.012 82 / 62%)" }}>
           Um único passo até o seu resultado. Sem cadastro complicado.
         </p>
       </div>
