@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Lock, Unlock, Mail, Pencil, MessageCircle } from "lucide-react";
+import { Search, Lock, Unlock, Mail, Pencil, MessageCircle, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
@@ -32,6 +32,7 @@ import {
   adminBloquearUsuario,
   adminResetSenhaUsuario,
   adminDefinirRoles,
+  adminExcluirUsuario,
 } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
@@ -45,6 +46,7 @@ function Usuarios() {
   const blockFn = useServerFn(adminBloquearUsuario);
   const resetFn = useServerFn(adminResetSenhaUsuario);
   const rolesFn = useServerFn(adminDefinirRoles);
+  const excluirFn = useServerFn(adminExcluirUsuario);
 
   const roleMut = useMutation({
     mutationFn: (v: {
@@ -68,6 +70,8 @@ function Usuarios() {
   const [detalhe, setDetalhe] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [blockDialog, setBlockDialog] = useState<any | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<any | null>(null);
+  const [confirmacao, setConfirmacao] = useState("");
   const [motivo, setMotivo] = useState("");
 
   const query = useQuery({
@@ -102,6 +106,19 @@ function Usuarios() {
     onSuccess: () => toast.success("E-mail de redefinição de senha enviado ao aluno."),
     onError: (e: any) => toast.error(e.message),
   });
+
+  const excluir = useMutation({
+    mutationFn: (id: string) => excluirFn({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setDeleteDialog(null);
+      setConfirmacao("");
+      toast.success("Conta excluída permanentemente.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
 
   const all = query.data ?? [];
   const rows = all.filter((r: any) =>
@@ -245,6 +262,18 @@ function Usuarios() {
                         }}
                       >
                         {r.bloqueado ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Excluir conta permanentemente"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setConfirmacao("");
+                          setDeleteDialog(r);
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </TableCell>
@@ -446,6 +475,44 @@ function Usuarios() {
               disabled={block.isPending}
             >
               Bloquear
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exclusão permanente */}
+      <Dialog
+        open={!!deleteDialog}
+        onOpenChange={(v) => {
+          if (!v) {
+            setDeleteDialog(null);
+            setConfirmacao("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir conta permanentemente</DialogTitle>
+            <DialogDescription>
+              {deleteDialog?.nome_completo} ({deleteDialog?.email}) e todo o histórico de estudo
+              serão apagados definitivamente. Esta ação não pode ser desfeita. O e-mail continua
+              livre para um novo cadastro.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>Digite EXCLUIR para confirmar</Label>
+            <Input value={confirmacao} onChange={(e) => setConfirmacao(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeleteDialog(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => excluir.mutate(deleteDialog.id)}
+              disabled={excluir.isPending || confirmacao.trim().toUpperCase() !== "EXCLUIR"}
+            >
+              Excluir definitivamente
             </Button>
           </DialogFooter>
         </DialogContent>

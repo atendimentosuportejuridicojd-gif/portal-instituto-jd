@@ -246,3 +246,56 @@ export const adminDefinirRoles = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Exclusão permanente da conta: remove os dados do aluno e o login.
+ * Não impede um novo cadastro futuro com o mesmo e-mail.
+ */
+export const adminExcluirUsuario = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (data.id === context.userId) throw new Error("Você não pode excluir sua própria conta.");
+
+    const { data: perfil } = await context.supabase
+      .from("profiles")
+      .select("email, nome_completo")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Dados do aluno sem exclusão em cascata garantida
+    const tabelas = [
+      "favoritos",
+      "material_leitura",
+      "plano_estudo_itens",
+      "notificacoes_leituras",
+      "questao_tentativas",
+      "questao_sessoes",
+      "questao_recursos",
+      "simulado_respostas",
+      "simulado_tentativas",
+      "sessoes_ativas",
+      "assinaturas",
+      "user_roles",
+    ] as const;
+    for (const t of tabelas) {
+      await supabaseAdmin.from(t).delete().eq("user_id", data.id);
+    }
+    await supabaseAdmin.from("profiles").delete().eq("id", data.id);
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.id);
+    if (error) throw new Error(error.message);
+
+    await context.supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: "usuario.excluir_permanente",
+      entidade: "auth.users",
+      entidade_id: data.id,
+      metadata: { email: perfil?.email ?? null, nome_completo: perfil?.nome_completo ?? null },
+    });
+
+    return { ok: true };
+  });
+
