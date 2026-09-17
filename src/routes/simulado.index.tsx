@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import simuladoLibraryBackground from "@/assets/simulado-library-background.jpg";
 
 export const Route = createFileRoute("/simulado/")({
   head: () => ({
@@ -27,6 +28,14 @@ export const Route = createFileRoute("/simulado/")({
 function SimuladoLanding() {
   return (
     <div className="jd-landing relative min-h-screen w-full overflow-hidden font-sans">
+      <img
+        src={simuladoLibraryBackground}
+        alt=""
+        width={1920}
+        height={1080}
+        aria-hidden="true"
+        className="jd-landing-background"
+      />
       <div className="jd-landing-orb ld-orb-1 size-72 -left-16 -top-10 bg-[oklch(0.28_0.07_260/25%)]" aria-hidden="true" />
       <div className="jd-landing-orb ld-orb-2 right-[-4rem] top-24 size-80 bg-[oklch(0.72_0.13_82/35%)]" aria-hidden="true" />
       <div className="jd-landing-orb ld-orb-3 bottom-10 left-1/3 size-64 bg-[oklch(0.28_0.07_260/18%)]" aria-hidden="true" />
