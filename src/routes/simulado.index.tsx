@@ -63,12 +63,10 @@ function SimuladoLanding() {
               <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">80</div>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">questões</div>
             </div>
-            <div className="jd-landing-glass-soft rounded-2xl px-5 py-4 text-left">
-              <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">90 min</div>
+            <div className="ld-rise jd-landing-glass-soft rounded-2xl px-5 py-4 text-left" style={{ animationDelay: "0.35s" }}>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">tempo estimado</div>
             </div>
-            <div className="jd-landing-glass-soft rounded-2xl px-5 py-4 text-left">
-              <div className="text-2xl font-bold text-[oklch(0.28_0.07_260)]">Grátis</div>
+            <div className="ld-rise jd-landing-glass-soft rounded-2xl px-5 py-4 text-left" style={{ animationDelay: "0.45s" }}>
               <div className="mt-1 text-sm text-[oklch(0.28_0.07_260/70%)]">
                 100% gratuito
               </div>
@@ -77,7 +75,7 @@ function SimuladoLanding() {
         </section>
 
         {/* Seção 3 — Explicação breve */}
-        <section className="jd-landing-glass mt-6 rounded-[2rem] px-6 py-10 sm:px-12 sm:py-12">
+        <section className="ld-rise jd-landing-glass mt-6 rounded-[2rem] px-6 py-10 sm:px-12 sm:py-12" style={{ animationDelay: "0.2s" }}>
           <div className="grid gap-8 sm:grid-cols-2 sm:items-center">
             <div>
               <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
