@@ -830,6 +830,8 @@ export type Database = {
           id: string
           nome_completo: string
           origem: string | null
+          simulado_ativado_em: string | null
+          simulado_status: string | null
           telefone: string | null
           teste_solicitado_em: string | null
           ultimo_acesso_em: string | null
@@ -844,6 +846,8 @@ export type Database = {
           id: string
           nome_completo?: string
           origem?: string | null
+          simulado_ativado_em?: string | null
+          simulado_status?: string | null
           telefone?: string | null
           teste_solicitado_em?: string | null
           ultimo_acesso_em?: string | null
@@ -858,6 +862,8 @@ export type Database = {
           id?: string
           nome_completo?: string
           origem?: string | null
+          simulado_ativado_em?: string | null
+          simulado_status?: string | null
           telefone?: string | null
           teste_solicitado_em?: string | null
           ultimo_acesso_em?: string | null
@@ -1163,6 +1169,174 @@ export type Database = {
           device_id?: string
           updated_at?: string
           user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      simulado_alternativas: {
+        Row: {
+          correta: boolean
+          created_at: string
+          id: string
+          letra: string
+          ordem: number
+          questao_id: string
+          texto: string
+        }
+        Insert: {
+          correta?: boolean
+          created_at?: string
+          id?: string
+          letra: string
+          ordem?: number
+          questao_id: string
+          texto: string
+        }
+        Update: {
+          correta?: boolean
+          created_at?: string
+          id?: string
+          letra?: string
+          ordem?: number
+          questao_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulado_alternativas_questao_id_fkey"
+            columns: ["questao_id"]
+            isOneToOne: false
+            referencedRelation: "simulado_questoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulado_questoes: {
+        Row: {
+          comentario: string | null
+          created_at: string
+          enunciado: string
+          id: string
+          materia: string
+          ordem: number
+          publicado: boolean
+          questao_id: string
+          updated_at: string
+        }
+        Insert: {
+          comentario?: string | null
+          created_at?: string
+          enunciado: string
+          id?: string
+          materia: string
+          ordem?: number
+          publicado?: boolean
+          questao_id: string
+          updated_at?: string
+        }
+        Update: {
+          comentario?: string | null
+          created_at?: string
+          enunciado?: string
+          id?: string
+          materia?: string
+          ordem?: number
+          publicado?: boolean
+          questao_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      simulado_respostas: {
+        Row: {
+          acertou: boolean
+          alternativa_id: string | null
+          created_at: string
+          id: string
+          questao_id: string
+          tentativa_id: string
+          user_id: string
+        }
+        Insert: {
+          acertou?: boolean
+          alternativa_id?: string | null
+          created_at?: string
+          id?: string
+          questao_id: string
+          tentativa_id: string
+          user_id: string
+        }
+        Update: {
+          acertou?: boolean
+          alternativa_id?: string | null
+          created_at?: string
+          id?: string
+          questao_id?: string
+          tentativa_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulado_respostas_alternativa_id_fkey"
+            columns: ["alternativa_id"]
+            isOneToOne: false
+            referencedRelation: "simulado_alternativas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulado_respostas_questao_id_fkey"
+            columns: ["questao_id"]
+            isOneToOne: false
+            referencedRelation: "simulado_questoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulado_respostas_tentativa_id_fkey"
+            columns: ["tentativa_id"]
+            isOneToOne: false
+            referencedRelation: "simulado_tentativas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulado_tentativas: {
+        Row: {
+          acertos: number
+          concluida_em: string | null
+          created_at: string
+          erros: number
+          id: string
+          iniciada_em: string
+          percentual: number
+          status: string
+          total_questoes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acertos?: number
+          concluida_em?: string | null
+          created_at?: string
+          erros?: number
+          id?: string
+          iniciada_em?: string
+          percentual?: number
+          status?: string
+          total_questoes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acertos?: number
+          concluida_em?: string | null
+          created_at?: string
+          erros?: number
+          id?: string
+          iniciada_em?: string
+          percentual?: number
+          status?: string
+          total_questoes?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

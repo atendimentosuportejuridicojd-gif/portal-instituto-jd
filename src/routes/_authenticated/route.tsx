@@ -11,12 +11,24 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getMinhaAssinatura, registrarUltimoAcesso } from "@/lib/assinaturas.functions";
 import { useSessaoUnica } from "@/hooks/use-sessao-unica";
+import { TrialRibbon } from "@/components/trial-ribbon";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
+
+    // Trava do funil do simulado: enquanto pendente, o acesso fica restrito ao simulado.
+    const { data: perfil } = await supabase
+      .from("profiles")
+      .select("simulado_status, simulado_ativado_em")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (perfil?.simulado_status === "pendente") throw redirect({ to: "/simulado/questoes" });
+    if (perfil?.simulado_status === "concluido" && !perfil.simulado_ativado_em)
+      throw redirect({ to: "/simulado/resultado" });
+
     return { user: data.user };
   },
   component: AuthenticatedLayout,
@@ -38,6 +50,12 @@ function AuthenticatedLayout() {
   }, [acessoFn]);
 
   const isAdmin = !!q.data?.isAdmin;
+  const mostrarFita =
+    !isBlockedPage &&
+    !isAdmin &&
+    !!q.data?.alunoTeste &&
+    !q.data?.ativa &&
+    q.data?.trialDiasRestantes != null;
 
   // Uma única sessão ativa por aluno (o último login encerra o anterior)
   useSessaoUnica(!!user);
@@ -56,6 +74,7 @@ function AuthenticatedLayout() {
       <div className="flex min-h-screen w-full bg-background">
         {!isBlockedPage && (inAdmin && isAdmin ? <AdminSidebar /> : <AppSidebar isAdmin={isAdmin} />)}
         <SidebarInset>
+          {mostrarFita && <TrialRibbon dias={q.data!.trialDiasRestantes!} />}
           <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             {!isBlockedPage && <SidebarTrigger />}
             {!isBlockedPage && (
