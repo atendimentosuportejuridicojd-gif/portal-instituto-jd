@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SimuladoIndexRouteImport } from './routes/simulado.index'
+import { Route as SimuladoResultadoRouteImport } from './routes/simulado.resultado'
 import { Route as SimuladoQuestoesRouteImport } from './routes/simulado.questoes'
 import { Route as SimuladoCadastroRouteImport } from './routes/simulado.cadastro'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -74,6 +75,11 @@ const IndexRoute = IndexRouteImport.update({
 const SimuladoIndexRoute = SimuladoIndexRouteImport.update({
   id: '/simulado/',
   path: '/simulado/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimuladoResultadoRoute = SimuladoResultadoRouteImport.update({
+  id: '/simulado/resultado',
+  path: '/simulado/resultado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SimuladoQuestoesRoute = SimuladoQuestoesRouteImport.update({
@@ -267,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulado/cadastro': typeof SimuladoCadastroRoute
   '/simulado/questoes': typeof SimuladoQuestoesRoute
+  '/simulado/resultado': typeof SimuladoResultadoRoute
   '/simulado/': typeof SimuladoIndexRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulado/cadastro': typeof SimuladoCadastroRoute
   '/simulado/questoes': typeof SimuladoQuestoesRoute
+  '/simulado/resultado': typeof SimuladoResultadoRoute
   '/simulado': typeof SimuladoIndexRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/simulado/cadastro': typeof SimuladoCadastroRoute
   '/simulado/questoes': typeof SimuladoQuestoesRoute
+  '/simulado/resultado': typeof SimuladoResultadoRoute
   '/simulado/': typeof SimuladoIndexRoute
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
@@ -385,6 +394,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/simulado/cadastro'
     | '/simulado/questoes'
+    | '/simulado/resultado'
     | '/simulado/'
     | '/admin/acervo'
     | '/admin/concursos'
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/simulado/cadastro'
     | '/simulado/questoes'
+    | '/simulado/resultado'
     | '/simulado'
     | '/admin/acervo'
     | '/admin/concursos'
@@ -462,6 +473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil'
     | '/simulado/cadastro'
     | '/simulado/questoes'
+    | '/simulado/resultado'
     | '/simulado/'
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
@@ -496,6 +508,7 @@ export interface RootRouteChildren {
   TesteRoute: typeof TesteRoute
   SimuladoCadastroRoute: typeof SimuladoCadastroRoute
   SimuladoQuestoesRoute: typeof SimuladoQuestoesRoute
+  SimuladoResultadoRoute: typeof SimuladoResultadoRoute
   SimuladoIndexRoute: typeof SimuladoIndexRoute
   ApiPublicHotmartWebhookRoute: typeof ApiPublicHotmartWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -544,6 +557,13 @@ declare module '@tanstack/react-router' {
       path: '/simulado'
       fullPath: '/simulado/'
       preLoaderRoute: typeof SimuladoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulado/resultado': {
+      id: '/simulado/resultado'
+      path: '/simulado/resultado'
+      fullPath: '/simulado/resultado'
+      preLoaderRoute: typeof SimuladoResultadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/simulado/questoes': {
@@ -843,6 +863,7 @@ const rootRouteChildren: RootRouteChildren = {
   TesteRoute: TesteRoute,
   SimuladoCadastroRoute: SimuladoCadastroRoute,
   SimuladoQuestoesRoute: SimuladoQuestoesRoute,
+  SimuladoResultadoRoute: SimuladoResultadoRoute,
   SimuladoIndexRoute: SimuladoIndexRoute,
   ApiPublicHotmartWebhookRoute: ApiPublicHotmartWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

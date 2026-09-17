@@ -17,6 +17,17 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
+
+    // Trava do funil do simulado: enquanto pendente, o acesso fica restrito ao simulado.
+    const { data: perfil } = await supabase
+      .from("profiles")
+      .select("simulado_status, simulado_ativado_em")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (perfil?.simulado_status === "pendente") throw redirect({ to: "/simulado/questoes" });
+    if (perfil?.simulado_status === "concluido" && !perfil.simulado_ativado_em)
+      throw redirect({ to: "/simulado/resultado" });
+
     return { user: data.user };
   },
   component: AuthenticatedLayout,
