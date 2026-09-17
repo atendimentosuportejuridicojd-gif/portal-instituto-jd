@@ -42,14 +42,14 @@ function SimuladoLanding() {
       <div className="jd-landing-orb ld-orb-3 bottom-10 left-1/3 size-64 bg-[oklch(0.28_0.07_260/18%)]" aria-hidden="true" />
 
       <header className="jd-landing-header relative z-10">
-        <div className="mx-auto flex max-w-5xl items-center px-5 py-5">
+        <div className="mx-auto flex max-w-5xl justify-center px-5 py-8 sm:py-10">
           <a href="https://carreira360.institutojd.ia.br/#top" aria-label="Carreira Judiciária 360">
             <img
               src={lockupAsset.url}
               alt="Instituto J&D — Carreira Judiciária 360"
-              width={280}
-              height={92}
-              className="h-12 w-auto object-contain sm:h-14"
+              width={840}
+              height={276}
+              className="h-36 w-auto object-contain sm:h-44"
             />
           </a>
         </div>
