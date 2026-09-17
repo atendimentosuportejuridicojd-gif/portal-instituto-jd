@@ -135,22 +135,9 @@ function SimuladoResultado() {
         {/* Oferta pós-simulado */}
         <section className="mt-14 grid gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="rounded-xl border border-primary/30 bg-primary/5 p-8">
-            <h2 className="text-2xl font-semibold tracking-tight">Conheça o Portal do Aluno</h2>
-            <p className="mt-2 text-base text-muted-foreground">
-              Acesso gratuito a todos os recursos por 5 dias, sem compromisso.
+            <p className="text-lg text-foreground">
+              Explore seu Portal. Você tem 5 dias para aproveitar.
             </p>
-            <ul className="mt-6 space-y-2 text-sm">
-              {[
-                "Acervo completo de matérias comentadas",
-                "Milhares de questões com desempenho por disciplina",
-                "Cronograma de estudos personalizado",
-              ].map((t) => (
-                <li key={t} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                  {t}
-                </li>
-              ))}
-            </ul>
             <Button
               size="lg"
               className="mt-8"
@@ -158,7 +145,7 @@ function SimuladoResultado() {
               onClick={() => ativar.mutate()}
             >
               {ativar.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Acessar o seu Portal
+              Acesse o seu Portal
             </Button>
           </div>
 
