@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import simuladoLibraryBackground from "@/assets/simulado-library-background.jpg";
 import lockupAsset from "@/assets/lockup-jd.png.asset.json";
@@ -85,12 +85,12 @@ function SimuladoLanding() {
           {videoPronto && (
             <div className="ld-rise mx-auto mt-8 w-full max-w-3xl">
               <video
+                ref={videoRef}
                 className="jd-landing-glass w-full rounded-2xl shadow-xl"
                 src={simuladoVideoAsset.url}
                 autoPlay
-                loop
-                muted
                 playsInline
+                controls
                 preload="auto"
                 aria-label="Apresentação do simulado gratuito do Instituto J&D"
               />
