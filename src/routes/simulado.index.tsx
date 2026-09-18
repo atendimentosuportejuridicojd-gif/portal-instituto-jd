@@ -82,9 +82,24 @@ function SimuladoLanding() {
             ou Ministério Público?
           </h1>
 
+          {videoPronto && (
+            <div className="ld-rise mx-auto mt-8 w-full max-w-3xl">
+              <video
+                className="jd-landing-glass w-full rounded-2xl shadow-xl"
+                src={simuladoVideoAsset.url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                aria-label="Apresentação do simulado gratuito do Instituto J&D"
+              />
+            </div>
+          )}
+
           <Link
             to="/simulado/cadastro"
-            className="jd-landing-cta mt-8 inline-flex min-h-[56px] items-center justify-center gap-2 rounded-2xl px-8 py-4 text-base font-bold transition-transform duration-200 hover:-translate-y-0.5 sm:text-lg"
+            className="jd-landing-cta jd-cta-ripple mt-8 inline-flex min-h-[56px] items-center justify-center gap-2 rounded-2xl px-8 py-4 text-base font-bold transition-transform duration-200 hover:-translate-y-0.5 sm:text-lg"
           >
             Fazer o simulado grátis
             <span aria-hidden="true">→</span>
