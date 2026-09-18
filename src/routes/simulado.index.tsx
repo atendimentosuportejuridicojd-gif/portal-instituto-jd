@@ -29,6 +29,13 @@ export const Route = createFileRoute("/simulado/")({
 });
 
 function SimuladoLanding() {
+  const [videoPronto, setVideoPronto] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVideoPronto(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="jd-landing relative min-h-screen w-full overflow-hidden font-sans">
       <img
