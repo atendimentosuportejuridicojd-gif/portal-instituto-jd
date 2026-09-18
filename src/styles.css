@@ -325,9 +325,40 @@
 }
 .jd-landing-cta { animation: ld-cta-glow 3.2s ease-in-out infinite; }
 
+/* Ondulação infinita do CTA — efeito de "piscar" suave e contínuo */
+@keyframes jd-cta-ripple {
+  0% {
+    box-shadow:
+      0 18px 38px -16px oklch(0.6 0.13 78 / 55%),
+      0 0 0 0 oklch(0.76 0.145 82 / 60%);
+  }
+  35% {
+    box-shadow:
+      0 18px 38px -16px oklch(0.6 0.13 78 / 55%),
+      0 0 0 14px oklch(0.76 0.145 82 / 32%);
+  }
+  60% {
+    box-shadow:
+      0 18px 38px -16px oklch(0.6 0.13 78 / 55%),
+      0 0 0 22px oklch(0.76 0.145 82 / 12%);
+  }
+  80% {
+    box-shadow:
+      0 18px 38px -16px oklch(0.6 0.13 78 / 55%),
+      0 0 0 28px oklch(0.76 0.145 82 / 0%);
+  }
+  100% {
+    box-shadow:
+      0 18px 38px -16px oklch(0.6 0.13 78 / 55%),
+      0 0 0 0 oklch(0.76 0.145 82 / 0%);
+  }
+}
+.jd-cta-ripple { animation: ld-cta-ripple 2.6s ease-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .jd-landing-cta,
-  .ld-rise { animation: none; }
+  .ld-rise,
+  .jd-cta-ripple { animation: none; }
 }
 .jd-landing-glass {
   background: #ffffff;
