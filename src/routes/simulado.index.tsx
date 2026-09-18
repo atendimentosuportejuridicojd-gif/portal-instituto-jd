@@ -30,11 +30,31 @@ export const Route = createFileRoute("/simulado/")({
 
 function SimuladoLanding() {
   const [videoPronto, setVideoPronto] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setVideoPronto(true), 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Tenta iniciar a reprodução COM som (uma única vez).
+  // Navegadores podem bloquear autoplay com áudio — nesse caso o usuário
+  // inicia manualmente pelos controles do vídeo.
+  useEffect(() => {
+    if (!videoPronto) return;
+    const video = videoRef.current;
+    if (!video) return;
+    const tentar = () => {
+      const p = video.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          /* autoplay bloqueado — controles ficam disponíveis */
+        });
+      }
+    };
+    const t = setTimeout(tentar, 150);
+    return () => clearTimeout(t);
+  }, [videoPronto]);
 
   return (
     <div className="jd-landing relative min-h-screen w-full overflow-hidden font-sans">
