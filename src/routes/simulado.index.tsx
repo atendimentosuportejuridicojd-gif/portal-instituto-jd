@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import simuladoLibraryBackground from "@/assets/simulado-library-background.jpg";
 import lockupAsset from "@/assets/lockup-jd.png.asset.json";
+import simuladoVideoAsset from "@/assets/simulado-video.mp4.asset.json";
 
 export const Route = createFileRoute("/simulado/")({
   head: () => ({
