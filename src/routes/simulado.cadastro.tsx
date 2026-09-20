@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { criarContaSimulado } from "@/lib/simulado.functions";
+import { trackConversion } from "@/lib/google-ads";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +46,7 @@ function SimuladoCadastro() {
   const criar = useMutation({
     mutationFn: () => criarFn({ data: { nome, email, telefone, senha } }),
     onSuccess: async () => {
+      trackConversion("AW-18069973013/oDN1CP-apP4cEJXQt6hD");
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
       if (error) {
         toast.success("Conta criada! Faça login para começar o simulado.");

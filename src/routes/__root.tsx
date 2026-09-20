@@ -13,6 +13,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { initGoogleAds } from "@/lib/google-ads";
 
 function NotFoundComponent() {
   return (
@@ -143,10 +145,15 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  useEffect(() => {
+    initGoogleAds();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <Toaster richColors position="top-right" />
+      <CookieConsentBanner />
     </QueryClientProvider>
   );
 }
