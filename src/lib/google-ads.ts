@@ -24,16 +24,21 @@ function isBrowser() {
   return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
+// Empilha o `arguments` da chamada (array-like), igual ao snippet oficial do
+// gtag.js (`function gtag(){dataLayer.push(arguments);}`) — empilhar um Array
+// de verdade em vez do `arguments` faz o gtag.js ignorar a entrada.
 function callGtag(...args: unknown[]) {
   window.dataLayer = window.dataLayer ?? [];
-  window.dataLayer.push(args);
+  // eslint-disable-next-line prefer-rest-params -- gtag.js exige o arguments em si, não um array
+  window.dataLayer.push(arguments);
 }
 
 function ensureGtagStub() {
   window.dataLayer = window.dataLayer ?? [];
   if (!window.gtag) {
     window.gtag = function gtag(...args: unknown[]) {
-      window.dataLayer!.push(args);
+      // eslint-disable-next-line prefer-rest-params -- gtag.js exige o arguments em si, não um array
+      window.dataLayer!.push(arguments);
     };
   }
 }
@@ -151,10 +156,69 @@ export function updateConsent(decision: ConsentDecision) {
  * próprio gtag, se envia dados completos ou um ping modelado/sem cookie —
  * a chamada é a mesma nos dois casos.
  *
+ * Quando `onComplete` é passado, o evento vai com `transport_type: 'beacon'`
+ * (não é cancelado por uma troca de página) e `onComplete` só roda depois do
+ * `event_callback` do gtag ou de um timeout curto — o que vier primeiro.
+ * Use isso antes de navegar para outra página no mesmo clique.
+ *
  * @param label `send_to` do evento, no formato `AW-XXXXXXXXX/xxxxxxxxxxxxxxxx`.
  */
-export function trackConversion(label: string) {
-  if (!isBrowser()) return;
+export function trackConversion(label: string, onComplete?: () => void) {
+  if (!isBrowser()) {
+    onComplete?.();
+    return;
+  }
   ensureGtagStub();
-  callGtag("event", "conversion", { send_to: label });
+
+  if (!onComplete) {
+    callGtag("event", "conversion", { send_to: label });
+    return;
+  }
+
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    onComplete();
+  };
+
+  callGtag("event", "conversion", {
+    send_to: label,
+    transport_type: "beacon",
+    event_callback: finish,
+  });
+  window.setTimeout(finish, 500);
+}
+
+/**
+ * Igual a `trackConversion`, mas só dispara uma vez por visitante — marca em
+ * `localStorage` na chave `storageKey`. Reload da página ou clique repetido
+ * não repetem o evento; `onComplete` roda de qualquer forma (imediatamente,
+ * se já estava marcado, ou depois do disparo, na primeira vez).
+ */
+export function trackConversionOnce(storageKey: string, label: string, onComplete?: () => void) {
+  if (!isBrowser()) {
+    onComplete?.();
+    return;
+  }
+
+  let already = false;
+  try {
+    already = window.localStorage.getItem(storageKey) === "1";
+  } catch {
+    already = false;
+  }
+
+  if (already) {
+    onComplete?.();
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(storageKey, "1");
+  } catch {
+    // localStorage indisponível (modo privado, etc.) — segue sem persistir.
+  }
+
+  trackConversion(label, onComplete);
 }

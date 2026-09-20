@@ -1,8 +1,10 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getResultadoSimulado, ativarAcessoPortal } from "@/lib/simulado.functions";
+import { trackConversionOnce } from "@/lib/google-ads";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -53,6 +55,13 @@ function SimuladoResultado() {
     onError: (e: any) => toast.error(e?.message ?? "Não foi possível liberar seu acesso."),
   });
 
+  const tentativa = q.data?.tentativa ?? null;
+
+  useEffect(() => {
+    if (!tentativa) return;
+    trackConversionOnce("jd_conv_simulado_concluido", "AW-18069973013/UwhNCLGZn_8cEJXQt6hD");
+  }, [tentativa]);
+
   if (q.isLoading) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
@@ -60,8 +69,6 @@ function SimuladoResultado() {
       </div>
     );
   }
-
-  const tentativa = q.data?.tentativa ?? null;
 
   if (!tentativa) {
     return (
@@ -143,7 +150,13 @@ function SimuladoResultado() {
               size="lg"
               className="mt-8"
               disabled={ativar.isPending}
-              onClick={() => ativar.mutate()}
+              onClick={() => {
+                trackConversionOnce(
+                  "jd_conv_acesso_portal",
+                  "AW-18069973013/C3H5CLbpof8cEJXQt6hD",
+                  () => ativar.mutate(),
+                );
+              }}
             >
               {ativar.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Acesse o seu Portal
@@ -162,7 +175,14 @@ function SimuladoResultado() {
               Guia da Carreira Judiciária — material introdutório gratuito.
             </p>
             <Button asChild variant="outline" size="sm" className="mt-4 w-full">
-              <a href={EBOOK_URL} target="_blank" rel="noreferrer">
+              <a
+                href={EBOOK_URL}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() =>
+                  trackConversionOnce("jd_conv_clique_guia", "AW-18069973013/ZPVoCLnCn_8cEJXQt6hD")
+                }
+              >
                 Baixar guia gratuito
               </a>
             </Button>
