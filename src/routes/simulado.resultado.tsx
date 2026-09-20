@@ -1,5 +1,5 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,12 +47,17 @@ function SimuladoResultado() {
 
   const q = useQuery({ queryKey: ["simulado-resultado"], queryFn: () => resFn(), retry: false });
 
+  const [ativando, setAtivando] = useState(false);
+
   const ativar = useMutation({
     mutationFn: () => ativarFn(),
     onSuccess: () => {
       window.location.replace("/dashboard");
     },
-    onError: (e: any) => toast.error(e?.message ?? "Não foi possível liberar seu acesso."),
+    onError: (e: any) => {
+      setAtivando(false);
+      toast.error(e?.message ?? "Não foi possível liberar seu acesso.");
+    },
   });
 
   const tentativa = q.data?.tentativa ?? null;
@@ -149,8 +154,10 @@ function SimuladoResultado() {
             <Button
               size="lg"
               className="mt-8"
-              disabled={ativar.isPending}
+              disabled={ativando || ativar.isPending}
               onClick={() => {
+                if (ativando || ativar.isPending) return;
+                setAtivando(true);
                 trackConversionOnce(
                   "jd_conv_acesso_portal",
                   "AW-18069973013/C3H5CLbpof8cEJXQt6hD",
@@ -158,7 +165,7 @@ function SimuladoResultado() {
                 );
               }}
             >
-              {ativar.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {(ativando || ativar.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Acesse o seu Portal
             </Button>
           </div>
