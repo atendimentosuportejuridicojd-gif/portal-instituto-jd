@@ -827,6 +827,8 @@ export type Database = {
           bloqueado_motivo: string | null
           created_at: string
           email: string
+          gclid: string | null
+          gclid_captured_at: string | null
           id: string
           nome_completo: string
           origem: string | null
@@ -843,6 +845,8 @@ export type Database = {
           bloqueado_motivo?: string | null
           created_at?: string
           email?: string
+          gclid?: string | null
+          gclid_captured_at?: string | null
           id: string
           nome_completo?: string
           origem?: string | null
@@ -859,6 +863,8 @@ export type Database = {
           bloqueado_motivo?: string | null
           created_at?: string
           email?: string
+          gclid?: string | null
+          gclid_captured_at?: string | null
           id?: string
           nome_completo?: string
           origem?: string | null
