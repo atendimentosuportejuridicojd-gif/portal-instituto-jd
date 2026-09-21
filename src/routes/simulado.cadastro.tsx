@@ -43,8 +43,19 @@ function SimuladoCadastro() {
   const [senha, setSenha] = useState("");
   const [confirmar, setConfirmar] = useState("");
 
+  const getGclid = () => {
+    if (typeof window === "undefined") return undefined;
+    const fromUrl = new URLSearchParams(window.location.search).get("gclid");
+    if (fromUrl) return fromUrl;
+    try {
+      return window.sessionStorage.getItem("jd_gclid") ?? undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
   const criar = useMutation({
-    mutationFn: () => criarFn({ data: { nome, email, telefone, senha } }),
+    mutationFn: () => criarFn({ data: { nome, email, telefone, senha, gclid: getGclid() } }),
     onSuccess: async () => {
       trackConversion("AW-18069973013/oDN1CP-apP4cEJXQt6hD");
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });

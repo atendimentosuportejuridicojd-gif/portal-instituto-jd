@@ -4,6 +4,14 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const TOTAL_PADRAO = 80;
 
+const gclidSchema = z.preprocess((value) => {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  return normalized.length > 0 && normalized.length <= 200 && /^[A-Za-z0-9_-]+$/.test(normalized)
+    ? normalized
+    : undefined;
+}, z.string().optional());
+
 const cadastroSchema = z.object({
   nome: z.string().trim().min(3, "Informe seu nome completo").max(120),
   email: z.string().trim().email("E-mail inválido").max(255),
@@ -14,6 +22,7 @@ const cadastroSchema = z.object({
     .max(20)
     .regex(/^[0-9()+\-\s]+$/, "Telefone inválido"),
   senha: z.string().min(6, "A senha deve ter no mínimo 6 caracteres").max(72),
+  gclid: gclidSchema,
 });
 
 /**
@@ -66,6 +75,9 @@ export const criarContaSimulado = createServerFn({ method: "POST" })
         telefone: telefoneDigitos,
         origem: "simulado",
         simulado_status: "pendente",
+        ...(data.gclid
+          ? { gclid: data.gclid, gclid_captured_at: new Date().toISOString() }
+          : {}),
       })
       .eq("id", userId);
 
