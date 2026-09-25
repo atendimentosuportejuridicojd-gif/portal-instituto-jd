@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as TesteRouteImport } from './routes/teste'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -48,6 +49,11 @@ import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from '
 import { Route as AuthenticatedAcervoCargoIdDisciplinaIdRouteImport } from './routes/_authenticated/acervo.$cargoId.$disciplinaId'
 import { Route as AuthenticatedAdminMateriaisMaterialIdEditarRouteImport } from './routes/_authenticated/admin/materiais.$materialId.editar'
 
+const WhatsappRoute = WhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TesteRoute = TesteRouteImport.update({
   id: '/teste',
   path: '/teste',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
+  '/whatsapp': typeof WhatsappRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
+  '/whatsapp': typeof WhatsappRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
+  '/whatsapp': typeof WhatsappRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
   '/_authenticated/cronogramas': typeof AuthenticatedCronogramasRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/teste'
+    | '/whatsapp'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/cronogramas'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/teste'
+    | '/whatsapp'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/cronogramas'
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/teste'
+    | '/whatsapp'
     | '/_authenticated/assinatura-bloqueada'
     | '/_authenticated/concursos'
     | '/_authenticated/cronogramas'
@@ -506,6 +518,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TesteRoute: typeof TesteRoute
+  WhatsappRoute: typeof WhatsappRoute
   SimuladoCadastroRoute: typeof SimuladoCadastroRoute
   SimuladoQuestoesRoute: typeof SimuladoQuestoesRoute
   SimuladoResultadoRoute: typeof SimuladoResultadoRoute
@@ -517,6 +530,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/whatsapp': {
+      id: '/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teste': {
       id: '/teste'
       path: '/teste'
@@ -861,6 +881,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TesteRoute: TesteRoute,
+  WhatsappRoute: WhatsappRoute,
   SimuladoCadastroRoute: SimuladoCadastroRoute,
   SimuladoQuestoesRoute: SimuladoQuestoesRoute,
   SimuladoResultadoRoute: SimuladoResultadoRoute,
