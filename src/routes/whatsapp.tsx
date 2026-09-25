@@ -3,6 +3,7 @@ import { ExternalLink, MessageCircle } from "lucide-react";
 
 import lockupAsset from "@/assets/lockup-jd.png.asset.json";
 import { Button } from "@/components/ui/button";
+import { trackConversion } from "@/lib/google-ads";
 
 const WHATSAPP_URL =
   "https://wa.me/5548991119813?text=Ol%C3%A1!%20Vi%20o%20an%C3%BAncio%20e%20quero%20fazer%20minha%20avalia%C3%A7%C3%A3o%20de%20desempenho%20gratuita%20e%20tamb%C3%A9m%20conhecer%20outros%20benef%C3%ADcios%20gratuitos.";
@@ -65,7 +66,23 @@ function WhatsAppPage() {
           size="lg"
           className="mt-9 h-14 bg-gold px-7 text-base font-semibold text-gold-foreground shadow-lg hover:bg-gold/90"
         >
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(event) => {
+              event.preventDefault();
+              const whatsappWindow = window.open("", "_blank");
+              trackConversion("AW-18069973013/8z4nCIismIUdEJXQt6hD", () => {
+                if (whatsappWindow) {
+                  whatsappWindow.opener = null;
+                  whatsappWindow.location.href = WHATSAPP_URL;
+                  return;
+                }
+                window.location.href = WHATSAPP_URL;
+              });
+            }}
+          >
             <MessageCircle className="size-6" aria-hidden="true" />
             Conversar pelo WhatsApp
             <ExternalLink className="size-4 opacity-70" aria-hidden="true" />
