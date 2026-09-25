@@ -72,8 +72,14 @@ function WhatsAppPage() {
             rel="noopener noreferrer"
             onClick={(event) => {
               event.preventDefault();
+              const whatsappWindow = window.open("", "_blank");
               trackConversion("AW-18069973013/8z4nCIismIUdEJXQt6hD", () => {
-                window.open(WHATSAPP_URL, "_blank", "noopener,noreferrer");
+                if (whatsappWindow) {
+                  whatsappWindow.opener = null;
+                  whatsappWindow.location.href = WHATSAPP_URL;
+                  return;
+                }
+                window.location.href = WHATSAPP_URL;
               });
             }}
           >
