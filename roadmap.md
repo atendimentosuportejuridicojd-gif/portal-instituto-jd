@@ -5,3 +5,5 @@
 
 - [x] Remover a espera de 3 segundos no carregamento do vídeo do simulado.
 - [x] Identificar os usuários que concluíram o simulado e seus resultados.
+- [ ] Refinar visualmente /curso-carreira-judiciaria com marinho e ouro, tipografia moderna e seções editoriais.
+- [ ] Usar o ícone do WhatsApp e a cor verde no botão flutuante "Fale com a nossa equipe".
