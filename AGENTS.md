@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Public advertising pages live as leaf routes under `src/routes/` and inherit `__root.tsx`, so shared Google Ads and cookie consent initialization always applies.
