@@ -14,6 +14,7 @@ import {
   MonitorSmartphone,
 } from "lucide-react";
 import lockupAsset from "@/assets/lockup-jd.png.asset.json";
+import perfilJohnLucasAsset from "@/assets/perfil-john-lucas.jpeg.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -241,13 +242,30 @@ function CursoCarreiraJudiciariaPage() {
 
         <section className="bg-background text-foreground">
           <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-            <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
-              <div>
+            <div className="grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-20">
+              <div className="grid gap-7 sm:grid-cols-[180px_1fr] sm:items-center lg:grid-cols-1 lg:items-start xl:grid-cols-[200px_1fr] xl:items-center">
+                <img
+                  src={perfilJohnLucasAsset.url}
+                  alt="John Lucas Rodrigues, fundador do Instituto J&D"
+                  width={847}
+                  height={768}
+                  className="aspect-[4/5] w-full max-w-[220px] rounded-md border border-gold/30 object-cover object-top shadow-lg"
+                />
+                <div>
                 <p className="text-sm font-bold uppercase text-gold">Quem está por trás</p>
                 <h2 className="mt-3 text-3xl font-bold text-primary">Sobre o autor</h2>
-                <div className="mt-6 border-l-4 border-gold pl-5">
+                <div className="mt-5 border-l-4 border-gold pl-5">
                   <p className="text-xl font-bold text-primary">John Lucas Rodrigues</p>
                   <p className="mt-1 text-muted-foreground">Fundador do Instituto J&D</p>
+                </div>
+                <p className="mt-5 leading-7 text-muted-foreground">
+                  Especialista na Carreira Judiciária, dedica-se a ensinar candidatos a construírem uma preparação inteligente para os concursos dos Tribunais e Ministérios Públicos. Sua metodologia é baseada em estratégia, constância e visão profunda da carreira.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold uppercase text-primary">
+                  <span className="border border-gold/40 bg-gold/10 px-3 py-2">Especialista</span>
+                  <span className="border border-gold/40 bg-gold/10 px-3 py-2">Método próprio</span>
+                  <span className="border border-gold/40 bg-gold/10 px-3 py-2">Autor J&D</span>
+                </div>
                 </div>
               </div>
               <div>
