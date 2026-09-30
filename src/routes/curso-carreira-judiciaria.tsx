@@ -1,7 +1,4 @@
-import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BookOpen,
@@ -9,18 +6,13 @@ import {
   CheckCircle2,
   CircleHelp,
   Clock3,
-  Loader2,
+  MessageCircle,
   MessageCircleQuestion,
   MonitorSmartphone,
 } from "lucide-react";
 import lockupAsset from "@/assets/lockup-jd.png.asset.json";
 import perfilJohnLucasAsset from "@/assets/perfil-john-lucas.jpeg.asset.json";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
-import { criarContaTeste } from "@/lib/teste-gratis.functions";
-import { toast } from "sonner";
 
 const PAGE_URL = "https://portal.institutojd.ia.br/curso-carreira-judiciaria";
 
@@ -85,116 +77,32 @@ export const Route = createFileRoute("/curso-carreira-judiciaria")({
   component: CursoCarreiraJudiciariaPage,
 });
 
-function getGclid() {
-  if (typeof window === "undefined") return undefined;
-  const fromUrl = new URLSearchParams(window.location.search).get("gclid");
-  if (fromUrl) return fromUrl;
-  try {
-    return window.sessionStorage.getItem("jd_gclid") ?? undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function TesteForm() {
-  const navigate = useNavigate();
-  const criarFn = useServerFn(criarContaTeste);
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmar, setConfirmar] = useState("");
-
-  const criar = useMutation({
-    mutationFn: () => criarFn({ data: { nome, email, telefone, senha, gclid: getGclid() } }),
-    onSuccess: async (result) => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error) {
-        toast.success("Conta de teste criada! Faça login para começar.");
-        return navigate({ to: "/auth", replace: true });
-      }
-      toast.success(`Teste de ${result.dias} dias liberado. Bons estudos!`);
-      navigate({ to: "/dashboard", replace: true });
-    },
-    onError: (error: Error) => toast.error(error.message || "Não foi possível criar a conta."),
-  });
-
-  const submit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (senha !== confirmar) {
-      toast.error("As senhas não coincidem.");
-      return;
-    }
-    criar.mutate();
-  };
-
-  return (
-    <div id="cadastro" className="scroll-mt-6 rounded-md border border-gold/30 bg-card p-5 text-card-foreground shadow-2xl sm:p-7">
-      <div className="mb-5">
-        <p className="text-xs font-bold uppercase text-gold">Comece agora</p>
-        <h2 className="mt-2 text-2xl font-bold text-primary">Seu teste grátis de 5 dias</h2>
-      </div>
-      <form onSubmit={submit} className="space-y-3.5">
-        <div className="space-y-1.5">
-          <Label htmlFor="curso-nome">Nome completo</Label>
-          <Input id="curso-nome" value={nome} onChange={(event) => setNome(event.target.value)} maxLength={120} required />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="curso-email">E-mail</Label>
-          <Input id="curso-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={255} required />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="curso-telefone">Celular (WhatsApp)</Label>
-          <Input id="curso-telefone" type="tel" inputMode="tel" autoComplete="tel" value={telefone} onChange={(event) => setTelefone(event.target.value)} maxLength={20} required />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="curso-senha">Senha</Label>
-            <Input id="curso-senha" type="password" autoComplete="new-password" value={senha} onChange={(event) => setSenha(event.target.value)} minLength={6} required />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="curso-confirmar">Confirmar senha</Label>
-            <Input id="curso-confirmar" type="password" autoComplete="new-password" value={confirmar} onChange={(event) => setConfirmar(event.target.value)} minLength={6} required />
-          </div>
-        </div>
-        <Button type="submit" className="min-h-12 w-full bg-gold font-bold text-gold-foreground hover:bg-gold/90" disabled={criar.isPending}>
-          {criar.isPending ? <Loader2 className="animate-spin" /> : <ArrowRight />}
-          Começar meu teste grátis de 5 dias
-        </Button>
-      </form>
-      <p className="mt-3 text-center text-xs text-muted-foreground">Sem cartão · Sem compromisso · Acesso imediato</p>
-    </div>
-  );
-}
-
 function CursoCarreiraJudiciariaPage() {
   return (
     <div className="min-h-screen bg-sidebar text-sidebar-foreground">
       <header className="border-b border-sidebar-border bg-sidebar/95">
-        <div className="mx-auto flex max-w-6xl justify-center px-5 py-5 sm:justify-start">
-          <img src={lockupAsset.url} alt="Instituto J&D — Carreira Judiciária 360" width={360} height={118} className="h-16 w-auto object-contain" />
+        <div className="mx-auto flex max-w-6xl justify-center px-5 py-8 sm:py-10">
+          <img src={lockupAsset.url} alt="Instituto J&D — Carreira Judiciária 360" width={840} height={276} className="h-36 w-auto object-contain sm:h-44" />
         </div>
       </header>
 
       <main>
         <section className="border-b border-sidebar-border">
-          <div className="mx-auto grid max-w-6xl gap-10 px-5 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] lg:items-center lg:py-16">
-            <div>
+          <div className="mx-auto max-w-5xl px-5 py-12 text-center sm:py-16">
+            <div className="mx-auto max-w-4xl">
               <p className="text-sm font-bold uppercase text-gold">Curso Carreira Judiciária 360</p>
-              <h1 className="mt-4 max-w-2xl font-serif text-4xl font-semibold leading-tight text-sidebar-foreground sm:text-6xl">
-                Sua preparação antes do edital sair
+              <h1 className="mt-4 font-serif text-4xl font-semibold leading-tight text-sidebar-foreground sm:text-6xl">
+                Sua <span className="text-gold">preparação continuada</span> antes do edital sair
               </h1>
-              <p className="mt-6 max-w-2xl text-base leading-7 text-sidebar-foreground/75 sm:text-lg">
+              <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-sidebar-foreground/75 sm:text-lg">
                 Técnico, Analista e Oficial de Justiça (Tribunais e MPs). Preparação contínua, atualizada todos os dias e em tempo real.
               </p>
-              <div className="mt-7 hidden lg:block">
+              <div className="mt-8">
                 <Button asChild size="lg" className="bg-gold font-bold text-gold-foreground hover:bg-gold/90">
-                  <a href="#cadastro">Começar meu teste grátis de 5 dias <ArrowRight /></a>
+                  <Link to="/teste">Começar meu teste grátis de 5 dias <ArrowRight /></Link>
                 </Button>
-                <p className="mt-3 text-sm text-sidebar-foreground/60">Sem cartão · Sem compromisso · Acesso imediato</p>
               </div>
             </div>
-            <TesteForm />
           </div>
         </section>
 
@@ -293,12 +201,17 @@ function CursoCarreiraJudiciariaPage() {
           <div className="mx-auto flex max-w-4xl flex-col items-center px-5 py-14 text-center">
             <Check className="size-9 text-gold" />
             <Button asChild size="lg" className="mt-7 bg-gold font-bold text-gold-foreground hover:bg-gold/90">
-              <a href="#cadastro">Começar meu teste grátis de 5 dias <ArrowRight /></a>
+               <Link to="/teste">Começar meu teste grátis de 5 dias <ArrowRight /></Link>
             </Button>
-            <p className="mt-3 text-sm text-sidebar-foreground/60">Sem cartão · Sem compromisso · Acesso imediato</p>
           </div>
         </section>
       </main>
+       <Button asChild size="lg" className="fixed bottom-5 right-5 z-50 bg-gold font-bold text-gold-foreground shadow-2xl hover:bg-gold/90 sm:bottom-7 sm:right-7">
+         <a href="https://wa.me/5548991119813" target="_blank" rel="noreferrer">
+           <MessageCircle />
+           Fale com a nossa equipe
+         </a>
+       </Button>
     </div>
   );
 }
