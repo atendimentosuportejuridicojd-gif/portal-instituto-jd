@@ -16,6 +16,14 @@ import { Button } from "@/components/ui/button";
 
 const PAGE_URL = "https://portal.institutojd.ia.br/curso-carreira-judiciaria";
 
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true" className={className} fill="currentColor">
+      <path d="M16.04 3C8.86 3 3.02 8.77 3.02 15.87c0 2.27.6 4.48 1.74 6.42L3 28.72l6.63-1.72a13.14 13.14 0 0 0 6.4 1.64h.01c7.18 0 13.02-5.77 13.02-12.87C29.06 8.77 23.22 3 16.04 3Zm0 23.47h-.01a10.9 10.9 0 0 1-5.55-1.5l-.4-.24-3.93 1.02 1.05-3.79-.26-.4a10.58 10.58 0 0 1-1.67-5.69c0-5.9 4.83-10.7 10.77-10.7 5.94 0 10.77 4.8 10.77 10.7 0 5.85-4.83 10.6-10.77 10.6Zm5.91-7.94c-.32-.16-1.92-.94-2.22-1.05-.3-.11-.51-.16-.73.16-.22.32-.84 1.05-1.03 1.26-.19.22-.38.24-.7.08-.33-.16-1.37-.5-2.61-1.59a9.78 9.78 0 0 1-1.81-2.23c-.19-.32-.02-.5.14-.66.15-.14.33-.38.49-.57.16-.19.22-.32.32-.54.11-.21.06-.4-.02-.56-.08-.16-.73-1.74-1-2.39-.27-.63-.54-.55-.73-.56h-.62c-.22 0-.57.08-.87.4-.3.32-1.14 1.1-1.14 2.69 0 1.58 1.17 3.12 1.33 3.33.16.22 2.3 3.48 5.57 4.88.78.33 1.39.53 1.86.68.78.25 1.49.21 2.05.13.63-.09 1.92-.78 2.19-1.53.27-.75.27-1.4.19-1.53-.08-.14-.3-.22-.62-.38Z" />
+    </svg>
+  );
+}
+
 const COMO_FUNCIONA = [
   "Leia o artigo do tema, escrito direto no portal. Sem vídeo, sem PDF, nada para baixar.",
   "Marque como lido.",
@@ -79,28 +87,45 @@ export const Route = createFileRoute("/curso-carreira-judiciaria")({
 
 function CursoCarreiraJudiciariaPage() {
   return (
-    <div className="min-h-screen bg-sidebar text-sidebar-foreground">
-      <header className="border-b border-sidebar-border bg-sidebar/95">
-        <div className="mx-auto flex max-w-6xl justify-center px-5 py-8 sm:py-10">
-          <img src={lockupAsset.url} alt="Instituto J&D — Carreira Judiciária 360" width={840} height={276} className="h-36 w-auto object-contain sm:h-44" />
+    <div className="min-h-screen bg-background font-course-body text-foreground">
+      <header className="border-b border-sidebar-border bg-sidebar">
+        <div className="mx-auto flex max-w-7xl justify-center px-5 py-8 sm:py-10">
+          <img src={lockupAsset.url} alt="Instituto J&D — Carreira Judiciária 360" width={840} height={276} className="h-32 w-auto object-contain sm:h-40" />
         </div>
       </header>
 
       <main>
-        <section className="border-b border-sidebar-border">
-          <div className="mx-auto max-w-5xl px-5 py-12 text-center sm:py-16">
-            <div className="mx-auto max-w-4xl">
-              <p className="text-sm font-bold uppercase text-gold">Curso Carreira Judiciária 360</p>
-              <h1 className="mt-4 font-serif text-4xl font-semibold leading-tight text-sidebar-foreground sm:text-6xl">
+        <section className="border-b border-border bg-background">
+          <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-16 lg:py-24">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-2 text-xs font-bold uppercase text-primary">
+                <span className="size-2 rounded-full bg-gold" /> Curso Carreira Judiciária 360
+              </div>
+              <h1 className="mt-7 font-course-heading text-4xl font-bold leading-tight text-primary sm:text-6xl">
                 Sua <span className="text-gold">preparação continuada</span> antes do edital sair
               </h1>
-              <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-sidebar-foreground/75 sm:text-lg">
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground lg:mx-0">
                 Técnico, Analista e Oficial de Justiça (Tribunais e MPs). Preparação contínua, atualizada todos os dias e em tempo real.
               </p>
-              <div className="mt-8">
-                <Button asChild size="lg" className="bg-gold font-bold text-gold-foreground hover:bg-gold/90">
+              <div className="mt-9">
+                <Button asChild size="lg" className="min-h-14 bg-primary px-8 font-bold text-primary-foreground shadow-xl hover:bg-primary/90">
                   <Link to="/teste">Começar meu teste grátis de 5 dias <ArrowRight /></Link>
                 </Button>
+              </div>
+            </div>
+            <div className="border border-border bg-card p-5 shadow-2xl sm:p-7">
+              <p className="text-xs font-bold uppercase text-gold">O que você encontra</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {BENEFICIOS.map(({ icon: Icon, text }, index) => (
+                  <div key={text} className={index === 1 ? "bg-primary p-5 text-primary-foreground" : "border border-border bg-background p-5 text-card-foreground"}>
+                    <Icon className={index === 1 ? "size-7 text-gold" : "size-7 text-primary"} />
+                    <p className="mt-5 font-semibold leading-6">{text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 flex items-center justify-between gap-4 bg-gold px-5 py-4 text-gold-foreground">
+                <div><p className="text-xs font-semibold uppercase">Comece hoje</p><p className="mt-1 font-bold">5 dias para conhecer o portal</p></div>
+                <ArrowRight className="size-6 shrink-0" />
               </div>
             </div>
           </div>
@@ -108,10 +133,10 @@ function CursoCarreiraJudiciariaPage() {
 
         <section className="bg-background text-foreground">
           <div className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
+            <div className="grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-24">
               <div>
                 <p className="text-sm font-bold uppercase text-gold">Como funciona</p>
-                <h2 className="mt-3 text-3xl font-bold text-primary sm:text-4xl">Um ciclo direto de estudo e prática</h2>
+                <h2 className="mt-3 font-course-heading text-3xl font-bold text-primary sm:text-4xl">Um ciclo direto de estudo e prática</h2>
                 <ol className="mt-8 space-y-5">
                   {COMO_FUNCIONA.map((item, index) => (
                     <li key={item} className="flex gap-4">
@@ -121,16 +146,10 @@ function CursoCarreiraJudiciariaPage() {
                   ))}
                 </ol>
               </div>
-              <div>
-                <p className="text-sm font-bold uppercase text-gold">No teste de 5 dias você tem</p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {BENEFICIOS.map(({ icon: Icon, text }) => (
-                    <div key={text} className="rounded-md border border-border bg-card p-5 shadow-sm">
-                      <Icon className="size-6 text-gold" />
-                      <p className="mt-4 font-semibold leading-6 text-card-foreground">{text}</p>
-                    </div>
-                  ))}
-                </div>
+              <div className="border-l border-gold/40 pl-7 sm:pl-10">
+                <p className="text-sm font-bold uppercase text-gold">Método Instituto J&D</p>
+                <p className="mt-4 font-course-heading text-2xl font-semibold leading-9 text-primary">Conteúdo e prática reunidos em uma rotina simples, clara e mensurável.</p>
+                <p className="mt-5 leading-7 text-muted-foreground">Cada tema leva você da leitura às questões comentadas e ao acompanhamento do próprio desempenho.</p>
               </div>
             </div>
           </div>
@@ -161,7 +180,7 @@ function CursoCarreiraJudiciariaPage() {
                 />
                 <div>
                 <p className="text-sm font-bold uppercase text-gold">Quem está por trás</p>
-                <h2 className="mt-3 text-3xl font-bold text-primary">Sobre o autor</h2>
+                <h2 className="mt-3 font-course-heading text-3xl font-bold text-primary">Sobre o autor</h2>
                 <div className="mt-5 border-l-4 border-gold pl-5">
                   <p className="text-xl font-bold text-primary">John Lucas Rodrigues</p>
                   <p className="mt-1 text-muted-foreground">Fundador do Instituto J&D</p>
@@ -179,7 +198,7 @@ function CursoCarreiraJudiciariaPage() {
               <div>
                 <div className="flex items-center gap-3">
                   <CircleHelp className="size-7 text-gold" />
-                  <h2 className="text-3xl font-bold text-primary">Perguntas frequentes</h2>
+                  <h2 className="font-course-heading text-3xl font-bold text-primary">Perguntas frequentes</h2>
                 </div>
                 <div className="mt-6 divide-y divide-border border-y border-border">
                   {FAQ.map((item) => (
@@ -206,9 +225,9 @@ function CursoCarreiraJudiciariaPage() {
           </div>
         </section>
       </main>
-       <Button asChild size="lg" className="fixed bottom-5 right-5 z-50 bg-gold font-bold text-gold-foreground shadow-2xl hover:bg-gold/90 sm:bottom-7 sm:right-7">
+       <Button asChild size="lg" className="fixed bottom-5 right-5 z-50 min-h-14 bg-whatsapp px-5 font-bold text-whatsapp-foreground shadow-2xl hover:bg-whatsapp/90 sm:bottom-7 sm:right-7">
          <a href="https://wa.me/5548991119813" target="_blank" rel="noreferrer">
-           <MessageCircle />
+           <WhatsAppIcon className="size-6" />
            Fale com a nossa equipe
          </a>
        </Button>
