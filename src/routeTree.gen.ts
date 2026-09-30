@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as TesteRouteImport } from './routes/teste'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as CursoCarreiraJudiciariaRouteImport } from './routes/curso-carreira-judiciaria'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -62,6 +63,11 @@ const TesteRoute = TesteRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CursoCarreiraJudiciariaRoute = CursoCarreiraJudiciariaRouteImport.update({
+  id: '/curso-carreira-judiciaria',
+  path: '/curso-carreira-judiciaria',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -269,6 +275,7 @@ const AuthenticatedAdminMateriaisMaterialIdEditarRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/whatsapp': typeof WhatsappRoute
@@ -309,6 +316,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/whatsapp': typeof WhatsappRoute
@@ -351,6 +359,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/whatsapp': typeof WhatsappRoute
@@ -393,6 +402,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/curso-carreira-judiciaria'
     | '/reset-password'
     | '/teste'
     | '/whatsapp'
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/curso-carreira-judiciaria'
     | '/reset-password'
     | '/teste'
     | '/whatsapp'
@@ -474,6 +485,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/curso-carreira-judiciaria'
     | '/reset-password'
     | '/teste'
     | '/whatsapp'
@@ -516,6 +528,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CursoCarreiraJudiciariaRoute: typeof CursoCarreiraJudiciariaRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TesteRoute: typeof TesteRoute
   WhatsappRoute: typeof WhatsappRoute
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/curso-carreira-judiciaria': {
+      id: '/curso-carreira-judiciaria'
+      path: '/curso-carreira-judiciaria'
+      fullPath: '/curso-carreira-judiciaria'
+      preLoaderRoute: typeof CursoCarreiraJudiciariaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -879,6 +899,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CursoCarreiraJudiciariaRoute: CursoCarreiraJudiciariaRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TesteRoute: TesteRoute,
   WhatsappRoute: WhatsappRoute,

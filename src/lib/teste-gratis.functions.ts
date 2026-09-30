@@ -11,6 +11,7 @@ const schema = z.object({
     .max(20)
     .regex(/^[0-9()+\-\s]+$/, "Telefone inválido"),
   senha: z.string().min(6, "A senha deve ter no mínimo 6 caracteres").max(72),
+  gclid: z.string().optional(),
 });
 
 /**
@@ -26,6 +27,10 @@ export const criarContaTeste = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = data.email.toLowerCase();
     const telefoneDigitos = data.telefone.replace(/\D/g, "");
+    const gclidInformado = data.gclid?.trim() ?? "";
+    const gclid = gclidInformado.length <= 200 && /^[A-Za-z0-9_-]+$/.test(gclidInformado)
+      ? gclidInformado
+      : undefined;
 
     // 1 teste por e-mail
     const { data: jaExiste } = await supabaseAdmin
@@ -77,6 +82,9 @@ export const criarContaTeste = createServerFn({ method: "POST" })
         telefone: telefoneDigitos,
         origem: "teste_gratis",
         teste_solicitado_em: new Date().toISOString(),
+        ...(gclid
+          ? { gclid, gclid_captured_at: new Date().toISOString() }
+          : {}),
       })
       .eq("id", userId);
 
