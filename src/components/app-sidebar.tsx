@@ -7,6 +7,7 @@ import {
   CalendarDays,
   Newspaper,
   LogOut,
+  Send,
   Shield,
 } from "lucide-react";
 import {
@@ -35,7 +36,7 @@ const items = [
 ];
 
 
-export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
+export function AppSidebar({ isAdmin, assinaturaAtiva }: { isAdmin: boolean; assinaturaAtiva: boolean }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
 
@@ -101,6 +102,18 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
 
       <SidebarFooter>
         <SidebarMenu>
+          {assinaturaAtiva && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild className="h-auto py-2" tooltip="Comunidade Telegram para assinantes">
+                <a href="https://t.me/+Y5hY1y0N6os1ZTUx" target="_blank" rel="noopener noreferrer">
+                  <Send />
+                  <span className="whitespace-normal leading-tight">
+                    Exclusivo para Assinantes: Comunidade Telegram
+                  </span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton onClick={signOut}>
               <LogOut />

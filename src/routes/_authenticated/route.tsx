@@ -72,7 +72,12 @@ function AuthenticatedLayout() {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
-        {!isBlockedPage && (inAdmin && isAdmin ? <AdminSidebar /> : <AppSidebar isAdmin={isAdmin} />)}
+        {!isBlockedPage &&
+          (inAdmin && isAdmin ? (
+            <AdminSidebar />
+          ) : (
+            <AppSidebar isAdmin={isAdmin} assinaturaAtiva={!!q.data?.ativa} />
+          ))}
         <SidebarInset>
           {mostrarFita && (
             <TrialRibbon dias={q.data!.trialDiasRestantes!} expiraEm={q.data!.trialExpiraEm} />
