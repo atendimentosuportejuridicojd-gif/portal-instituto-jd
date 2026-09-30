@@ -75,20 +75,17 @@ export const criarContaTeste = createServerFn({ method: "POST" })
 
     const expira = new Date(Date.now() + dias * 24 * 60 * 60 * 1000).toISOString();
 
-    const profileUpdate: Record<string, string> = {
-      nome_completo: data.nome,
-      telefone: telefoneDigitos,
-      origem: "teste_gratis",
-      teste_solicitado_em: new Date().toISOString(),
-    };
-    if (gclid) {
-      profileUpdate.gclid = gclid;
-      profileUpdate.gclid_captured_at = new Date().toISOString();
-    }
-
     await supabaseAdmin
       .from("profiles")
-      .update(profileUpdate)
+      .update({
+        nome_completo: data.nome,
+        telefone: telefoneDigitos,
+        origem: "teste_gratis",
+        teste_solicitado_em: new Date().toISOString(),
+        ...(gclid
+          ? { gclid, gclid_captured_at: new Date().toISOString() }
+          : {}),
+      })
       .eq("id", userId);
 
     const { error: errRole } = await supabaseAdmin

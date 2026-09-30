@@ -274,7 +274,6 @@ function CursoCarreiraJudiciariaPage() {
         <section className="border-t border-sidebar-border bg-sidebar">
           <div className="mx-auto flex max-w-4xl flex-col items-center px-5 py-14 text-center">
             <Check className="size-9 text-gold" />
-            <h2 className="mt-4 text-3xl font-bold text-sidebar-foreground">Sua preparação pode começar hoje.</h2>
             <Button asChild size="lg" className="mt-7 bg-gold font-bold text-gold-foreground hover:bg-gold/90">
               <a href="#cadastro">Começar meu teste grátis de 5 dias <ArrowRight /></a>
             </Button>
