@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   CircleHelp,
   Clock3,
-  MessageCircle,
   MessageCircleQuestion,
   MonitorSmartphone,
 } from "lucide-react";
