@@ -7,3 +7,5 @@
 - [x] Identificar os usuários que concluíram o simulado e seus resultados.
 - [x] Refinar visualmente /curso-carreira-judiciaria com marinho e ouro, tipografia moderna e seções editoriais.
 - [x] Usar o ícone do WhatsApp e a cor verde no botão flutuante "Fale com a nossa equipe".
+- [ ] Disparar a conversão somente após cadastro bem-sucedido vindo de /curso-carreira-judiciaria.
+- [ ] Tornar clicável a faixa dourada "5 dias para conhecer o portal".
