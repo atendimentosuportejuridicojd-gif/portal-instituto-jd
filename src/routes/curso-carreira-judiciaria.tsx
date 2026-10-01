@@ -108,7 +108,9 @@ function CursoCarreiraJudiciariaPage() {
               </p>
               <div className="mt-9">
                 <Button asChild size="lg" className="min-h-14 bg-primary px-8 font-bold text-primary-foreground shadow-xl hover:bg-primary/90">
-                  <Link to="/teste">Começar meu teste grátis de 5 dias <ArrowRight /></Link>
+                  <Link to="/teste" search={{ origem: "curso-carreira-judiciaria" }}>
+                    Começar meu teste grátis de 5 dias <ArrowRight />
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -122,10 +124,12 @@ function CursoCarreiraJudiciariaPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-5 flex items-center justify-between gap-4 bg-gold px-5 py-4 text-gold-foreground">
-                <div><p className="text-xs font-semibold uppercase">Comece hoje</p><p className="mt-1 font-bold">5 dias para conhecer o portal</p></div>
-                <ArrowRight className="size-6 shrink-0" />
-              </div>
+              <Button asChild className="mt-5 h-auto w-full justify-between rounded-none bg-gold px-5 py-4 text-left text-gold-foreground hover:bg-gold/90">
+                <Link to="/teste" search={{ origem: "curso-carreira-judiciaria" }}>
+                  <span><span className="block text-xs font-semibold uppercase">Comece hoje</span><span className="mt-1 block font-bold">5 dias para conhecer o portal</span></span>
+                  <ArrowRight className="size-6 shrink-0" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
@@ -219,7 +223,9 @@ function CursoCarreiraJudiciariaPage() {
           <div className="mx-auto flex max-w-4xl flex-col items-center px-5 py-14 text-center">
             <Check className="size-9 text-gold" />
             <Button asChild size="lg" className="mt-7 bg-gold font-bold text-gold-foreground hover:bg-gold/90">
-               <Link to="/teste">Começar meu teste grátis de 5 dias <ArrowRight /></Link>
+               <Link to="/teste" search={{ origem: "curso-carreira-judiciaria" }}>
+                 Começar meu teste grátis de 5 dias <ArrowRight />
+               </Link>
             </Button>
           </div>
         </section>
