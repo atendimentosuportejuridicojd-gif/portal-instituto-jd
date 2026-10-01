@@ -13,9 +13,10 @@ import { Scale, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/teste")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>) => ({
-    origem: search.origem === "curso-carreira-judiciaria" ? search.origem : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { origem?: "curso-carreira-judiciaria" } =>
+    search.origem === "curso-carreira-judiciaria"
+      ? { origem: "curso-carreira-judiciaria" }
+      : {},
   head: () => ({
     meta: [
       { title: "Teste grátis — Portal do Aluno J&D" },
