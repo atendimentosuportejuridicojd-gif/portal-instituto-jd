@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   CircleHelp,
   Clock3,
-  MessageCircle,
   MessageCircleQuestion,
   MonitorSmartphone,
 } from "lucide-react";
@@ -225,7 +224,7 @@ function CursoCarreiraJudiciariaPage() {
           </div>
         </section>
       </main>
-       <Button asChild size="lg" className="fixed bottom-5 right-5 z-50 min-h-14 bg-whatsapp px-5 font-bold text-whatsapp-foreground shadow-2xl hover:bg-whatsapp/90 sm:bottom-7 sm:right-7">
+       <Button asChild size="lg" className="fixed bottom-20 right-5 z-50 min-h-14 bg-whatsapp px-5 font-bold text-whatsapp-foreground shadow-2xl hover:bg-whatsapp/90 sm:bottom-8 sm:right-7">
          <a href="https://wa.me/5548991119813" target="_blank" rel="noreferrer">
            <WhatsAppIcon className="size-6" />
            Fale com a nossa equipe
