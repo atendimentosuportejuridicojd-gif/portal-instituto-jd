@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { criarContaTeste } from "@/lib/teste-gratis.functions";
+import { trackConversion } from "@/lib/google-ads";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,9 @@ import { Scale, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/teste")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => ({
+    origem: search.origem === "curso-carreira-judiciaria" ? search.origem : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Teste grátis — Portal do Aluno J&D" },
@@ -35,6 +39,7 @@ export const Route = createFileRoute("/teste")({
 function TestePage() {
   const navigate = useNavigate();
   const criarFn = useServerFn(criarContaTeste);
+  const { origem } = Route.useSearch();
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -45,6 +50,9 @@ function TestePage() {
   const criar = useMutation({
     mutationFn: () => criarFn({ data: { nome, email, telefone, senha } }),
     onSuccess: async (r: any) => {
+      if (origem === "curso-carreira-judiciaria") {
+        trackConversion("AW-18069973013/QELhCPrwpowdEJXQt6hD");
+      }
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
       if (error) {
         toast.success("Conta de teste criada! Faça login para começar.");
