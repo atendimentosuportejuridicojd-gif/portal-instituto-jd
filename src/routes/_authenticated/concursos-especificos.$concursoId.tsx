@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookMarked, FileText, ArrowLeft, ExternalLink } from "lucide-react";
 import { alunoGetConcursoEspecifico } from "@/lib/disciplinas-especificas.functions";
@@ -108,17 +107,14 @@ function ConcursoEspecifico() {
                                 </p>
                               )}
                             </div>
-                            <Badge variant="secondary" className="ml-auto shrink-0">
-                              v{m.versao}
-                            </Badge>
                           </div>
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Button size="sm" asChild>
                               <Link
-                                to="/materiais/$materialId/pdf"
+                                to="/materiais/$materialId/leitura"
                                 params={{ materialId: m.id }}
                               >
-                                Visualizar PDF
+                                Ler matéria
                               </Link>
                             </Button>
                             <Button size="sm" variant="outline" asChild>

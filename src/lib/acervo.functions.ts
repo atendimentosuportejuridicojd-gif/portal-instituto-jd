@@ -192,6 +192,7 @@ export const adminUpsertMaterial = createServerFn({ method: "POST" })
         ordem: z.number().int().min(0).default(0),
         publicado: z.boolean().default(true),
         download_permitido: z.boolean().default(false),
+        tipo: z.enum(["markdown", "pdf"]).optional().default("markdown"),
       })
       .parse(d),
   )
@@ -205,6 +206,7 @@ export const adminUpsertMaterial = createServerFn({ method: "POST" })
       ordem: data.ordem,
       publicado: data.publicado,
       download_permitido: data.download_permitido,
+      tipo: data.tipo,
     };
     if (data.id) {
       const { error } = await context.supabase.from("materiais").update(payload).eq("id", data.id);
@@ -216,8 +218,7 @@ export const adminUpsertMaterial = createServerFn({ method: "POST" })
       .insert({
         ...payload,
         // Sufixo para nao colidir com materiais_disciplina_id_slug_key
-        // (UNIQUE(disciplina_id, slug)) se dois PDFs tiverem o mesmo titulo.
-        tipo: "pdf",
+        // (UNIQUE(disciplina_id, slug)) se duas materias tiverem o mesmo titulo.
         slug: `${gerarSlug(data.titulo)}-${Date.now().toString(36)}`,
         versao: 1,
         publicado_em: new Date().toISOString(),

@@ -1,13 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookMarked, FileText, Plus, Trash2, Pencil, Upload } from "lucide-react";
+import { BookMarked, Eye, FileText, Plus, Trash2, Pencil, PencilLine } from "lucide-react";
 import {
   adminListDisciplinasEspecificas,
   adminUpsertDisciplinaEspecifica,
@@ -32,10 +33,7 @@ import {
 import {
   adminUpsertMaterial,
   adminDeleteMaterial,
-  adminCriarUploadUrl,
-  adminRegistrarArquivo,
 } from "@/lib/acervo.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/disciplinas-especificas")({
@@ -178,7 +176,7 @@ function DisciplinaCard({
       <div className="mt-3 space-y-2">
         {d.materiais.length === 0 ? (
           <p className="text-xs text-muted-foreground">
-            Nenhum material nesta disciplina. Use “Novo material” para adicionar o PDF.
+            Nenhuma matéria nesta disciplina. Use “Novo material” para começar a escrever.
           </p>
         ) : (
           d.materiais.map((m: any) => (
@@ -190,20 +188,34 @@ function DisciplinaCard({
                 <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="truncate text-xs font-medium">{m.titulo}</span>
                 {!m.publicado && <Badge variant="secondary">Rascunho</Badge>}
-                {!m.storage_path && <Badge variant="outline">Sem arquivo</Badge>}
                 <span className="text-[11px] text-muted-foreground">
-                  v{m.versao} · {m.total_questoes} questões
+                  {m.total_questoes} questão(ões)
                 </span>
               </div>
-              <div className="flex items-center gap-1">
-                <UploadDialog material={m} onDone={onDone} />
+              <div className="flex flex-wrap items-center gap-1">
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    to="/admin/materiais/$materialId/editar"
+                    params={{ materialId: m.id }}
+                    search={{ origem: "disciplinas-especificas" }}
+                  >
+                    <PencilLine className="mr-1 h-3.5 w-3.5" />
+                    Escrever matéria
+                  </Link>
+                </Button>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/materiais/$materialId/leitura" params={{ materialId: m.id }}>
+                    <Eye className="mr-1 h-3.5 w-3.5" />
+                    Ver como aluno
+                  </Link>
+                </Button>
                 <MaterialDialog disciplinaId={d.id} material={m} onDone={onDone} />
                 <Button
                   variant="ghost"
                   size="icon"
                   aria-label="Excluir material"
                   onClick={() => {
-                    if (confirm("Excluir este material e seus arquivos?"))
+                    if (confirm("Excluir esta matéria? Esta ação não pode ser desfeita."))
                       removerMaterial.mutate(m.id);
                   }}
                 >
@@ -346,7 +358,9 @@ function MaterialDialog({
   const [titulo, setTitulo] = useState(material?.titulo ?? "");
   const [descricao, setDescricao] = useState(material?.descricao ?? "");
   const [ordem, setOrdem] = useState(String(material?.ordem ?? 0));
+  const [publicado, setPublicado] = useState(material?.publicado ?? true);
   const salvarFn = useServerFn(adminUpsertMaterial);
+  const navigate = useNavigate();
 
   const salvar = useMutation({
     mutationFn: () =>
@@ -358,17 +372,23 @@ function MaterialDialog({
           disciplina_id: disciplinaId,
           modulo_id: null,
           ordem: Number(ordem) || 0,
-          publicado: material?.publicado ?? true,
+          publicado,
           download_permitido: false,
+          tipo: "markdown",
         },
       }),
-    onSuccess: () => {
+    onSuccess: ({ id }) => {
       onDone();
       setOpen(false);
-      toast.success(material ? "Material atualizado." : "Material criado. Agora envie o PDF.");
+      toast.success(material ? "Material atualizado." : "Material criado. Agora escreva a matéria.");
       if (!material) {
         setTitulo("");
         setDescricao("");
+        navigate({
+          to: "/admin/materiais/$materialId/editar",
+          params: { materialId: id },
+          search: { origem: "disciplinas-especificas" },
+        });
       }
     },
     onError: (e: any) => toast.error(e.message),
@@ -419,96 +439,17 @@ function MaterialDialog({
               onChange={(e) => setOrdem(e.target.value)}
             />
           </div>
+          <div className="flex items-center justify-between rounded-md border border-border/60 p-3">
+            <div>
+              <p className="text-sm font-medium">Publicado</p>
+              <p className="text-xs text-muted-foreground">Visível para os alunos.</p>
+            </div>
+            <Switch checked={publicado} onCheckedChange={setPublicado} />
+          </div>
         </div>
         <DialogFooter>
           <Button onClick={() => salvar.mutate()} disabled={!titulo.trim() || salvar.isPending}>
             Salvar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function UploadDialog({ material, onDone }: { material: any; onDone: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [notas, setNotas] = useState("");
-  const [paginas, setPaginas] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const criarUrl = useServerFn(adminCriarUploadUrl);
-  const registrar = useServerFn(adminRegistrarArquivo);
-
-  const enviar = async () => {
-    const file = inputRef.current?.files?.[0];
-    if (!file) return toast.error("Selecione um arquivo PDF.");
-    if (file.type !== "application/pdf") return toast.error("O arquivo precisa ser um PDF.");
-    setEnviando(true);
-    try {
-      const { storage_path, token } = await criarUrl({
-        data: { material_id: material.id, nome_arquivo: file.name },
-      });
-      const { error } = await supabase.storage
-        .from("materiais")
-        .uploadToSignedUrl(storage_path, token, file, { contentType: "application/pdf" });
-      if (error) throw new Error(error.message);
-
-      await registrar({
-        data: {
-          material_id: material.id,
-          storage_path,
-          tamanho_bytes: file.size,
-          paginas: paginas ? Number(paginas) : undefined,
-          notas,
-        },
-      });
-      toast.success(material.storage_path ? "Nova versão publicada." : "Arquivo publicado.");
-      setOpen(false);
-      setNotas("");
-      setPaginas("");
-      onDone();
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha no envio.");
-    } finally {
-      setEnviando(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Enviar PDF">
-          <Upload className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {material.storage_path ? "Substituir PDF" : "Enviar PDF"} — {material.titulo}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="file-pdf">Arquivo PDF</Label>
-            <Input id="file-pdf" ref={inputRef} type="file" accept="application/pdf" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="paginas-pdf">Páginas (opcional)</Label>
-            <Input
-              id="paginas-pdf"
-              type="number"
-              value={paginas}
-              onChange={(e) => setPaginas(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="notas-pdf">Notas da versão (opcional)</Label>
-            <Textarea id="notas-pdf" value={notas} onChange={(e) => setNotas(e.target.value)} />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button onClick={enviar} disabled={enviando}>
-            {enviando ? "Enviando…" : "Enviar"}
           </Button>
         </DialogFooter>
       </DialogContent>
