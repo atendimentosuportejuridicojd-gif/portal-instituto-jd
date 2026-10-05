@@ -16,6 +16,9 @@ import {
 } from "@/lib/acervo.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/materiais/$materialId/editar")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    origem: search.origem === "disciplinas-especificas" ? "disciplinas-especificas" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Editar matéria — Admin J&D" },
@@ -30,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/admin/materiais/$materialI
 
 function AdminEditarMateria() {
   const { materialId } = Route.useParams();
+  const { origem } = Route.useSearch();
   const getFn = useServerFn(adminGetMaterialConteudo);
   const saveFn = useServerFn(adminSalvarMaterialConteudo);
 
@@ -72,9 +76,17 @@ function AdminEditarMateria() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="ghost" size="sm">
-              <Link to="/admin/acervo">
+              <Link
+                to={
+                  origem === "disciplinas-especificas"
+                    ? "/admin/disciplinas-especificas"
+                    : "/admin/acervo"
+                }
+              >
                 <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-                Voltar ao acervo
+                {origem === "disciplinas-especificas"
+                  ? "Voltar às disciplinas específicas"
+                  : "Voltar ao acervo"}
               </Link>
             </Button>
             <Button

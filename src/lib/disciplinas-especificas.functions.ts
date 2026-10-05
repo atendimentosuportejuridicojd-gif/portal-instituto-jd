@@ -23,7 +23,7 @@ export const adminListDisciplinasEspecificas = createServerFn({ method: "GET" })
           .order("ordem"),
         supabase
           .from("materiais")
-          .select("id, titulo, descricao, disciplina_id, publicado, versao, ordem, storage_path")
+          .select("id, titulo, descricao, disciplina_id, publicado, ordem, tipo")
           .order("ordem"),
         contarQuestoesPorMaterial(supabase),
       ]);
@@ -150,7 +150,7 @@ export const alunoGetConcursoEspecifico = createServerFn({ method: "GET" })
     const { data: materiais } = ids.length
       ? await supabase
           .from("materiais")
-          .select("id, titulo, descricao, disciplina_id, versao, ordem")
+          .select("id, titulo, descricao, disciplina_id, ordem, tipo")
           .in("disciplina_id", ids)
           .eq("publicado", true)
           .order("ordem")
