@@ -237,7 +237,11 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link to="/admin/materiais/$materialId/editar" params={{ materialId: m.id }}>
+          <Link
+            to="/admin/materiais/$materialId/editar"
+            params={{ materialId: m.id }}
+            search={{ origem: undefined }}
+          >
             <PencilLine className="mr-1 h-3.5 w-3.5" />
             Escrever matéria
           </Link>

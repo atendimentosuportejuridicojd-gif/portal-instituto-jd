@@ -9,4 +9,4 @@
 - [x] Usar o ícone do WhatsApp e a cor verde no botão flutuante "Fale com a nossa equipe".
 - [x] Disparar a conversão somente após cadastro bem-sucedido vindo de /curso-carreira-judiciaria.
 - [x] Tornar clicável a faixa dourada "5 dias para conhecer o portal".
-- [ ] Igualar os materiais de Disciplinas Específicas ao fluxo escrito do Acervo Base, sem PDFs.
+- [x] Igualar os materiais de Disciplinas Específicas ao fluxo escrito do Acervo Base, sem PDFs.
