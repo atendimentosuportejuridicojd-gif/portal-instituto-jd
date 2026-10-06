@@ -240,7 +240,7 @@ function MaterialRow({ m, disciplina, onDone }: { m: any; disciplina: any; onDon
           <Link
             to="/admin/materiais/$materialId/editar"
             params={{ materialId: m.id }}
-            search={{}}
+            search={{ origem: undefined }}
           >
             <PencilLine className="mr-1 h-3.5 w-3.5" />
             Escrever matéria
