@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { criarContaTeste } from "@/lib/teste-gratis.functions";
-import { trackConversion } from "@/lib/google-ads";
+import { getStoredClickId, trackConversion } from "@/lib/google-ads";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,7 @@ function TestePage() {
   const [confirmar, setConfirmar] = useState("");
 
   const criar = useMutation({
-    mutationFn: () => criarFn({ data: { nome, email, telefone, senha } }),
+    mutationFn: () => criarFn({ data: { nome, email, telefone, senha, gclid: getStoredClickId() } }),
     onSuccess: async (r: any) => {
       if (origem === "curso-carreira-judiciaria") {
         trackConversion("AW-18069973013/QELhCPrwpowdEJXQt6hD");

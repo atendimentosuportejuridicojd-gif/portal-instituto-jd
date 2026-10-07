@@ -21,7 +21,7 @@ export const getMinhaAssinatura = createServerFn({ method: "GET" })
     const [{ data: profile }, { data: roleTeste }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("bloqueado, bloqueado_motivo, simulado_status, simulado_ativado_em")
+        .select("bloqueado, bloqueado_motivo")
         .eq("id", userId)
         .maybeSingle(),
       supabase
@@ -61,8 +61,6 @@ export const getMinhaAssinatura = createServerFn({ method: "GET" })
       bloqueado_motivo: profile?.bloqueado_motivo ?? null,
       trialExpiraEm,
       trialDiasRestantes,
-      simuladoStatus: (profile?.simulado_status as string | null) ?? null,
-      simuladoAtivado: !!profile?.simulado_ativado_em,
     };
   });
 
