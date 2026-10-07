@@ -15,17 +15,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CursoCarreiraJudiciariaRouteImport } from './routes/curso-carreira-judiciaria'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TesteRouteImport } from './routes/teste'
-import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
 import { Route as AuthenticatedCronogramasRouteImport } from './routes/_authenticated/cronogramas'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedNoticiasRouteImport } from './routes/_authenticated/noticias'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
-import { Route as SimuladoIndexRouteImport } from './routes/simulado.index'
-import { Route as SimuladoCadastroRouteImport } from './routes/simulado.cadastro'
-import { Route as SimuladoQuestoesRouteImport } from './routes/simulado.questoes'
-import { Route as SimuladoResultadoRouteImport } from './routes/simulado.resultado'
 import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
@@ -79,11 +74,6 @@ const TesteRoute = TesteRouteImport.update({
   path: '/teste',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WhatsappRoute = WhatsappRouteImport.update({
-  id: '/whatsapp',
-  path: '/whatsapp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAssinaturaBloqueadaRoute =
   AuthenticatedAssinaturaBloqueadaRouteImport.update({
     id: '/assinatura-bloqueada',
@@ -115,26 +105,6 @@ const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
   getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const SimuladoIndexRoute = SimuladoIndexRouteImport.update({
-  id: '/simulado/',
-  path: '/simulado/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SimuladoCadastroRoute = SimuladoCadastroRouteImport.update({
-  id: '/simulado/cadastro',
-  path: '/simulado/cadastro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SimuladoQuestoesRoute = SimuladoQuestoesRouteImport.update({
-  id: '/simulado/questoes',
-  path: '/simulado/questoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SimuladoResultadoRoute = SimuladoResultadoRouteImport.update({
-  id: '/simulado/resultado',
-  path: '/simulado/resultado',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAcervoIndexRoute =
   AuthenticatedAcervoIndexRouteImport.update({
@@ -278,17 +248,12 @@ export interface FileRoutesByFullPath {
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
-  '/whatsapp': typeof WhatsappRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/simulado/cadastro': typeof SimuladoCadastroRoute
-  '/simulado/questoes': typeof SimuladoQuestoesRoute
-  '/simulado/resultado': typeof SimuladoResultadoRoute
-  '/simulado/': typeof SimuladoIndexRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -319,17 +284,12 @@ export interface FileRoutesByTo {
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
-  '/whatsapp': typeof WhatsappRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/simulado/cadastro': typeof SimuladoCadastroRoute
-  '/simulado/questoes': typeof SimuladoQuestoesRoute
-  '/simulado/resultado': typeof SimuladoResultadoRoute
-  '/simulado': typeof SimuladoIndexRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -362,17 +322,12 @@ export interface FileRoutesById {
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
-  '/whatsapp': typeof WhatsappRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
   '/_authenticated/cronogramas': typeof AuthenticatedCronogramasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/noticias': typeof AuthenticatedNoticiasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
-  '/simulado/cadastro': typeof SimuladoCadastroRoute
-  '/simulado/questoes': typeof SimuladoQuestoesRoute
-  '/simulado/resultado': typeof SimuladoResultadoRoute
-  '/simulado/': typeof SimuladoIndexRoute
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -405,17 +360,12 @@ export interface FileRouteTypes {
     | '/curso-carreira-judiciaria'
     | '/reset-password'
     | '/teste'
-    | '/whatsapp'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/cronogramas'
     | '/dashboard'
     | '/noticias'
     | '/perfil'
-    | '/simulado/cadastro'
-    | '/simulado/questoes'
-    | '/simulado/resultado'
-    | '/simulado/'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -446,17 +396,12 @@ export interface FileRouteTypes {
     | '/curso-carreira-judiciaria'
     | '/reset-password'
     | '/teste'
-    | '/whatsapp'
     | '/assinatura-bloqueada'
     | '/concursos'
     | '/cronogramas'
     | '/dashboard'
     | '/noticias'
     | '/perfil'
-    | '/simulado/cadastro'
-    | '/simulado/questoes'
-    | '/simulado/resultado'
-    | '/simulado'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -488,17 +433,12 @@ export interface FileRouteTypes {
     | '/curso-carreira-judiciaria'
     | '/reset-password'
     | '/teste'
-    | '/whatsapp'
     | '/_authenticated/assinatura-bloqueada'
     | '/_authenticated/concursos'
     | '/_authenticated/cronogramas'
     | '/_authenticated/dashboard'
     | '/_authenticated/noticias'
     | '/_authenticated/perfil'
-    | '/simulado/cadastro'
-    | '/simulado/questoes'
-    | '/simulado/resultado'
-    | '/simulado/'
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
     | '/_authenticated/admin/configuracoes'
@@ -531,11 +471,6 @@ export interface RootRouteChildren {
   CursoCarreiraJudiciariaRoute: typeof CursoCarreiraJudiciariaRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TesteRoute: typeof TesteRoute
-  WhatsappRoute: typeof WhatsappRoute
-  SimuladoCadastroRoute: typeof SimuladoCadastroRoute
-  SimuladoQuestoesRoute: typeof SimuladoQuestoesRoute
-  SimuladoResultadoRoute: typeof SimuladoResultadoRoute
-  SimuladoIndexRoute: typeof SimuladoIndexRoute
   ApiPublicHotmartWebhookRoute: typeof ApiPublicHotmartWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -585,13 +520,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TesteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/whatsapp': {
-      id: '/whatsapp'
-      path: '/whatsapp'
-      fullPath: '/whatsapp'
-      preLoaderRoute: typeof WhatsappRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/assinatura-bloqueada': {
       id: '/_authenticated/assinatura-bloqueada'
       path: '/assinatura-bloqueada'
@@ -633,34 +561,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/simulado/': {
-      id: '/simulado/'
-      path: '/simulado'
-      fullPath: '/simulado/'
-      preLoaderRoute: typeof SimuladoIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/simulado/cadastro': {
-      id: '/simulado/cadastro'
-      path: '/simulado/cadastro'
-      fullPath: '/simulado/cadastro'
-      preLoaderRoute: typeof SimuladoCadastroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/simulado/questoes': {
-      id: '/simulado/questoes'
-      path: '/simulado/questoes'
-      fullPath: '/simulado/questoes'
-      preLoaderRoute: typeof SimuladoQuestoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/simulado/resultado': {
-      id: '/simulado/resultado'
-      path: '/simulado/resultado'
-      fullPath: '/simulado/resultado'
-      preLoaderRoute: typeof SimuladoResultadoRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/acervo/': {
       id: '/_authenticated/acervo/'
@@ -902,11 +802,6 @@ const rootRouteChildren: RootRouteChildren = {
   CursoCarreiraJudiciariaRoute: CursoCarreiraJudiciariaRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TesteRoute: TesteRoute,
-  WhatsappRoute: WhatsappRoute,
-  SimuladoCadastroRoute: SimuladoCadastroRoute,
-  SimuladoQuestoesRoute: SimuladoQuestoesRoute,
-  SimuladoResultadoRoute: SimuladoResultadoRoute,
-  SimuladoIndexRoute: SimuladoIndexRoute,
   ApiPublicHotmartWebhookRoute: ApiPublicHotmartWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

@@ -43,6 +43,18 @@ function ensureGtagStub() {
   }
 }
 
+/** Lê o gclid persistido por `persistClickId` (ou da URL atual, se presente). */
+export function getStoredClickId(): string | undefined {
+  if (!isBrowser()) return undefined;
+  const fromUrl = new URLSearchParams(window.location.search).get("gclid");
+  if (fromUrl) return fromUrl;
+  try {
+    return window.sessionStorage.getItem(CLICK_ID_STORAGE_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function getStoredConsent(): ConsentDecision | null {
   if (!isBrowser()) return null;
   try {
@@ -63,9 +75,9 @@ function setStoredConsent(decision: ConsentDecision) {
 }
 
 /**
- * Mantém o gclid da URL do anúncio disponível durante a navegação do funil
- * do simulado (landing -> cadastro é troca de rota no cliente, sem reload,
- * então o parâmetro não sobrevive sozinho na URL entre as páginas).
+ * Mantém o gclid da URL do anúncio disponível durante a navegação do visitante
+ * (troca de rota no cliente, sem reload, então o parâmetro não sobrevive
+ * sozinho na URL entre as páginas).
  */
 function persistClickId() {
   if (!isBrowser()) return;
