@@ -173,6 +173,61 @@ export const Route = createFileRoute("/api/public/hotmart/webhook")({
           }
         }
 
+        // 4b. Conversão offline para o Google Ads: primeira compra aprovada de quem chegou por anúncio
+        // (gclid guardado no perfil). Nunca pode quebrar o webhook: qualquer erro é só registrado.
+        if ((event === "PURCHASE_APPROVED" || event === "PURCHASE_COMPLETE") && transactionId) {
+          try {
+            // Diagnóstico único: só os NOMES das chaves de purchase e purchase.price (nunca valores).
+            const { data: jaRegistrado } = await supabaseAdmin
+              .from("admin_logs")
+              .select("id")
+              .eq("acao", "hotmart.payload_chaves")
+              .limit(1)
+              .maybeSingle();
+            if (!jaRegistrado) {
+              await supabaseAdmin.from("admin_logs").insert({
+                acao: "hotmart.payload_chaves",
+                entidade: "hotmart",
+                metadata: {
+                  event,
+                  purchase: Object.keys(data?.purchase ?? {}),
+                  purchase_price: Object.keys(data?.purchase?.price ?? {}),
+                },
+              });
+            }
+            const recorrencia = Number(data?.purchase?.recurrency_number ?? data?.purchase?.recurrence_number ?? 1);
+            const { data: perfil } = await supabaseAdmin
+              .from("profiles")
+              .select("gclid, gclid_captured_at")
+              .eq("id", userId)
+              .maybeSingle();
+            if (perfil?.gclid && recorrencia <= 1) {
+              const valorBruto = Number(data?.purchase?.price?.value ?? data?.purchase?.full_price?.value);
+              const aprovadaEm = Number(data?.purchase?.approved_date);
+              const { error: erroConversao } = await (supabaseAdmin as any).from("conversoes_google_ads").upsert(
+                {
+                  user_id: userId,
+                  gclid: perfil.gclid,
+                  gclid_capturado_em: perfil.gclid_captured_at,
+                  hotmart_transaction_id: transactionId,
+                  valor: Number.isFinite(valorBruto) && valorBruto > 0 ? valorBruto : null,
+                  convertido_em: Number.isFinite(aprovadaEm) && aprovadaEm > 0 ? new Date(aprovadaEm).toISOString() : new Date().toISOString(),
+                },
+                { onConflict: "hotmart_transaction_id", ignoreDuplicates: true },
+              );
+              if (erroConversao) {
+                await supabaseAdmin.from("admin_logs").insert({
+                  acao: "hotmart.conversao_google_erro",
+                  entidade: "hotmart",
+                  metadata: { transactionId, mensagem: erroConversao.message },
+                });
+              }
+            }
+          } catch (e) {
+            console.error("[hotmart] conversao google ads", e);
+          }
+        }
+
         // 5. Sincroniza nome no profile (se veio no payload)
         if (nome) {
           await supabaseAdmin.from("profiles").update({ nome_completo: nome }).eq("id", userId);
