@@ -23,13 +23,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Lock, Unlock, Mail, Pencil, MessageCircle, Trash2 } from "lucide-react";
+import { Search, Lock, Unlock, Mail, Pencil, MessageCircle, Trash2, ClipboardCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   adminListUsuarios,
   adminEditarUsuario,
   adminBloquearUsuario,
+  adminDefinirAcessoSimulado,
   adminResetSenhaUsuario,
   adminDefinirRoles,
   adminExcluirUsuario,
@@ -44,6 +45,7 @@ function Usuarios() {
   const listFn = useServerFn(adminListUsuarios);
   const editFn = useServerFn(adminEditarUsuario);
   const blockFn = useServerFn(adminBloquearUsuario);
+  const simuladoFn = useServerFn(adminDefinirAcessoSimulado);
   const resetFn = useServerFn(adminResetSenhaUsuario);
   const rolesFn = useServerFn(adminDefinirRoles);
   const excluirFn = useServerFn(adminExcluirUsuario);
@@ -73,6 +75,8 @@ function Usuarios() {
   const [deleteDialog, setDeleteDialog] = useState<any | null>(null);
   const [confirmacao, setConfirmacao] = useState("");
   const [motivo, setMotivo] = useState("");
+  const [simuladoDialog, setSimuladoDialog] = useState<any | null>(null);
+  const [simuladoAte, setSimuladoAte] = useState("");
 
   const query = useQuery({
     queryKey: ["admin", "usuarios", q],
@@ -96,6 +100,17 @@ function Usuarios() {
       setBlockDialog(null);
       setMotivo("");
       toast.success(v.bloqueado ? "Usuário bloqueado." : "Usuário desbloqueado.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const simulado = useMutation({
+    mutationFn: (v: { id: string; ativo: boolean; ate?: string }) => simuladoFn({ data: v }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["admin", "usuarios"] });
+      setSimuladoDialog(null);
+      setSimuladoAte("");
+      toast.success(v.ativo ? "Simulados liberados." : "Acesso aos simulados revogado.");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -199,6 +214,7 @@ function Usuarios() {
                         {r.nome_completo || "—"}
                       </button>
                       {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
+                      {r.simulado_liberado && <Badge variant="secondary">Simulados</Badge>}
                       {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
                       {r.roles?.includes("aluno_teste") && (
                         <Badge variant={r.teste_expirado ? "destructive" : "secondary"}>
@@ -243,6 +259,20 @@ function Usuarios() {
                         onClick={() => setEditing(r)}
                       >
                         <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={r.simulado_liberado ? "Revogar simulados" : "Liberar simulados"}
+                        onClick={() => {
+                          if (r.simulado_liberado) simulado.mutate({ id: r.id, ativo: false });
+                          else {
+                            setSimuladoAte("");
+                            setSimuladoDialog(r);
+                          }
+                        }}
+                      >
+                        <ClipboardCheck className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -452,6 +482,32 @@ function Usuarios() {
 
         </DialogContent>
 
+      </Dialog>
+
+      {/* Liberar simulados */}
+      <Dialog open={!!simuladoDialog} onOpenChange={(v) => !v && setSimuladoDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Liberar simulados</DialogTitle>
+            <DialogDescription>
+              {simuladoDialog?.nome_completo} ({simuladoDialog?.email}) poderá usar os simulados do cronograma sem
+              pagamento.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>Válido até (data da prova — opcional)</Label>
+            <Input type="date" value={simuladoAte} onChange={(e) => setSimuladoAte(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setSimuladoDialog(null)}>Cancelar</Button>
+            <Button
+              onClick={() => simulado.mutate({ id: simuladoDialog.id, ativo: true, ate: simuladoAte || undefined })}
+              disabled={simulado.isPending}
+            >
+              Liberar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
       {/* Bloquear */}

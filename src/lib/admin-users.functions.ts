@@ -33,15 +33,20 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
     const ids = (profiles ?? []).map((p: any) => p.id);
     if (ids.length === 0) return [];
 
-    const [{ data: assins }, { data: sessoes }, { data: tent }, { data: roles }] = await Promise.all([
-      supabase
-        .from("assinaturas")
-        .select("user_id, status, plano, fim, ultima_renovacao_em")
-        .in("user_id", ids),
-      supabase.from("questao_sessoes").select("user_id, status").in("user_id", ids),
-      supabase.from("questao_tentativas").select("user_id").in("user_id", ids),
-      supabase.from("user_roles").select("user_id, role, expira_em").in("user_id", ids),
-    ]);
+    const [{ data: assins }, { data: sessoes }, { data: tent }, { data: roles }, { data: simulados }] =
+      await Promise.all([
+        supabase
+          .from("assinaturas")
+          .select("user_id, status, plano, fim, ultima_renovacao_em")
+          .in("user_id", ids),
+        supabase.from("questao_sessoes").select("user_id, status").in("user_id", ids),
+        supabase.from("questao_tentativas").select("user_id").in("user_id", ids),
+        supabase.from("user_roles").select("user_id, role, expira_em").in("user_id", ids),
+        (supabase as any).from("simulado_acessos").select("user_id, ativo, origem, fim").in("user_id", ids),
+      ]);
+
+    const simuladoMap = new Map<string, any>();
+    (simulados ?? []).forEach((s: any) => simuladoMap.set(s.user_id, s));
 
     const assinMap = new Map<string, any>();
     (assins ?? []).forEach((a: any) => {
@@ -73,6 +78,11 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
       questionarios_concluidos: sessCount.get(p.id) ?? 0,
       questoes_respondidas: tentCount.get(p.id) ?? 0,
       roles: roleMap.get(p.id) ?? ["aluno"],
+      simulado_liberado:
+        simuladoMap.get(p.id)?.ativo === true &&
+        (!simuladoMap.get(p.id)?.fim || new Date(simuladoMap.get(p.id).fim).getTime() > Date.now()),
+      simulado_origem: simuladoMap.get(p.id)?.origem ?? null,
+      simulado_fim: simuladoMap.get(p.id)?.fim ?? null,
       teste_expira_em: testeFim.get(p.id) ?? null,
       teste_expirado:
         roleMap.get(p.id)?.includes("aluno_teste") === true &&
@@ -128,6 +138,45 @@ export const adminBloquearUsuario = createServerFn({ method: "POST" })
       entidade: "profiles",
       entidade_id: data.id,
       metadata: { motivo: data.motivo },
+    });
+    return { ok: true };
+  });
+
+/** Libera ou revoga manualmente o serviço avulso de simulados (sem pagamento, para testes ou cortesia). */
+export const adminDefinirAcessoSimulado = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        ativo: z.boolean(),
+        // Data da prova (YYYY-MM-DD): o acesso vale até o fim desse dia. Vazio = sem prazo.
+        ate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const fim = data.ativo && data.ate ? new Date(`${data.ate}T23:59:59-03:00`).toISOString() : null;
+    const { error } = await (context.supabase as any).from("simulado_acessos").upsert(
+      {
+        user_id: data.id,
+        ativo: data.ativo,
+        origem: "manual",
+        referencia_externa: null,
+        inicio: new Date().toISOString(),
+        fim,
+        observacao: "Definido pelo administrador.",
+      },
+      { onConflict: "user_id" },
+    );
+    if (error) throw new Error(error.message);
+    await context.supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: data.ativo ? "simulado.liberar" : "simulado.revogar",
+      entidade: "simulado_acessos",
+      entidade_id: data.id,
+      metadata: { ate: data.ate ?? null },
     });
     return { ok: true };
   });
