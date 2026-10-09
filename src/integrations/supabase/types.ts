@@ -248,6 +248,59 @@ export type Database = {
         }
         Relationships: []
       }
+      conversoes_google_ads: {
+        Row: {
+          convertido_em: string
+          created_at: string
+          enviada_em: string | null
+          erro: string | null
+          gclid: string
+          gclid_capturado_em: string | null
+          hotmart_transaction_id: string
+          id: string
+          moeda: string
+          status: string
+          user_id: string
+          valor: number | null
+        }
+        Insert: {
+          convertido_em?: string
+          created_at?: string
+          enviada_em?: string | null
+          erro?: string | null
+          gclid: string
+          gclid_capturado_em?: string | null
+          hotmart_transaction_id: string
+          id?: string
+          moeda?: string
+          status?: string
+          user_id: string
+          valor?: number | null
+        }
+        Update: {
+          convertido_em?: string
+          created_at?: string
+          enviada_em?: string | null
+          erro?: string | null
+          gclid?: string
+          gclid_capturado_em?: string | null
+          hotmart_transaction_id?: string
+          id?: string
+          moeda?: string
+          status?: string
+          user_id?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversoes_google_ads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cronograma_itens: {
         Row: {
           created_at: string
