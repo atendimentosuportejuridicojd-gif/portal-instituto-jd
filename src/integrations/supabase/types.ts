@@ -134,6 +134,51 @@ export type Database = {
           },
         ]
       }
+      concurso_prova_estrutura: {
+        Row: {
+          concurso_id: string
+          created_at: string
+          disciplina_id: string
+          ordem: number
+          peso: number
+          qtd_questoes: number
+          updated_at: string
+        }
+        Insert: {
+          concurso_id: string
+          created_at?: string
+          disciplina_id: string
+          ordem?: number
+          peso?: number
+          qtd_questoes: number
+          updated_at?: string
+        }
+        Update: {
+          concurso_id?: string
+          created_at?: string
+          disciplina_id?: string
+          ordem?: number
+          peso?: number
+          qtd_questoes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concurso_prova_estrutura_concurso_id_fkey"
+            columns: ["concurso_id"]
+            isOneToOne: false
+            referencedRelation: "concursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concurso_prova_estrutura_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       concursos: {
         Row: {
           ano: number | null
@@ -1231,6 +1276,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      simulado_acessos: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          fim: string | null
+          id: string
+          inicio: string
+          observacao: string | null
+          origem: string
+          referencia_externa: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          fim?: string | null
+          id?: string
+          inicio?: string
+          observacao?: string | null
+          origem?: string
+          referencia_externa?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          fim?: string | null
+          id?: string
+          inicio?: string
+          observacao?: string | null
+          origem?: string
+          referencia_externa?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulado_acessos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       simulado_alternativas: {
         Row: {
