@@ -78,6 +78,10 @@ export interface ResultadoPlano {
   diasDisponiveis: number;
   /** Último dia com estudo/revisão (null se não houver nada a estudar). */
   fimEstudo: string | null;
+  /** Dias livres entre o fim do estudo e a fase final (ou a véspera da prova). Acima de 14, vale sugerir recomeçar. */
+  diasSobra: number;
+  /** Disciplinas que ficaram total ou parcialmente fora do plano porque o tempo não bastou. */
+  disciplinasForaDoPlano: string[];
   /** Período reservado para a fase final, quando coube. */
   faseFinal: { inicio: string; fim: string } | null;
   simulados: string[];
@@ -217,6 +221,10 @@ export function gerarPlano(p: ParametrosPlano): ResultadoPlano {
   const faltamMinutos =
     idxItem >= itens.length ? 0 : restoItem + itens.slice(idxItem + 1).reduce((acc, i) => acc + i.minutos, 0);
 
+  const disciplinasForaDoPlano = [...new Set(itens.slice(idxItem).map((i) => i.disciplinaId))];
+  const limiteEstudo = reservaFaseFinal ? somarDias(p.dataProva, -(DIAS_FASE_FINAL + 1)) : ultimoDia;
+  const diasSobra = faltamMinutos === 0 && fimEstudo ? Math.max(0, diferencaDias(fimEstudo, limiteEstudo)) : 0;
+
   // Fase final: um bloco por dia (conteúdo a definir), com a capacidade do dia.
   let faseFinal: ResultadoPlano["faseFinal"] = null;
   if (reservaFaseFinal) {
@@ -265,6 +273,8 @@ export function gerarPlano(p: ParametrosPlano): ResultadoPlano {
     minutosDisponiveis,
     diasDisponiveis: totalDias,
     fimEstudo,
+    diasSobra,
+    disciplinasForaDoPlano,
     faseFinal,
     simulados: datasSimulado,
   };
