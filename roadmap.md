@@ -10,3 +10,5 @@
 - [x] Disparar a conversão somente após cadastro bem-sucedido vindo de /curso-carreira-judiciaria.
 - [x] Tornar clicável a faixa dourada "5 dias para conhecer o portal".
 - [x] Igualar os materiais de Disciplinas Específicas ao fluxo escrito do Acervo Base, sem PDFs.
+- [x] Habilitar pagamentos Stripe para a cobrança avulsa de Simulados J&D, mantendo Hotmart.
+- [ ] Implementar produto avulso, checkout e confirmação de acesso: aguarda decisão sobre checkout incorporado, pois pagamentos integrados não permitem o redirecionamento solicitado.
