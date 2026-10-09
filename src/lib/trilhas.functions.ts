@@ -116,7 +116,8 @@ export const adminListConcursos = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabase } = context;
-    const [{ data: concursos }, { data: vinculos }, { data: materiais }] = await Promise.all([
+    const [{ data: concursos }, { data: vinculos }, { data: materiais }, { data: estrutura }, { data: disciplinas }] =
+      await Promise.all([
       supabase
         .from("concursos")
         .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes, publicado")
@@ -129,6 +130,11 @@ export const adminListConcursos = createServerFn({ method: "GET" })
         .from("materiais")
         .select("id, titulo, publicado, storage_path, disciplinas(nome)")
         .order("titulo"),
+      (supabase as any)
+        .from("concurso_prova_estrutura")
+        .select("concurso_id, disciplina_id, qtd_questoes, peso, ordem")
+        .order("ordem"),
+      supabase.from("disciplinas").select("id, nome, especifica, concurso_id").order("nome"),
     ]);
 
     const mats = (materiais ?? []).map((m: any) => ({
@@ -141,8 +147,10 @@ export const adminListConcursos = createServerFn({ method: "GET" })
     const byId = new Map(mats.map((m) => [m.id, m]));
 
     return {
+      disciplinas: disciplinas ?? [],
       concursos: (concursos ?? []).map((c: any) => ({
         ...c,
+        estrutura: (estrutura ?? []).filter((e: any) => e.concurso_id === c.id),
         materiais: (vinculos ?? [])
           .filter((v: any) => v.concurso_id === c.id)
           .map((v: any) => ({ ...byId.get(v.material_id), ordem: v.ordem, exclusivo: v.exclusivo }))
@@ -165,6 +173,8 @@ export const adminUpsertConcurso = createServerFn({ method: "POST" })
         ano: z.number().int().min(1990).max(2100).nullable().optional(),
         edital_url: z.string().trim().max(500).optional().default(""),
         observacoes: z.string().trim().max(2000).optional().default(""),
+        // Data da prova (YYYY-MM-DD); vazio = ainda sem data.
+        data_prova: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).or(z.literal("")).optional().default(""),
         publicado: z.boolean().default(true),
       })
       .parse(d),
@@ -179,6 +189,7 @@ export const adminUpsertConcurso = createServerFn({ method: "POST" })
       ano: data.ano ?? null,
       edital_url: data.edital_url || null,
       observacoes: data.observacoes || null,
+      data_prova: data.data_prova || null,
       publicado: data.publicado,
     };
     if (data.id) {
@@ -193,6 +204,62 @@ export const adminUpsertConcurso = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     return { id: ins.id };
+  });
+
+/** Substitui a estrutura da prova do concurso (questões e peso por disciplina). */
+export const adminSalvarEstruturaProva = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        concurso_id: z.string().uuid(),
+        linhas: z
+          .array(
+            z.object({
+              disciplina_id: z.string().uuid(),
+              qtd_questoes: z.number().int().min(1).max(500),
+              peso: z.number().min(0.01).max(99),
+            }),
+          )
+          .max(60),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const db = context.supabase as any;
+    const ids = new Set(data.linhas.map((l) => l.disciplina_id));
+    if (ids.size !== data.linhas.length) throw new Error("Há disciplinas repetidas na estrutura.");
+
+    const { data: atuais, error: e1 } = await db
+      .from("concurso_prova_estrutura")
+      .select("disciplina_id")
+      .eq("concurso_id", data.concurso_id);
+    if (e1) throw new Error(e1.message);
+    const remover = (atuais ?? []).map((a: any) => a.disciplina_id).filter((id: string) => !ids.has(id));
+    if (remover.length) {
+      const { error } = await db
+        .from("concurso_prova_estrutura")
+        .delete()
+        .eq("concurso_id", data.concurso_id)
+        .in("disciplina_id", remover);
+      if (error) throw new Error(error.message);
+    }
+    if (data.linhas.length) {
+      const { error } = await db.from("concurso_prova_estrutura").upsert(
+        data.linhas.map((l, i) => ({ concurso_id: data.concurso_id, ...l, ordem: i })),
+        { onConflict: "concurso_id,disciplina_id" },
+      );
+      if (error) throw new Error(error.message);
+    }
+    await context.supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: "concurso.estrutura_prova",
+      entidade: "concursos",
+      entidade_id: data.concurso_id,
+      metadata: { disciplinas: data.linhas.length },
+    });
+    return { ok: true };
   });
 
 export const adminDeleteConcurso = createServerFn({ method: "POST" })
@@ -286,42 +353,17 @@ export const alunoListConcursos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [{ data: concursos }, { data: vinculos }, { data: materiais }, { data: favs }] =
-      await Promise.all([
-        supabase
-          .from("concursos")
-          .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes")
-          .eq("publicado", true)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("concurso_materiais")
-          .select("concurso_id, material_id, ordem, exclusivo")
-          .order("ordem"),
-        supabase
-          .from("materiais")
-          .select("id, titulo, versao, storage_path, disciplinas(nome)")
-          .eq("publicado", true),
-        supabase.from("favoritos").select("item_id").eq("user_id", userId).eq("tipo", "concurso"),
-      ]);
+    const [{ data: concursos }, { data: favs }] = await Promise.all([
+      supabase
+        .from("concursos")
+        .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes")
+        .eq("publicado", true)
+        .order("created_at", { ascending: false }),
+      supabase.from("favoritos").select("item_id").eq("user_id", userId).eq("tipo", "concurso"),
+    ]);
 
-    const byId = new Map((materiais ?? []).map((m: any) => [m.id, m]));
     const favSet = new Set((favs ?? []).map((f: any) => f.item_id));
 
-    return (concursos ?? []).map((c: any) => ({
-      ...c,
-      favorito: favSet.has(c.id),
-      materiais: (vinculos ?? [])
-        .filter((v: any) => v.concurso_id === c.id && byId.has(v.material_id))
-        .map((v: any) => {
-          const m: any = byId.get(v.material_id);
-          return {
-            id: m.id,
-            titulo: m.titulo,
-            versao: m.versao ?? 1,
-            exclusivo: v.exclusivo,
-            tem_arquivo: !!m.storage_path,
-            disciplina: m.disciplinas?.nome ?? "Sem disciplina",
-          };
-        }),
-    }));
+    // Somente dados de consulta: a lista de matérias do concurso é exclusiva do painel do administrador.
+    return (concursos ?? []).map((c: any) => ({ ...c, favorito: favSet.has(c.id) }));
   });
