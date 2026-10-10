@@ -637,6 +637,22 @@ export async function recalcularCronograma(ctx: Ctx) {
   return { resumo: resumo(plano) };
 }
 
+/**
+ * Exclui de vez o cronograma ativo ou o rascunho do aluno. O banco apaga junto, em cascata, os blocos do plano e os
+ * simulados desse cronograma (com respostas e resultados). O histórico de questões e de leitura das matérias fica.
+ */
+export async function excluirCronograma(ctx: Ctx, status: "ativo" | "rascunho") {
+  await assertAcessoAluno(ctx);
+  const { data, error } = await ctx.supabase
+    .from("cronogramas_aluno")
+    .delete()
+    .eq("user_id", ctx.userId)
+    .eq("status", status)
+    .select("id");
+  if (error) throw new Error(error.message);
+  return { excluidos: (data ?? []).length };
+}
+
 export async function arquivarCronograma(ctx: Ctx) {
   const { error } = await ctx.supabase
     .from("cronogramas_aluno")

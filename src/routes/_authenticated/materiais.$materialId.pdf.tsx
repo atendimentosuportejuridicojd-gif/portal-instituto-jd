@@ -26,6 +26,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { alunoAbrirMaterial } from "@/lib/acervo.functions";
+import { BotaoQuestoes } from "@/components/botao-questoes";
 import { salvarLeituraMaterial } from "@/lib/aluno.functions";
 import { EmptyState } from "@/components/page";
 import { FileText } from "lucide-react";
@@ -171,12 +172,7 @@ function LeitorPdf() {
         <div className="flex items-center gap-2">
           {q.data!.total_questoes > 0 && (
             <>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/materiais/$materialId/questoes" params={{ materialId }}>
-                  <PencilLine className="mr-1 h-3.5 w-3.5" />
-                  Questões ({q.data!.total_questoes})
-                </Link>
-              </Button>
+              <BotaoQuestoes materialId={materialId} rotulo={`Questões (${q.data!.total_questoes})`} />
               <Button asChild variant="ghost" size="sm">
                 <Link to="/materiais/$materialId/desempenho" params={{ materialId }}>
                   <BarChart3 className="mr-1 h-3.5 w-3.5" />

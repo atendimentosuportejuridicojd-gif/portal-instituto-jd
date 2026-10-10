@@ -19,7 +19,9 @@ vi.mock("@/lib/cronograma-aluno.functions", () => ({
   alunoCriarCronograma: () => undefined,
   alunoPreviaCronograma: () => undefined,
   alunoRevisaoBloco: () => undefined,
+  alunoExcluirCronograma: () => undefined,
 }));
+vi.mock("@/lib/questoes.functions", () => ({ alunoSessoesEmAndamento: () => undefined }));
 vi.mock("@/lib/simulado-checkout", () => ({ iniciarCheckoutSimulado: () => undefined }));
 vi.mock("@/components/checkout-simulado", () => ({ CheckoutSimulado: () => null }));
 
@@ -58,6 +60,7 @@ describe("telas do cronograma (renderização)", () => {
     const html = renderToString(<PlanoDoAluno estado={estado} onNovo={() => undefined} />);
     expect(html).toContain("TJSC — Técnico Judiciário");
     expect(html).toContain("dias para a prova");
+    expect(html).toContain("Excluir cronograma");
     expect(html).toContain("Atividade em atraso"); // destaque da próxima ação: a atrasada vem primeiro
     expect(html).toContain("Como funciona o seu cronograma: Método J&amp;D"); // aviso do método (recolhido no servidor)
     expect(html).toContain("Semana");

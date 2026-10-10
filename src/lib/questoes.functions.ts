@@ -197,6 +197,46 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
     });
   });
 
+/**
+ * Matérias em que o aluno começou a resolver questões e ainda não terminou (sessão em andamento), com quantas já
+ * respondeu. Os botões de questões usam isso para mostrar "Retomar as questões".
+ */
+export const alunoSessoesEmAndamento = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAcessoAluno(context);
+    const { supabase, userId } = context;
+    const { data: sessoes } = await supabase
+      .from("questao_sessoes")
+      .select("id, material_id, total_questoes")
+      .eq("user_id", userId)
+      .eq("status", "em_andamento");
+    const lista = (sessoes ?? []).filter((s: any) => s.material_id);
+    const respondidas = new Map<string, number>();
+    const ids = lista.map((s: any) => s.id);
+    for (let i = 0; i < ids.length; i += 50) {
+      const grupo = ids.slice(i, i + 50);
+      for (let de = 0; ; de += 1000) {
+        const { data } = await supabase
+          .from("questao_tentativas")
+          .select("sessao_id")
+          .in("sessao_id", grupo)
+          .order("id")
+          .range(de, de + 999);
+        for (const t of data ?? []) {
+          const sid = t.sessao_id as string | null;
+          if (sid) respondidas.set(sid, (respondidas.get(sid) ?? 0) + 1);
+        }
+        if ((data ?? []).length < 1000) break;
+      }
+    }
+    return lista.map((s: any) => ({
+      material_id: s.material_id as string,
+      respondidas: respondidas.get(s.id) ?? 0,
+      total: (s.total_questoes as number) ?? 0,
+    }));
+  });
+
 export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ material_id: z.string().uuid() }).parse(d))

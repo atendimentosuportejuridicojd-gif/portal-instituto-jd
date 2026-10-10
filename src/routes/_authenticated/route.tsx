@@ -1,4 +1,15 @@
-import { createFileRoute, Outlet, redirect, useLocation, Link } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useLocation,
+  Link,
+  useRouter,
+  useCanGoBack,
+  useNavigate,
+} from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -29,6 +40,16 @@ function AuthenticatedLayout() {
   const location = useLocation();
   const inAdmin = location.pathname.startsWith("/admin");
   const isBlockedPage = location.pathname === "/assinatura-bloqueada";
+
+  // "Voltar" em todas as páginas (menos na inicial): volta para a página anterior; sem histórico, vai para o início.
+  const router = useRouter();
+  const navigate = useNavigate();
+  const podeVoltarHistorico = useCanGoBack();
+  const paginaInicial = location.pathname === "/dashboard" || location.pathname === "/admin/dashboard";
+  const voltar = () => {
+    if (podeVoltarHistorico) router.history.back();
+    else navigate({ to: inAdmin ? "/admin/dashboard" : "/dashboard" });
+  };
 
   const assFn = useServerFn(getMinhaAssinatura);
   const acessoFn = useServerFn(registrarUltimoAcesso);
@@ -74,6 +95,18 @@ function AuthenticatedLayout() {
           )}
           <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             {!isBlockedPage && <SidebarTrigger />}
+            {!isBlockedPage && !paginaInicial && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={voltar}
+                aria-label="Voltar para a página anterior"
+                className="gap-1.5 px-2.5 text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Voltar</span>
+              </Button>
+            )}
             {!isBlockedPage && (
               <>
                 <div className="ml-2 hidden md:block">

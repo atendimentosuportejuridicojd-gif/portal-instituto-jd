@@ -86,3 +86,12 @@ export const alunoRevisaoBloco = createServerFn({ method: "GET" })
     const { revisaoDoBloco } = await import("@/lib/cronograma-aluno.server");
     return revisaoDoBloco(context, data.bloco_id);
   });
+
+/** Exclui de vez o cronograma ativo ou o rascunho (apaga também o andamento e os simulados dele). */
+export const alunoExcluirCronograma = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ status: z.enum(["ativo", "rascunho"]) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { excluirCronograma } = await import("@/lib/cronograma-aluno.server");
+    return excluirCronograma(context, data.status);
+  });
