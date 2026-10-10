@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
 import { processarEventoSimulado } from './simulado-webhook.server';
 import type Stripe from 'stripe';
