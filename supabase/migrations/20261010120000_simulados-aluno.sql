@@ -28,7 +28,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS simulados_aluno_bloco_uidx
 CREATE INDEX IF NOT EXISTS simulados_aluno_user_idx
   ON public.simulados_aluno (user_id, cronograma_id, numero);
 
-CREATE TABLE IF NOT EXISTS public.simulado_questoes (
+CREATE TABLE IF NOT EXISTS public.simulado_aluno_questoes (
   simulado_id uuid NOT NULL REFERENCES public.simulados_aluno(id) ON DELETE CASCADE,
   questao_id uuid NOT NULL REFERENCES public.questoes(id) ON DELETE CASCADE,
   disciplina_id uuid NULL REFERENCES public.disciplinas(id) ON DELETE SET NULL,
@@ -41,27 +41,27 @@ CREATE TABLE IF NOT EXISTS public.simulado_questoes (
 );
 
 ALTER TABLE public.simulados_aluno ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.simulado_questoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.simulado_aluno_questoes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "simulados_aluno_select_own" ON public.simulados_aluno
   FOR SELECT TO authenticated USING (user_id = auth.uid());
 CREATE POLICY "simulados_aluno_admin_select" ON public.simulados_aluno
   FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'administrador'));
 
-CREATE POLICY "simulado_questoes_select_own" ON public.simulado_questoes
+CREATE POLICY "simulado_aluno_questoes_select_own" ON public.simulado_aluno_questoes
   FOR SELECT TO authenticated
   USING (EXISTS (SELECT 1 FROM public.simulados_aluno s WHERE s.id = simulado_id AND s.user_id = auth.uid()));
-CREATE POLICY "simulado_questoes_admin_select" ON public.simulado_questoes
+CREATE POLICY "simulado_aluno_questoes_admin_select" ON public.simulado_aluno_questoes
   FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'administrador'));
 
 GRANT SELECT ON public.simulados_aluno TO authenticated;
-GRANT SELECT ON public.simulado_questoes TO authenticated;
+GRANT SELECT ON public.simulado_aluno_questoes TO authenticated;
 GRANT ALL ON public.simulados_aluno TO service_role;
-GRANT ALL ON public.simulado_questoes TO service_role;
+GRANT ALL ON public.simulado_aluno_questoes TO service_role;
 REVOKE ALL ON public.simulados_aluno FROM anon;
-REVOKE ALL ON public.simulado_questoes FROM anon;
+REVOKE ALL ON public.simulado_aluno_questoes FROM anon;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.simulados_aluno FROM authenticated;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.simulado_questoes FROM authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.simulado_aluno_questoes FROM authenticated;
 
 COMMENT ON TABLE public.simulados_aluno IS 'Simulados do cronograma: um por bloco do plano, montado pela estrutura da prova.';
-COMMENT ON TABLE public.simulado_questoes IS 'Questões sorteadas de cada simulado e as respostas do aluno.';
+COMMENT ON TABLE public.simulado_aluno_questoes IS 'Questões sorteadas de cada simulado e as respostas do aluno.';

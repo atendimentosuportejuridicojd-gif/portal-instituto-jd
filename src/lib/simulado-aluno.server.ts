@@ -176,7 +176,7 @@ export async function iniciarSimulado(ctx: Ctx, blocoId: string) {
   const usadas = new Set<string>();
   const idsAnteriores = (anteriores ?? []).map((s: any) => s.id);
   for (const grupo of pedacos(idsAnteriores, 50)) {
-    const { data } = await supabase.from("simulado_questoes").select("questao_id").in("simulado_id", grupo);
+    const { data } = await supabase.from("simulado_aluno_questoes").select("questao_id").in("simulado_id", grupo);
     for (const r of data ?? []) usadas.add(r.questao_id);
   }
 
@@ -222,7 +222,7 @@ export async function iniciarSimulado(ctx: Ctx, blocoId: string) {
     throw new Error(error.message);
   }
   const { error: eQ } = await db
-    .from("simulado_questoes")
+    .from("simulado_aluno_questoes")
     .insert(escolhidas.map((q) => ({ simulado_id: criado.id, ...q })));
   if (eQ) {
     await db.from("simulados_aluno").delete().eq("id", criado.id);
@@ -258,7 +258,7 @@ export async function lerSimulado(ctx: Ctx, id: string) {
 
   const { supabase } = ctx;
   const { data: sq } = await supabase
-    .from("simulado_questoes")
+    .from("simulado_aluno_questoes")
     .select("questao_id, disciplina_id, ordem, alternativa_id")
     .eq("simulado_id", id)
     .order("ordem");
@@ -314,7 +314,7 @@ export async function responderSimulado(
   if (Date.now() > expiraEm(s) + TOLERANCIA_MS) throw new Error("O tempo do simulado acabou.");
 
   const { data: sq } = await ctx.supabase
-    .from("simulado_questoes")
+    .from("simulado_aluno_questoes")
     .select("questao_id")
     .eq("simulado_id", d.simulado_id)
     .eq("questao_id", d.questao_id)
@@ -332,7 +332,7 @@ export async function responderSimulado(
 
   const db = await adminDb(ctx);
   const { error } = await db
-    .from("simulado_questoes")
+    .from("simulado_aluno_questoes")
     .update({ alternativa_id: d.alternativa_id, respondida_em: d.alternativa_id ? new Date().toISOString() : null })
     .eq("simulado_id", d.simulado_id)
     .eq("questao_id", d.questao_id);
@@ -361,7 +361,7 @@ export async function finalizarSimulado(ctx: Ctx, id: string) {
 
   const db = await adminDb(ctx);
   const { data: sq } = await db
-    .from("simulado_questoes")
+    .from("simulado_aluno_questoes")
     .select("questao_id, disciplina_id, ordem, alternativa_id")
     .eq("simulado_id", id);
   const linhas: any[] = sq ?? [];
@@ -409,7 +409,7 @@ export async function finalizarSimulado(ctx: Ctx, id: string) {
   const percentual = total ? Math.round((acertos / total) * 10000) / 100 : 0;
 
   const { error: eQ } = await db
-    .from("simulado_questoes")
+    .from("simulado_aluno_questoes")
     .upsert(corrigidas.map((l) => ({ simulado_id: id, ...l })), { onConflict: "simulado_id,questao_id" });
   if (eQ) throw new Error(eQ.message);
 

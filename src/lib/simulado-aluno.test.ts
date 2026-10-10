@@ -102,7 +102,7 @@ function cenario() {
     ],
     questao_alternativas: ["q1", "q2", "q3", "q4", "q5", "q6", "q7"].flatMap(alts),
     simulados_aluno: [],
-    simulado_questoes: [],
+    simulado_aluno_questoes: [],
   };
   const db = criarBanco(t);
   return { t, db, ctx: { supabase: db, admin: db, userId: "u1", aleatorio: () => 0.3 } };
@@ -117,7 +117,7 @@ describe("simulados do cronograma", () => {
   it("monta a prova pela estrutura (qtd por disciplina), registra o que faltou e retoma se já iniciado", async () => {
     const r = await iniciarSimulado(c.ctx, "b1");
     expect(r.retomado).toBe(false);
-    const qs = c.t.simulado_questoes;
+    const qs = c.t.simulado_aluno_questoes;
     expect(qs.filter((q) => q.disciplina_id === "d1")).toHaveLength(3);
     expect(qs.filter((q) => q.disciplina_id === "d2")).toHaveLength(2);
     expect(c.t.simulados_aluno[0]).toMatchObject({ numero: 1, duracao_min: 120, total_questoes: 5 });
@@ -144,7 +144,7 @@ describe("simulados do cronograma", () => {
 
   it("corrige com nota ponderada pelo peso, conta sem resposta como erro e marca o bloco como feito", async () => {
     const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
-    const todas = c.t.simulado_questoes;
+    const todas = c.t.simulado_aluno_questoes;
     // d1: acerta as 3. d2: acerta 1 e deixa 1 em branco.
     for (const q of todas.filter((x) => x.disciplina_id === "d1")) {
       await responderSimulado(c.ctx, { simulado_id, questao_id: q.questao_id, alternativa_id: `${q.questao_id}-a` });
@@ -170,8 +170,8 @@ describe("simulados do cronograma", () => {
 
   it("recusa resposta depois de finalizado, alternativa de outra questão e questão fora do simulado", async () => {
     const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
-    const [q] = c.t.simulado_questoes;
-    const fora = c.t.questoes.find((x) => !c.t.simulado_questoes.some((s) => s.questao_id === x.id))!;
+    const [q] = c.t.simulado_aluno_questoes;
+    const fora = c.t.questoes.find((x) => !c.t.simulado_aluno_questoes.some((s) => s.questao_id === x.id))!;
     await expect(
       responderSimulado(c.ctx, { simulado_id, questao_id: q.questao_id, alternativa_id: "q7-a" }),
     ).rejects.toThrow("Alternativa inválida");
@@ -186,7 +186,7 @@ describe("simulados do cronograma", () => {
 
   it("tempo esgotado: ao abrir, encerra com o que foi respondido", async () => {
     const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
-    const q = c.t.simulado_questoes.find((x) => x.disciplina_id === "d1")!;
+    const q = c.t.simulado_aluno_questoes.find((x) => x.disciplina_id === "d1")!;
     await responderSimulado(c.ctx, { simulado_id, questao_id: q.questao_id, alternativa_id: `${q.questao_id}-a` });
     c.t.simulados_aluno[0].iniciado_em = new Date(Date.now() - 3 * 3600_000).toISOString(); // 3 h atrás, prova de 2 h
     const r: any = await lerSimulado(c.ctx, simulado_id);
@@ -199,10 +199,10 @@ describe("simulados do cronograma", () => {
 
   it("o segundo simulado prefere questões que o aluno ainda não viu", async () => {
     await iniciarSimulado(c.ctx, "b1");
-    const vistas = new Set(c.t.simulado_questoes.filter((q) => q.disciplina_id === "d1").map((q) => q.questao_id));
+    const vistas = new Set(c.t.simulado_aluno_questoes.filter((q) => q.disciplina_id === "d1").map((q) => q.questao_id));
     expect(vistas.size).toBe(3);
     await iniciarSimulado(c.ctx, "b2");
-    const segundo = c.t.simulado_questoes.filter((q) => q.simulado_id === c.t.simulados_aluno[1].id && q.disciplina_id === "d1");
+    const segundo = c.t.simulado_aluno_questoes.filter((q) => q.simulado_id === c.t.simulados_aluno[1].id && q.disciplina_id === "d1");
     const inéditas = segundo.filter((q) => !vistas.has(q.questao_id)).length;
     expect(segundo).toHaveLength(3);
     expect(inéditas).toBe(2); // só existiam 2 inéditas em d1; a 3ª repete
