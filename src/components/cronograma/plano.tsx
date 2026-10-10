@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { alunoMarcarBloco, alunoRecalcularCronograma } from "@/lib/cronograma-aluno.functions";
 import { somarDias } from "@/lib/cronograma-motor";
 import { formatarData, formatarDia, formatarMinutos, proximosDias, ROTULO_TIPO } from "./formato";
+import { RevisaoBloco } from "./revisao";
 
 export type Bloco = {
   id: string;
@@ -317,7 +318,7 @@ function AcaoDoBloco({ bloco }: { bloco: Bloco }) {
     );
   }
   if (bloco.tipo === "revisao") {
-    return <span className="text-xs text-muted-foreground">Conteúdo ao concluir a disciplina</span>;
+    return <RevisaoBloco blocoId={bloco.id} />;
   }
   if (bloco.tipo === "simulado") {
     return <span className="text-xs text-muted-foreground">Em breve</span>;
