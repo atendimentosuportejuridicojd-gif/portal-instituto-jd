@@ -2,6 +2,7 @@
 - [x] Reutilizar o cadastro de teste atual e capturar gclid sem impedir o cadastro.
 - [x] Omitir Termos, Privacidade e conteúdo institucional que não existam atualmente.
 # Tarefas
+- [x] Corrigir falha de carregamento de arquivos antigos das páginas com recuperação automática limitada e nova tentativa completa.
 
 - [x] Remover a espera de 3 segundos no carregamento do vídeo do simulado.
 - [x] Identificar os usuários que concluíram o simulado e seus resultados.

@@ -134,6 +134,49 @@ export type Database = {
           },
         ]
       }
+      concurso_materiais_excecao: {
+        Row: {
+          concurso_id: string
+          created_at: string
+          disciplina_id: string
+          material_id: string
+        }
+        Insert: {
+          concurso_id: string
+          created_at?: string
+          disciplina_id: string
+          material_id: string
+        }
+        Update: {
+          concurso_id?: string
+          created_at?: string
+          disciplina_id?: string
+          material_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concurso_materiais_excecao_concurso_id_fkey"
+            columns: ["concurso_id"]
+            isOneToOne: false
+            referencedRelation: "concursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concurso_materiais_excecao_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concurso_materiais_excecao_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       concurso_prova_estrutura: {
         Row: {
           concurso_id: string
@@ -346,6 +389,76 @@ export type Database = {
           },
         ]
       }
+      cronograma_blocos: {
+        Row: {
+          concluido: boolean
+          concluido_em: string | null
+          continuacao: boolean
+          created_at: string
+          cronograma_id: string
+          data: string
+          disciplina_id: string | null
+          id: string
+          material_id: string | null
+          minutos: number
+          ordem: number
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          concluido?: boolean
+          concluido_em?: string | null
+          continuacao?: boolean
+          created_at?: string
+          cronograma_id: string
+          data: string
+          disciplina_id?: string | null
+          id?: string
+          material_id?: string | null
+          minutos: number
+          ordem?: number
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          concluido?: boolean
+          concluido_em?: string | null
+          continuacao?: boolean
+          created_at?: string
+          cronograma_id?: string
+          data?: string
+          disciplina_id?: string | null
+          id?: string
+          material_id?: string | null
+          minutos?: number
+          ordem?: number
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cronograma_blocos_cronograma_id_fkey"
+            columns: ["cronograma_id"]
+            isOneToOne: false
+            referencedRelation: "cronogramas_aluno"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cronograma_blocos_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cronograma_blocos_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cronograma_itens: {
         Row: {
           created_at: string
@@ -445,6 +558,75 @@ export type Database = {
           },
         ]
       }
+      cronogramas_aluno: {
+        Row: {
+          concurso_id: string | null
+          concurso_nome: string
+          created_at: string
+          data_inicio: string
+          data_prova: string
+          duracao_prova_min: number | null
+          id: string
+          minutos_por_dia: number[]
+          minutos_por_questao: number
+          ordem_disciplinas: string[]
+          resumo: Json
+          status: string
+          updated_at: string
+          usa_simulado: boolean
+          user_id: string
+        }
+        Insert: {
+          concurso_id?: string | null
+          concurso_nome: string
+          created_at?: string
+          data_inicio: string
+          data_prova: string
+          duracao_prova_min?: number | null
+          id?: string
+          minutos_por_dia: number[]
+          minutos_por_questao?: number
+          ordem_disciplinas?: string[]
+          resumo?: Json
+          status?: string
+          updated_at?: string
+          usa_simulado?: boolean
+          user_id: string
+        }
+        Update: {
+          concurso_id?: string | null
+          concurso_nome?: string
+          created_at?: string
+          data_inicio?: string
+          data_prova?: string
+          duracao_prova_min?: number | null
+          id?: string
+          minutos_por_dia?: number[]
+          minutos_por_questao?: number
+          ordem_disciplinas?: string[]
+          resumo?: Json
+          status?: string
+          updated_at?: string
+          usa_simulado?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cronogramas_aluno_concurso_id_fkey"
+            columns: ["concurso_id"]
+            isOneToOne: false
+            referencedRelation: "concursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cronogramas_aluno_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disciplina_senhas: {
         Row: {
           disciplina_id: string
@@ -477,6 +659,7 @@ export type Database = {
           concurso_id: string | null
           created_at: string
           descricao: string | null
+          disciplina_base_id: string | null
           especifica: boolean
           grupo: string
           id: string
@@ -491,6 +674,7 @@ export type Database = {
           concurso_id?: string | null
           created_at?: string
           descricao?: string | null
+          disciplina_base_id?: string | null
           especifica?: boolean
           grupo?: string
           id?: string
@@ -505,6 +689,7 @@ export type Database = {
           concurso_id?: string | null
           created_at?: string
           descricao?: string | null
+          disciplina_base_id?: string | null
           especifica?: boolean
           grupo?: string
           id?: string
@@ -520,6 +705,13 @@ export type Database = {
             columns: ["concurso_id"]
             isOneToOne: false
             referencedRelation: "concursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinas_disciplina_base_id_fkey"
+            columns: ["disciplina_base_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
             referencedColumns: ["id"]
           },
         ]
@@ -1324,173 +1516,140 @@ export type Database = {
           },
         ]
       }
-      simulado_alternativas: {
+      simulado_aluno_questoes: {
         Row: {
-          correta: boolean
-          created_at: string
-          id: string
-          letra: string
-          ordem: number
-          questao_id: string
-          texto: string
-        }
-        Insert: {
-          correta?: boolean
-          created_at?: string
-          id?: string
-          letra: string
-          ordem?: number
-          questao_id: string
-          texto: string
-        }
-        Update: {
-          correta?: boolean
-          created_at?: string
-          id?: string
-          letra?: string
-          ordem?: number
-          questao_id?: string
-          texto?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "simulado_alternativas_questao_id_fkey"
-            columns: ["questao_id"]
-            isOneToOne: false
-            referencedRelation: "simulado_questoes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      simulado_questoes: {
-        Row: {
-          comentario: string | null
-          created_at: string
-          enunciado: string
-          id: string
-          materia: string
-          ordem: number
-          publicado: boolean
-          questao_id: string
-          updated_at: string
-        }
-        Insert: {
-          comentario?: string | null
-          created_at?: string
-          enunciado: string
-          id?: string
-          materia: string
-          ordem?: number
-          publicado?: boolean
-          questao_id: string
-          updated_at?: string
-        }
-        Update: {
-          comentario?: string | null
-          created_at?: string
-          enunciado?: string
-          id?: string
-          materia?: string
-          ordem?: number
-          publicado?: boolean
-          questao_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      simulado_respostas: {
-        Row: {
-          acertou: boolean
+          acertou: boolean | null
           alternativa_id: string | null
-          created_at: string
-          id: string
+          disciplina_id: string | null
+          ordem: number
           questao_id: string
-          tentativa_id: string
-          user_id: string
+          respondida_em: string | null
+          simulado_id: string
         }
         Insert: {
-          acertou?: boolean
+          acertou?: boolean | null
           alternativa_id?: string | null
-          created_at?: string
-          id?: string
+          disciplina_id?: string | null
+          ordem?: number
           questao_id: string
-          tentativa_id: string
-          user_id: string
+          respondida_em?: string | null
+          simulado_id: string
         }
         Update: {
-          acertou?: boolean
+          acertou?: boolean | null
           alternativa_id?: string | null
-          created_at?: string
-          id?: string
+          disciplina_id?: string | null
+          ordem?: number
           questao_id?: string
-          tentativa_id?: string
-          user_id?: string
+          respondida_em?: string | null
+          simulado_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "simulado_respostas_alternativa_id_fkey"
+            foreignKeyName: "simulado_aluno_questoes_alternativa_id_fkey"
             columns: ["alternativa_id"]
             isOneToOne: false
-            referencedRelation: "simulado_alternativas"
+            referencedRelation: "questao_alternativas"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "simulado_respostas_questao_id_fkey"
+            foreignKeyName: "simulado_aluno_questoes_disciplina_id_fkey"
+            columns: ["disciplina_id"]
+            isOneToOne: false
+            referencedRelation: "disciplinas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulado_aluno_questoes_questao_id_fkey"
             columns: ["questao_id"]
             isOneToOne: false
-            referencedRelation: "simulado_questoes"
+            referencedRelation: "questoes"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "simulado_respostas_tentativa_id_fkey"
-            columns: ["tentativa_id"]
+            foreignKeyName: "simulado_aluno_questoes_simulado_id_fkey"
+            columns: ["simulado_id"]
             isOneToOne: false
-            referencedRelation: "simulado_tentativas"
+            referencedRelation: "simulados_aluno"
             referencedColumns: ["id"]
           },
         ]
       }
-      simulado_tentativas: {
+      simulados_aluno: {
         Row: {
-          acertos: number
-          concluida_em: string | null
+          acertos: number | null
+          bloco_id: string | null
+          concluido_em: string | null
           created_at: string
-          erros: number
+          cronograma_id: string
+          duracao_min: number
           id: string
-          iniciada_em: string
-          percentual: number
+          iniciado_em: string
+          nota_ponderada: number | null
+          numero: number
+          percentual: number | null
+          por_disciplina: Json | null
           status: string
           total_questoes: number
-          updated_at: string
           user_id: string
         }
         Insert: {
-          acertos?: number
-          concluida_em?: string | null
+          acertos?: number | null
+          bloco_id?: string | null
+          concluido_em?: string | null
           created_at?: string
-          erros?: number
+          cronograma_id: string
+          duracao_min: number
           id?: string
-          iniciada_em?: string
-          percentual?: number
+          iniciado_em?: string
+          nota_ponderada?: number | null
+          numero: number
+          percentual?: number | null
+          por_disciplina?: Json | null
           status?: string
           total_questoes?: number
-          updated_at?: string
           user_id: string
         }
         Update: {
-          acertos?: number
-          concluida_em?: string | null
+          acertos?: number | null
+          bloco_id?: string | null
+          concluido_em?: string | null
           created_at?: string
-          erros?: number
+          cronograma_id?: string
+          duracao_min?: number
           id?: string
-          iniciada_em?: string
-          percentual?: number
+          iniciado_em?: string
+          nota_ponderada?: number | null
+          numero?: number
+          percentual?: number | null
+          por_disciplina?: Json | null
           status?: string
           total_questoes?: number
-          updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "simulados_aluno_bloco_id_fkey"
+            columns: ["bloco_id"]
+            isOneToOne: false
+            referencedRelation: "cronograma_blocos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulados_aluno_cronograma_id_fkey"
+            columns: ["cronograma_id"]
+            isOneToOne: false
+            referencedRelation: "cronogramas_aluno"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulados_aluno_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trilha_materiais: {
         Row: {

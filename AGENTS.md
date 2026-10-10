@@ -14,3 +14,4 @@
 - Simulados one-time payments use isolated checkout modules and the managed payments webhook, never the Hotmart subscription flow; this keeps paid service entitlements separate from portal subscriptions.
 - The Simulados Stripe price is resolved by its stable catalog lookup key, not an amount duplicated in code; change that catalog price to keep a single source of truth.
 - Test payment webhooks must not write simulado_acessos because this shared entitlement table has no environment discriminator.
+- Recover stale dynamic route assets with one guarded browser reload per minute and a full-page manual retry; router invalidation alone reuses the failed module reference.
