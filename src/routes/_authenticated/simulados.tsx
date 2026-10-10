@@ -43,6 +43,8 @@ function Simulados() {
   return (
     <>
       <PageHeader
+        icone={ClipboardCheck}
+        rotulo="Serviço J&D"
         title="Simulados"
         description="Um simulado a cada 15 dias, pela estrutura da prova do seu concurso. Sem comentários: servem para medir o seu nível."
       />

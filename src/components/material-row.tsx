@@ -61,10 +61,23 @@ export function MaterialRow({ m }: { m: any }) {
           : "text-red-600";
 
   return (
-    <div className="surface-card flex flex-col gap-3 p-4 transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className={cn(
+        "surface-card flex flex-col gap-3 border-l-4 p-4 hover:shadow-md sm:flex-row sm:items-center sm:justify-between",
+        perf === null
+          ? "border-l-border"
+          : perf >= 85
+            ? "border-l-emerald-500"
+            : perf >= 70
+              ? "border-l-amber-500"
+              : "border-l-rose-500",
+      )}
+    >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+            <FileText className="h-3.5 w-3.5" />
+          </span>
           <h3 className="truncate text-sm font-semibold">{m.titulo}</h3>
           {m.lido && (
             <Badge variant="outline" className="shrink-0 border-green-600/40 text-green-700">

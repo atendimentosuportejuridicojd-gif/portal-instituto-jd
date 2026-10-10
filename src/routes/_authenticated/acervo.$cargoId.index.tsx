@@ -93,6 +93,8 @@ function CargoDisciplinas() {
   return (
     <>
       <PageHeader
+        icone={BookOpen}
+        rotulo="Acervo Base"
         title={loading ? "Carregando…" : titulo}
         description="Escolha uma matéria para ver os materiais em PDF."
         actions={
@@ -118,7 +120,7 @@ function CargoDisciplinas() {
             {grupos.map((g) => (
               <section key={g.key}>
                 <div className="mb-3 flex items-center gap-3">
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <h2 className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
                     {g.titulo}
                   </h2>
                   <span className="text-xs text-muted-foreground">
@@ -132,11 +134,11 @@ function CargoDisciplinas() {
                       key={d.id}
                       to="/acervo/$cargoId/$disciplinaId"
                       params={{ cargoId, disciplinaId: d.id }}
-                      className="surface-card group flex items-center justify-between gap-4 p-5 transition-shadow hover:shadow-md"
+                      className="surface-card group flex items-center justify-between gap-4 p-5 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                     >
                       <div className="min-w-0">
-                        <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
-                          <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                        <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/15 to-gold/25 text-primary">
+                          <FolderOpen className="h-5 w-5" />
                         </div>
                         <h3 className="flex items-center gap-1.5 truncate text-sm font-semibold">
                           {d.nome}
