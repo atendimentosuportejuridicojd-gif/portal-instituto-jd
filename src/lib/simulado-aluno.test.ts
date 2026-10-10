@@ -10,6 +10,8 @@ function criarBanco(tabelas: Record<string, any[]>) {
   let seq = 0;
   return {
     tabelas,
+    // Papéis: o teste de administrador liga u-admin; os demais alunos não são administradores.
+    rpc: async (_nome: string, args: { _user_id: string }) => ({ data: args._user_id === "u-admin" }),
     from(nome: string) {
       const linhas = (tabelas[nome] ??= []);
       const filtros: ((r: any) => boolean)[] = [];
@@ -215,6 +217,18 @@ describe("simulados do cronograma", () => {
     c.t.simulado_acessos[0].ativo = true;
     c.t.cronograma_blocos[0].data = "2999-01-01";
     await expect(iniciarSimulado(c.ctx, "b1")).rejects.toThrow("só abre na data prevista");
+  });
+
+  it("o administrador usa os simulados sem liberação nem pagamento", async () => {
+    c.t.simulado_acessos.length = 0; // nenhum registro de acesso
+    c.t.cronogramas_aluno[0].user_id = "u-admin";
+    const admin = { ...c.ctx, userId: "u-admin" };
+    const r = await iniciarSimulado(admin, "b1");
+    expect(r.retomado).toBe(false);
+    expect((await lerSimulado(admin, r.simulado_id)).status).toBe("em_andamento");
+    // Um aluno comum, sem registro de acesso, continua barrado.
+    c.t.cronogramas_aluno[0].user_id = "u1";
+    await expect(iniciarSimulado(c.ctx, "b2")).rejects.toThrow("não estão liberados");
   });
 
   it("não mexe no simulado de outro aluno", async () => {

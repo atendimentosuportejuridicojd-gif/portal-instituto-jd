@@ -214,6 +214,9 @@ function resumo(r: ResultadoPlano) {
 // ---------- simulados ----------
 
 export async function acessoSimuladoLiberado(supabase: any, userId: string): Promise<boolean> {
+  // O administrador usa os simulados quando quiser, sem pagar nem precisar de liberação.
+  const { data: ehAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "administrador" });
+  if (ehAdmin === true) return true;
   const { data } = await supabase.from("simulado_acessos").select("ativo, fim").eq("user_id", userId).maybeSingle();
   return data?.ativo === true && (!data.fim || new Date(data.fim).getTime() > Date.now());
 }
