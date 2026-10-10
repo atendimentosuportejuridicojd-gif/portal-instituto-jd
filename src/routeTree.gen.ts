@@ -21,6 +21,7 @@ import { Route as AuthenticatedCronogramasRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedNoticiasRouteImport } from './routes/_authenticated/noticias'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedSimuladosRouteImport } from './routes/_authenticated/simulados'
 import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
@@ -34,6 +35,7 @@ import { Route as AuthenticatedAdminRecursosRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminTrilhasRouteImport } from './routes/_authenticated/admin/trilhas'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedConcursosEspecificosConcursoIdRouteImport } from './routes/_authenticated/concursos-especificos.$concursoId'
+import { Route as AuthenticatedSimuladosSimuladoIdRouteImport } from './routes/_authenticated/simulados.$simuladoId'
 import { Route as ApiPublicConversoesGoogleAdsRouteImport } from './routes/api/public/conversoes-google-ads'
 import { Route as AuthenticatedAcervoCargoIdIndexRouteImport } from './routes/_authenticated/acervo.$cargoId.index'
 import { Route as AuthenticatedAcervoCargoIdDisciplinaIdRouteImport } from './routes/_authenticated/acervo.$cargoId.$disciplinaId'
@@ -106,6 +108,11 @@ const AuthenticatedNoticiasRoute = AuthenticatedNoticiasRouteImport.update({
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSimuladosRoute = AuthenticatedSimuladosRouteImport.update({
+  id: '/simulados',
+  path: '/simulados',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAcervoIndexRoute =
@@ -185,6 +192,12 @@ const AuthenticatedConcursosEspecificosConcursoIdRoute =
     id: '/concursos-especificos/$concursoId',
     path: '/concursos-especificos/$concursoId',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSimuladosSimuladoIdRoute =
+  AuthenticatedSimuladosSimuladoIdRouteImport.update({
+    id: '/$simuladoId',
+    path: '/$simuladoId',
+    getParentRoute: () => AuthenticatedSimuladosRoute,
   } as any)
 const ApiPublicConversoesGoogleAdsRoute =
   ApiPublicConversoesGoogleAdsRouteImport.update({
@@ -268,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -280,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
+  '/simulados/$simuladoId': typeof AuthenticatedSimuladosSimuladoIdRoute
   '/api/public/conversoes-google-ads': typeof ApiPublicConversoesGoogleAdsRoute
   '/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
@@ -306,6 +321,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -318,6 +334,7 @@ export interface FileRoutesByTo {
   '/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
+  '/simulados/$simuladoId': typeof AuthenticatedSimuladosSimuladoIdRoute
   '/api/public/conversoes-google-ads': typeof ApiPublicConversoesGoogleAdsRoute
   '/acervo': typeof AuthenticatedAcervoIndexRoute
   '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
@@ -346,6 +363,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/noticias': typeof AuthenticatedNoticiasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/simulados': typeof AuthenticatedSimuladosRouteWithChildren
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -358,6 +376,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/trilhas': typeof AuthenticatedAdminTrilhasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/concursos-especificos/$concursoId': typeof AuthenticatedConcursosEspecificosConcursoIdRoute
+  '/_authenticated/simulados/$simuladoId': typeof AuthenticatedSimuladosSimuladoIdRoute
   '/api/public/conversoes-google-ads': typeof ApiPublicConversoesGoogleAdsRoute
   '/_authenticated/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/_authenticated/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
@@ -386,6 +405,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/noticias'
     | '/perfil'
+    | '/simulados'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -398,6 +418,7 @@ export interface FileRouteTypes {
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/concursos-especificos/$concursoId'
+    | '/simulados/$simuladoId'
     | '/api/public/conversoes-google-ads'
     | '/acervo/'
     | '/acervo/$cargoId/$disciplinaId'
@@ -424,6 +445,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/noticias'
     | '/perfil'
+    | '/simulados'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -436,6 +458,7 @@ export interface FileRouteTypes {
     | '/admin/trilhas'
     | '/admin/usuarios'
     | '/concursos-especificos/$concursoId'
+    | '/simulados/$simuladoId'
     | '/api/public/conversoes-google-ads'
     | '/acervo'
     | '/acervo/$cargoId/$disciplinaId'
@@ -463,6 +486,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/noticias'
     | '/_authenticated/perfil'
+    | '/_authenticated/simulados'
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
     | '/_authenticated/admin/configuracoes'
@@ -475,6 +499,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/trilhas'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/concursos-especificos/$concursoId'
+    | '/_authenticated/simulados/$simuladoId'
     | '/api/public/conversoes-google-ads'
     | '/_authenticated/acervo/'
     | '/_authenticated/acervo/$cargoId/$disciplinaId'
@@ -590,6 +615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/simulados': {
+      id: '/_authenticated/simulados'
+      path: '/simulados'
+      fullPath: '/simulados'
+      preLoaderRoute: typeof AuthenticatedSimuladosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/acervo/': {
       id: '/_authenticated/acervo/'
       path: '/acervo'
@@ -681,6 +713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConcursosEspecificosConcursoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/simulados/$simuladoId': {
+      id: '/_authenticated/simulados/$simuladoId'
+      path: '/$simuladoId'
+      fullPath: '/simulados/$simuladoId'
+      preLoaderRoute: typeof AuthenticatedSimuladosSimuladoIdRouteImport
+      parentRoute: typeof AuthenticatedSimuladosRoute
+    }
     '/api/public/conversoes-google-ads': {
       id: '/api/public/conversoes-google-ads'
       path: '/api/public/conversoes-google-ads'
@@ -768,6 +807,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedSimuladosRouteChildren {
+  AuthenticatedSimuladosSimuladoIdRoute: typeof AuthenticatedSimuladosSimuladoIdRoute
+}
+
+const AuthenticatedSimuladosRouteChildren: AuthenticatedSimuladosRouteChildren =
+  {
+    AuthenticatedSimuladosSimuladoIdRoute:
+      AuthenticatedSimuladosSimuladoIdRoute,
+  }
+
+const AuthenticatedSimuladosRouteWithChildren =
+  AuthenticatedSimuladosRoute._addFileChildren(
+    AuthenticatedSimuladosRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAssinaturaBloqueadaRoute: typeof AuthenticatedAssinaturaBloqueadaRoute
   AuthenticatedConcursosRoute: typeof AuthenticatedConcursosRoute
@@ -775,6 +829,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNoticiasRoute: typeof AuthenticatedNoticiasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedSimuladosRoute: typeof AuthenticatedSimuladosRouteWithChildren
   AuthenticatedAdminAcervoRoute: typeof AuthenticatedAdminAcervoRoute
   AuthenticatedAdminConcursosRoute: typeof AuthenticatedAdminConcursosRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
@@ -804,6 +859,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNoticiasRoute: AuthenticatedNoticiasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedSimuladosRoute: AuthenticatedSimuladosRouteWithChildren,
   AuthenticatedAdminAcervoRoute: AuthenticatedAdminAcervoRoute,
   AuthenticatedAdminConcursosRoute: AuthenticatedAdminConcursosRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,

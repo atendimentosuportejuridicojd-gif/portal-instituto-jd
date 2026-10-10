@@ -13,6 +13,7 @@ import {
   alunoDadosAssistente,
   alunoFinalizarRascunho,
 } from "@/lib/cronograma-aluno.functions";
+import { alunoAtivarSimulados } from "@/lib/simulado-aluno.functions";
 
 export const Route = createFileRoute("/_authenticated/cronogramas")({
   head: () => ({
@@ -72,6 +73,25 @@ function MeuCronograma() {
       finalizar.mutate();
     }
   }, [q.data, finalizar]);
+
+  // Voltou do pagamento dos simulados com o cronograma já ativo: inclui os simulados no plano.
+  const ativarFn = useServerFn(alunoAtivarSimulados);
+  const ativarSimulados = useMutation({
+    mutationFn: () => ativarFn({ data: {} }),
+    onSuccess: (r: any) => {
+      if (r?.estado === "ativo") toast.success("Simulados incluídos no seu cronograma.");
+      qc.invalidateQueries({ queryKey: ["aluno"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const tentouSimulados = useRef(false);
+  useEffect(() => {
+    const c = q.data?.cronograma;
+    if (c && q.data?.simuladoLiberado && !c.usa_simulado && c.duracao_prova_min && !tentouSimulados.current) {
+      tentouSimulados.current = true;
+      ativarSimulados.mutate();
+    }
+  }, [q.data, ativarSimulados]);
 
   const aoCriar = () => {
     setCriando(false);

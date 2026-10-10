@@ -43,7 +43,7 @@ interface DisciplinaCarregada extends DisciplinaPlano {
 }
 
 /** Disciplinas da estrutura da prova do concurso, com as matérias de cada uma e o tempo estimado. */
-async function carregarDisciplinas(
+export async function carregarDisciplinas(
   supabase: any,
   concursoId: string,
   ordemEscolhida: string[] | undefined,
