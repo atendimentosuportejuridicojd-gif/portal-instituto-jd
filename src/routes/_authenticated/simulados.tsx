@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute, useChildMatches, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -35,7 +35,13 @@ export const Route = createFileRoute("/_authenticated/simulados")({
 
 const META = 85;
 
+/** `simulados.$simuladoId` é filha desta rota: quando há filha ativa, mostra a prova em vez da lista. */
 function Simulados() {
+  const filhas = useChildMatches();
+  return filhas.length > 0 ? <Outlet /> : <PainelSimulados />;
+}
+
+function PainelSimulados() {
   const painelFn = useServerFn(alunoPainelSimulados);
   const q = useQuery({ queryKey: ["aluno", "simulados"], queryFn: () => painelFn() });
   const d = q.data;
