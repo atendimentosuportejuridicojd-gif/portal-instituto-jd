@@ -19,6 +19,18 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    // Prebundle dependencies used by lazy cronograma routes at startup. Discovering
+    // them on navigation can otherwise replace React's optimized module graph
+    // while an open tab still holds the previous react-dom instance.
+    optimizeDeps: {
+      include: [
+        "@tanstack/react-query",
+        "@tanstack/react-router",
+        "@radix-ui/react-alert-dialog",
+        "@stripe/react-stripe-js",
+        "@stripe/stripe-js",
+      ],
+    },
     resolve: {
       alias: {
         "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
