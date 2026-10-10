@@ -77,3 +77,12 @@ export const alunoArquivarCronograma = createServerFn({ method: "POST" })
     const { arquivarCronograma } = await import("@/lib/cronograma-aluno.server");
     return arquivarCronograma(context);
   });
+
+/** Matérias a revisar em um bloco de revisão (abaixo da meta de desempenho). */
+export const alunoRevisaoBloco = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ bloco_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { revisaoDoBloco } = await import("@/lib/cronograma-aluno.server");
+    return revisaoDoBloco(context, data.bloco_id);
+  });

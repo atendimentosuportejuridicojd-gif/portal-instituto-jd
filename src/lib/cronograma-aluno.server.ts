@@ -2,10 +2,12 @@ import { assertAcessoAluno } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 import { hojeBrasilia } from "@/lib/simulado-pagamento";
 import {
+  META_DESEMPENHO,
   diferencaDias,
   gerarPlano,
   type BlocoPlano,
   type DisciplinaPlano,
+  type MateriaPlano,
   type ParametrosPlano,
   type ResultadoPlano,
 } from "@/lib/cronograma-motor";
@@ -29,9 +31,15 @@ const QUESTOES_PADRAO = 20;
 
 // ---------- dados do concurso ----------
 
+interface MateriaCarregada extends MateriaPlano {
+  /** Questões realmente cadastradas na matéria (0 = ainda sem questões). */
+  qtdReal: number;
+}
+
 interface DisciplinaCarregada extends DisciplinaPlano {
   peso: number;
   qtdProva: number;
+  materias: MateriaCarregada[];
 }
 
 /** Disciplinas da estrutura da prova do concurso, com as matérias de cada uma e o tempo estimado. */
@@ -102,6 +110,7 @@ async function carregarDisciplinas(
           titulo: m.titulo,
           minutosLeitura: m.tempo_leitura ?? LEITURA_PADRAO_MIN,
           qtdQuestoes: contagem.get(m.id) || mediaDisciplina,
+          qtdReal: contagem.get(m.id) ?? 0,
         })),
     };
   });
@@ -393,6 +402,113 @@ export async function cronogramaAtual(ctx: Ctx) {
     progresso: { totalMinutos: total, feitoMinutos: feito, percentual: total ? Math.round((feito / total) * 100) : 0 },
     diasAteProva: ativo ? diferencaDias(hoje, ativo.data_prova) : null,
     diasAtrasados: new Set(atrasados.map((b: any) => b.data)).size,
+  };
+}
+
+export interface ItemRevisao {
+  material_id: string;
+  titulo: string;
+  disciplina: string;
+  /** Percentual da última sessão de questões concluída; null = ainda não resolveu. */
+  percentual: number | null;
+  acertos: number | null;
+  total: number | null;
+  qtdQuestoes: number;
+  estado: "sem_resolucao" | "abaixo";
+}
+
+/**
+ * Conteúdo da revisão de uma disciplina, decidido no dia: as matérias abaixo da meta (85%) desta disciplina
+ * e das anteriores, medidas pela última sessão de questões concluída de cada uma.
+ */
+export async function revisaoDoBloco(ctx: Ctx, blocoId: string) {
+  await assertAcessoAluno(ctx);
+  const { supabase, userId } = ctx;
+
+  const { data: bloco } = await supabase
+    .from("cronograma_blocos")
+    .select("id, cronograma_id, tipo, disciplina_id, minutos")
+    .eq("id", blocoId)
+    .maybeSingle();
+  if (!bloco || bloco.tipo !== "revisao" || !bloco.disciplina_id) throw new Error("Bloco de revisão não encontrado.");
+
+  const { data: c } = await supabase
+    .from("cronogramas_aluno")
+    .select("concurso_id, ordem_disciplinas, minutos_por_questao")
+    .eq("id", bloco.cronograma_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!c) throw new Error("Cronograma não encontrado.");
+  if (!c.concurso_id) throw new Error("O concurso deste cronograma não existe mais.");
+
+  const ordem: string[] = c.ordem_disciplinas ?? [];
+  const ate = ordem.indexOf(bloco.disciplina_id);
+  const ids = ate >= 0 ? ordem.slice(0, ate + 1) : [bloco.disciplina_id];
+  const disciplinas = (await carregarDisciplinas(supabase, c.concurso_id, ordem)).filter((d) => ids.includes(d.id));
+
+  const materias = disciplinas.flatMap((d) => d.materias.map((m) => ({ ...m, disciplina: d.nome })));
+  const comQuestoes = materias.filter((m) => m.qtdReal > 0);
+  const idsMateria = comQuestoes.map((m) => m.id);
+
+  const ultima = new Map<string, { percentual: number; acertos: number | null; total: number | null }>();
+  if (idsMateria.length) {
+    const { data: sessoes, error } = await supabase
+      .from("questao_sessoes")
+      .select("material_id, percentual, acertos, total_questoes, concluida_em")
+      .eq("user_id", userId)
+      .eq("status", "concluida")
+      .in("material_id", idsMateria)
+      .order("concluida_em", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    for (const s of sessoes ?? []) {
+      if (!ultima.has(s.material_id)) {
+        ultima.set(s.material_id, {
+          percentual: Number(s.percentual ?? 0),
+          acertos: s.acertos ?? null,
+          total: s.total_questoes ?? null,
+        });
+      }
+    }
+  }
+
+  const itens: ItemRevisao[] = [];
+  let aprovadas = 0;
+  for (const m of comQuestoes) {
+    const u = ultima.get(m.id);
+    if (u && u.percentual >= META_DESEMPENHO) {
+      aprovadas++;
+      continue;
+    }
+    itens.push({
+      material_id: m.id,
+      titulo: m.titulo,
+      disciplina: m.disciplina,
+      percentual: u ? u.percentual : null,
+      acertos: u?.acertos ?? null,
+      total: u?.total ?? null,
+      qtdQuestoes: m.qtdReal,
+      estado: u ? "abaixo" : "sem_resolucao",
+    });
+  }
+  // Primeiro o que ainda não foi resolvido, depois as notas mais baixas.
+  itens.sort((a, b) => {
+    if (a.estado !== b.estado) return a.estado === "sem_resolucao" ? -1 : 1;
+    return (a.percentual ?? 0) - (b.percentual ?? 0);
+  });
+
+  const nome = disciplinas.find((d) => d.id === bloco.disciplina_id)?.nome ?? "Disciplina";
+  return {
+    meta: META_DESEMPENHO,
+    disciplina: nome,
+    itens,
+    resumo: {
+      paraRevisar: itens.length,
+      aprovadas,
+      semQuestoes: materias.length - comQuestoes.length,
+      minutosEstimados: itens.reduce((acc, i) => acc + i.qtdQuestoes * c.minutos_por_questao, 0),
+      minutosReservados: bloco.minutos as number,
+    },
   };
 }
 
