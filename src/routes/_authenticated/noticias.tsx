@@ -46,6 +46,8 @@ function NoticiasAluno() {
   return (
     <>
       <PageHeader
+        icone={Newspaper}
+        rotulo="Novidades"
         title="Fique por Dentro"
         description="Editais, bancas e avisos importantes selecionados pela equipe."
       />
@@ -64,9 +66,9 @@ function NoticiasAluno() {
               <article
                 key={n.id}
                 id={`noticia-${n.id}`}
-                className={`surface-card overflow-hidden ${
-                  destaqueId === n.id ? "ring-2 ring-primary" : ""
-                }`}
+                className={`surface-card overflow-hidden border-l-4 hover:shadow-md ${
+                  n.fixado ? "border-l-gold" : "border-l-primary/30"
+                } ${destaqueId === n.id ? "ring-2 ring-primary" : ""}`}
               >
                 {n.imagem_url && (
                   <img
@@ -88,7 +90,7 @@ function NoticiasAluno() {
                       {new Date(n.published_at).toLocaleDateString("pt-BR")}
                     </span>
                   </div>
-                  <h2 className="mt-2 text-sm font-semibold">{n.titulo}</h2>
+                  <h2 className="mt-2 text-base font-semibold leading-snug tracking-tight">{n.titulo}</h2>
                   {n.resumo && <p className="mt-1 text-sm text-muted-foreground">{n.resumo}</p>}
                   {n.conteudo && (
                     <p className="mt-3 whitespace-pre-line text-sm leading-relaxed">{n.conteudo}</p>

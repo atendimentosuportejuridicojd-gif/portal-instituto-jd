@@ -102,6 +102,8 @@ function CargoDisciplinaMateriais() {
   return (
     <>
       <PageHeader
+        icone={BookOpen}
+        rotulo="Acervo Base"
         title={loading ? "Carregando…" : moduloSelNome ? `${nome} — ${moduloSelNome}` : nome}
         description={
           temModulos && !moduloSel

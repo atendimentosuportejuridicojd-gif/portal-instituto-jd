@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageContent, PageHeader } from "@/components/page";
+import { Kpi } from "@/components/cronograma/visual";
+import { BookOpen, Gauge, ListChecks, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
@@ -65,31 +67,27 @@ function Perfil() {
 
   return (
     <>
-      <PageHeader title="Perfil" description="Suas informações e assinatura." />
+      <PageHeader icone={User} rotulo="Minha conta" title="Perfil" description="Suas informações e assinatura." />
       <PageContent>
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="surface-card space-y-4 p-6 lg:col-span-2">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Sua jornada
             </h2>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Info label="PDFs estudados">
-                <span className="text-2xl font-semibold tabular-nums">
-                  {jornada.data?.materiais_estudados ?? 0}
-                </span>
-              </Info>
-              <Info label="Questionários concluídos">
-                <span className="text-2xl font-semibold tabular-nums">
-                  {jornada.data?.questionarios_concluidos ?? 0}
-                </span>
-              </Info>
-              <Info label="Aproveitamento geral">
-                <span className="text-2xl font-semibold tabular-nums">
-                  {jornada.data?.aproveitamento_geral === null || jornada.data === undefined
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Kpi icone={BookOpen} rotulo="Matérias estudadas" valor={jornada.data?.materiais_estudados ?? 0} />
+              <Kpi icone={ListChecks} rotulo="Questionários concluídos" valor={jornada.data?.questionarios_concluidos ?? 0} />
+              <Kpi
+                icone={Gauge}
+                rotulo="Aproveitamento geral"
+                destaque={(jornada.data?.aproveitamento_geral ?? 0) >= 85}
+                valor={
+                  jornada.data?.aproveitamento_geral === null || jornada.data === undefined
                     ? "—"
-                    : `${jornada.data.aproveitamento_geral}%`}
-                </span>
-              </Info>
+                    : `${jornada.data.aproveitamento_geral}%`
+                }
+                detalhe="meta de 85% por matéria"
+              />
             </div>
           </div>
 

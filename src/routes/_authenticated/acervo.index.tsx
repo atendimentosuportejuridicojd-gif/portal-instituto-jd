@@ -34,6 +34,8 @@ function AcervoCargos() {
   return (
     <>
       <PageHeader
+        icone={Library}
+        rotulo="Biblioteca do Instituto"
         title="Acervo Base"
         description="Escolha o cargo para ver apenas as matérias daquela preparação."
       />
@@ -49,11 +51,11 @@ function AcervoCargos() {
                   key={c.id}
                   to="/acervo/$cargoId"
                   params={{ cargoId: c.id }}
-                  className="surface-card group flex items-center justify-between gap-4 p-5 transition-shadow hover:shadow-md"
+                  className="surface-card group flex items-center justify-between gap-4 p-5 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                 >
                   <div className="min-w-0">
-                    <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
-                      <Target className="h-5 w-5 text-muted-foreground" />
+                    <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/15 to-gold/25 text-primary">
+                      <Target className="h-5 w-5" />
                     </div>
                     <h2 className="truncate text-sm font-semibold">{c.nome}</h2>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -69,11 +71,11 @@ function AcervoCargos() {
             <Link
               to="/acervo/$cargoId"
               params={{ cargoId: "todos" }}
-              className="surface-card group flex items-center justify-between gap-4 p-5 transition-shadow hover:shadow-md"
+              className="surface-card group flex items-center justify-between gap-4 p-5 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
             >
               <div className="min-w-0">
-                <div className="mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
-                  <Library className="h-5 w-5 text-muted-foreground" />
+                <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/15 to-gold/25 text-primary">
+                  <Library className="h-5 w-5" />
                 </div>
                 <h2 className="truncate text-sm font-semibold">Acervo completo</h2>
                 <p className="mt-1 text-xs text-muted-foreground">

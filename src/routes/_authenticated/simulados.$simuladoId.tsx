@@ -3,7 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Clock, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ClipboardCheck, Clock, Gauge, Loader2, Target } from "lucide-react";
+import { Kpi } from "@/components/cronograma/visual";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,8 @@ function SimuladoPage() {
   return (
     <>
       <PageHeader
+        icone={ClipboardCheck}
+        rotulo="Avaliação do seu nível"
         title="Simulado"
         description="Sem comentários e sem gabarito: o objetivo é medir o seu nível."
         actions={
@@ -303,10 +306,5 @@ function Resultado({ r }: { r: any }) {
 }
 
 function Numero({ rotulo, valor, destaque }: { rotulo: string; valor: string; destaque?: boolean }) {
-  return (
-    <div className={`rounded-lg border p-4 ${destaque ? "border-primary/40 bg-primary/5" : "border-border/60"}`}>
-      <p className="text-xs text-muted-foreground">{rotulo}</p>
-      <p className="mt-1 text-xl font-semibold tabular-nums">{valor}</p>
-    </div>
-  );
+  return <Kpi icone={destaque ? Gauge : Target} rotulo={rotulo} valor={valor} destaque={destaque} />;
 }
