@@ -25,6 +25,7 @@ export const adminListTrilhas = createServerFn({ method: "GET" })
       publicado: m.publicado,
       tem_arquivo: !!m.storage_path,
       disciplina: m.disciplinas?.nome ?? "Sem disciplina",
+      disciplina_id: m.disciplina_id as string | null,
     }));
     const byId = new Map(mats.map((m) => [m.id, m]));
 
@@ -116,7 +117,7 @@ export const adminListConcursos = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabase } = context;
-    const [{ data: concursos }, { data: vinculos }, { data: materiais }, { data: estrutura }, { data: disciplinas }] =
+    const [{ data: concursos }, { data: vinculos }, { data: materiais }, { data: estrutura }, { data: disciplinas }, { data: excecoes }] =
       await Promise.all([
       supabase
         .from("concursos")
@@ -128,13 +129,14 @@ export const adminListConcursos = createServerFn({ method: "GET" })
         .order("ordem"),
       supabase
         .from("materiais")
-        .select("id, titulo, publicado, storage_path, disciplinas(nome)")
+        .select("id, titulo, publicado, storage_path, disciplina_id, disciplinas(nome)")
         .order("titulo"),
       (supabase as any)
         .from("concurso_prova_estrutura")
         .select("concurso_id, disciplina_id, qtd_questoes, peso, ordem")
         .order("ordem"),
       (supabase as any).from("disciplinas").select("id, nome, especifica, concurso_id, disciplina_base_id").order("nome"),
+      (supabase as any).from("concurso_materiais_excecao").select("concurso_id, material_id, disciplina_id"),
     ]);
 
     const mats = (materiais ?? []).map((m: any) => ({
@@ -151,6 +153,7 @@ export const adminListConcursos = createServerFn({ method: "GET" })
       concursos: (concursos ?? []).map((c: any) => ({
         ...c,
         estrutura: (estrutura ?? []).filter((e: any) => e.concurso_id === c.id),
+        excecoes: (excecoes ?? []).filter((e: any) => e.concurso_id === c.id),
         materiais: (vinculos ?? [])
           .filter((v: any) => v.concurso_id === c.id)
           .map((v: any) => ({ ...byId.get(v.material_id), ordem: v.ordem, exclusivo: v.exclusivo }))
@@ -307,6 +310,81 @@ export const adminToggleMaterialConcurso = createServerFn({ method: "POST" })
     );
     if (error) throw new Error(error.message);
     return { vinculado: true };
+  });
+
+/**
+ * "Vincular materiais exceção": define quais matérias (de qualquer disciplina) contam dentro de uma disciplina da
+ * estrutura da prova do concurso. Substitui a seleção anterior daquela disciplina: marcadas passam a contar nela;
+ * desmarcadas voltam à disciplina de origem. Não mexe em "Vincular materiais" (concurso_materiais).
+ */
+export const adminDefinirMateriaisExcecao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        concurso_id: z.string().uuid(),
+        disciplina_id: z.string().uuid(),
+        material_ids: z.array(z.string().uuid()).max(500),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const db = context.supabase as any;
+
+    const { data: naEstrutura } = await db
+      .from("concurso_prova_estrutura")
+      .select("disciplina_id")
+      .eq("concurso_id", data.concurso_id)
+      .eq("disciplina_id", data.disciplina_id)
+      .maybeSingle();
+    if (!naEstrutura) throw new Error("Escolha uma disciplina que faça parte da estrutura da prova deste concurso.");
+
+    const ids = [...new Set(data.material_ids)];
+    // Matérias da própria disciplina de destino já contam nela: não precisam de exceção.
+    const { data: proprias } = ids.length
+      ? await db.from("materiais").select("id").in("id", ids).eq("disciplina_id", data.disciplina_id)
+      : { data: [] as any[] };
+    const proprio = new Set<string>((proprias ?? []).map((m: any) => m.id));
+    const alvo = ids.filter((id) => !proprio.has(id));
+
+    // Desmarcadas: saem da exceção (voltam à disciplina de origem).
+    const { data: atuais, error: eAt } = await db
+      .from("concurso_materiais_excecao")
+      .select("material_id")
+      .eq("concurso_id", data.concurso_id)
+      .eq("disciplina_id", data.disciplina_id);
+    if (eAt) throw new Error(eAt.message);
+    const soltar = (atuais ?? []).map((r: any) => r.material_id).filter((id: string) => !alvo.includes(id));
+    if (soltar.length) {
+      const { error } = await db
+        .from("concurso_materiais_excecao")
+        .delete()
+        .eq("concurso_id", data.concurso_id)
+        .eq("disciplina_id", data.disciplina_id)
+        .in("material_id", soltar);
+      if (error) throw new Error(error.message);
+    }
+    // Marcadas: uma matéria tem um único destino por concurso (se já estava em outro, passa para este).
+    if (alvo.length) {
+      const { error } = await db.from("concurso_materiais_excecao").upsert(
+        alvo.map((material_id) => ({
+          concurso_id: data.concurso_id,
+          material_id,
+          disciplina_id: data.disciplina_id,
+        })),
+        { onConflict: "concurso_id,material_id" },
+      );
+      if (error) throw new Error(error.message);
+    }
+    await context.supabase.from("admin_logs").insert({
+      user_id: context.userId,
+      acao: "concurso.materiais_excecao",
+      entidade: "concursos",
+      entidade_id: data.concurso_id,
+      metadata: { disciplina_id: data.disciplina_id, incluidas: alvo.length, devolvidas: soltar.length },
+    });
+    return { incluidas: alvo.length, devolvidas: soltar.length };
   });
 
 // ===================== ALUNO =====================

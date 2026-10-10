@@ -35,7 +35,9 @@ const mat = (id: string, disciplina_id: string, ordem: number, publicado = true)
   id, titulo: `Matéria ${id}`, disciplina_id, ordem, tempo_leitura: 30, publicado, tipo: "markdown",
 });
 
-function dados(estrutura: string[], vinculos: string[] = []) {
+type Excecao = { id: string; destino: string };
+
+function dados(estrutura: string[], vinculos: string[] = [], excecoes: Excecao[] = []) {
   return fake({
     concurso_prova_estrutura: estrutura.map((d, i) => ({ concurso_id: "c1", disciplina_id: d, qtd_questoes: 10, peso: 2 - i * 0.5, ordem: i })),
     disciplinas: [
@@ -43,14 +45,17 @@ function dados(estrutura: string[], vinculos: string[] = []) {
       { id: "ds-comp", nome: "Direito Constitucional — Tópicos Complementares", especifica: true, concurso_id: "c1", disciplina_base_id: "dc", ordem: 8 },
       { id: "ds-reg", nome: "Conhecimentos Regionais de SC", especifica: true, concurso_id: "c1", disciplina_base_id: null, ordem: 1 },
       { id: "ds-outro", nome: "Complemento de outro concurso", especifica: true, concurso_id: "c2", disciplina_base_id: "dc", ordem: 9 },
+      { id: "dl", nome: "Lei de Acesso à Informação", especifica: false, concurso_id: null, disciplina_base_id: null, ordem: 20 },
     ],
     materiais: [
       mat("m1", "dc", 1), mat("m2", "dc", 2),
       mat("mc1", "ds-comp", 1), mat("mc2", "ds-comp", 2, false), // rascunho: fica de fora
       mat("mr1", "ds-reg", 1),
       mat("mo1", "ds-outro", 1),
+      mat("ml1", "dl", 1), mat("ml2", "dl", 2, false), // LAI: ml2 é rascunho
     ],
     concurso_materiais: vinculos.map((m) => ({ concurso_id: "c1", material_id: m })),
+    concurso_materiais_excecao: excecoes.map((e) => ({ concurso_id: "c1", material_id: e.id, disciplina_id: e.destino })),
   });
 }
 
@@ -87,5 +92,47 @@ describe("disciplina específica vinculada ao Acervo Base", () => {
     expect(porId.mc1.qtdReal).toBe(10);
     expect(porId.m2.qtdReal).toBe(0);
     expect(porId.m2.qtdQuestoes).toBe(25); // média de 40 e 10
+  });
+});
+
+describe("Vincular materiais exceção (matéria que conta em outra disciplina da estrutura)", () => {
+  it("matérias de uma disciplina que não está na prova passam a contar na disciplina de destino (rascunho fica de fora)", async () => {
+    const r = await carregarDisciplinas(
+      dados(["dc"], [], [{ id: "ml1", destino: "dc" }, { id: "ml2", destino: "dc" }]),
+      "c1",
+      undefined,
+    );
+    expect(r.map((d) => d.id)).toEqual(["dc"]);
+    expect(r[0].materias.map((m) => m.id)).toEqual(["m1", "m2", "mc1", "ml1"]);
+  });
+
+  it("uma matéria de disciplina que está na prova pode ser movida para outra: sai da origem e entra no destino", async () => {
+    const r = await carregarDisciplinas(dados(["dc", "ds-reg"], [], [{ id: "m2", destino: "ds-reg" }]), "c1", undefined);
+    const porId = Object.fromEntries(r.map((d) => [d.id, d.materias.map((m) => m.id)]));
+    expect(porId.dc).toEqual(["m1", "mc1"]);
+    expect(porId["ds-reg"]).toEqual(["mr1", "m2"]);
+  });
+
+  it("destino que não faz parte da prova é ignorado (a matéria continua na origem)", async () => {
+    const r = await carregarDisciplinas(dados(["dc"], [], [{ id: "m2", destino: "ds-reg" }]), "c1", undefined);
+    expect(r[0].materias.map((m) => m.id)).toEqual(["m1", "m2", "mc1"]);
+  });
+
+  it("tirar a única matéria vinculada da origem não faz a origem voltar a incluir todas as publicadas", async () => {
+    // Só m2 está vinculada na base e vai para outra disciplina: a base não pode "cair" para m1 + m2.
+    const r = await carregarDisciplinas(dados(["dc", "ds-reg"], ["m2"], [{ id: "m2", destino: "ds-reg" }]), "c1", undefined);
+    expect(r.find((d) => d.id === "dc")!.materias.map((m) => m.id)).not.toContain("m1");
+  });
+
+  it("a exceção não altera os vínculos normais: sem exceção, tudo volta ao que era", async () => {
+    const com = await carregarDisciplinas(dados(["dc", "ds-reg"], ["m1"], [{ id: "m1", destino: "ds-reg" }]), "c1", undefined);
+    const sem = await carregarDisciplinas(dados(["dc", "ds-reg"], ["m1"]), "c1", undefined);
+    expect(sem.find((d) => d.id === "dc")!.materias.map((m) => m.id)).toEqual(["m1", "mc1"]);
+    expect(com.find((d) => d.id === "ds-reg")!.materias.map((m) => m.id)).toEqual(["mr1", "m1"]);
+  });
+
+  it("a matéria da exceção não duplica quando já pertence à disciplina de destino", async () => {
+    const r = await carregarDisciplinas(dados(["dc"], [], [{ id: "m1", destino: "dc" }]), "c1", undefined);
+    expect(r[0].materias.map((m) => m.id).filter((id) => id === "m1")).toHaveLength(1);
   });
 });

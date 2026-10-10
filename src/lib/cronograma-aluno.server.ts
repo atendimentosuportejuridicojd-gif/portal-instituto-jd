@@ -90,6 +90,29 @@ export async function carregarDisciplinas(
   const nomes = new Map<string, string>((disciplinas ?? []).map((d: any) => [d.id, d.nome]));
   const vinculados = new Set<string>((vinculos ?? []).map((v: any) => v.material_id));
 
+  // "Vincular materiais exceção": matérias que, neste concurso, contam numa disciplina da estrutura da prova que
+  // não é a delas. Só vale se o destino é uma disciplina que está de fato na prova.
+  const idsEfetivos = new Set<string>(estruturaEfetiva.map((e: any) => e.disciplina_id));
+  const { data: linhasExcecao } = await (supabase as any)
+    .from("concurso_materiais_excecao")
+    .select("material_id, disciplina_id")
+    .eq("concurso_id", concursoId);
+  const excecoes = new Map<string, string>(
+    (linhasExcecao ?? [])
+      .filter((x: any) => idsEfetivos.has(x.disciplina_id))
+      .map((x: any) => [x.material_id, x.disciplina_id]),
+  );
+  const { data: materiaisExcecao } = excecoes.size
+    ? await supabase
+        .from("materiais")
+        .select("id, titulo, disciplina_id, tempo_leitura, ordem")
+        .in("id", [...excecoes.keys()])
+        .eq("publicado", true)
+        .eq("tipo", "markdown")
+        .order("ordem")
+        .order("titulo")
+    : { data: [] as any[] };
+
   // Ordem das disciplinas: a escolhida pelo aluno; o que faltar, por peso (maior primeiro) e ordem do admin.
   const padrao = [...estruturaEfetiva].sort((a: any, b: any) => Number(b.peso) - Number(a.peso) || a.ordem - b.ordem);
   const ordenadas: any[] = [];
@@ -111,12 +134,21 @@ export async function carregarDisciplinas(
       const vinc = lista.filter((m: any) => vinculados.has(m.id));
       return vinc.length ? vinc : lista;
     };
-    const proprias = selecionar((materiais ?? []).filter((m: any) => m.disciplina_id === e.disciplina_id));
+    // Matéria com exceção só conta na disciplina de destino; sai da de origem (depois de aplicar a regra do vínculo,
+    // para que tirar uma matéria não faça a disciplina de origem "voltar" a incluir todas as publicadas).
+    const fica = (m: any) => !excecoes.has(m.id) || excecoes.get(m.id) === e.disciplina_id;
+    const proprias = selecionar((materiais ?? []).filter((m: any) => m.disciplina_id === e.disciplina_id)).filter(fica);
     // Complementares vinculadas a esta disciplina vêm depois das matérias do Acervo Base.
     const complementares = complementos
       .filter((c: any) => c.disciplina_base_id === e.disciplina_id)
-      .flatMap((c: any) => selecionar((materiais ?? []).filter((m: any) => m.disciplina_id === c.id)));
-    const doConcurso = [...proprias, ...complementares];
+      .flatMap((c: any) => selecionar((materiais ?? []).filter((m: any) => m.disciplina_id === c.id)))
+      .filter(fica);
+    // Por último, as matérias de outras disciplinas escolhidas como exceção para esta.
+    const jaIncluidas = new Set<string>([...proprias, ...complementares].map((m: any) => m.id));
+    const deExcecao = (materiaisExcecao ?? []).filter(
+      (m: any) => excecoes.get(m.id) === e.disciplina_id && !jaIncluidas.has(m.id),
+    );
+    const doConcurso = [...proprias, ...complementares, ...deExcecao];
     const reais = doConcurso.map((m: any) => contagem.get(m.id) ?? 0).filter((n: number) => n > 0);
     const mediaDisciplina = reais.length
       ? Math.round(reais.reduce((a: number, b: number) => a + b, 0) / reais.length)
