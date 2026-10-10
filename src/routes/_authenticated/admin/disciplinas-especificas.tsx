@@ -39,13 +39,13 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/disciplinas-especificas")({
   head: () => ({
     meta: [
-      { title: "Disciplinas Específicas — Admin J&D" },
+      { title: "Disciplinas Exclusivas — Admin J&D" },
       {
         name: "description",
         content:
           "Cadastre disciplinas e materiais exclusivos de um concurso, fora do Acervo Base do Instituto J&D.",
       },
-      { property: "og:title", content: "Disciplinas Específicas — Admin J&D" },
+      { property: "og:title", content: "Disciplinas Exclusivas — Admin J&D" },
       {
         property: "og:description",
         content: "Matérias exclusivas de concursos abertos, separadas do Acervo Base.",
@@ -68,7 +68,7 @@ function AdminDisciplinasEspecificas() {
   return (
     <>
       <PageHeader
-        title="Disciplinas Específicas"
+        title="Disciplinas Exclusivas"
         description="Matérias que não fazem parte do Acervo Base e pertencem a um concurso específico. Elas aparecem para o aluno pelo link do concurso no Cronograma."
         actions={<DisciplinaDialog concursos={concursos} base={base} onDone={invalidate} />}
       />
@@ -84,8 +84,8 @@ function AdminDisciplinasEspecificas() {
         ) : disciplinas.length === 0 ? (
           <EmptyState
             icon={BookMarked}
-            title="Nenhuma disciplina específica"
-            description="Clique em “Nova disciplina específica” para adicionar matérias exclusivas de um concurso."
+            title="Nenhuma disciplina exclusiva"
+            description="Clique em “Nova disciplina exclusiva” para adicionar matérias exclusivas de um concurso."
           />
         ) : (
           <div className="space-y-6">
@@ -299,14 +299,14 @@ function DisciplinaDialog({
         ) : (
           <Button>
             <Plus className="mr-1 h-4 w-4" />
-            Nova disciplina específica
+            Nova disciplina exclusiva
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {disciplina ? "Editar disciplina específica" : "Nova disciplina específica"}
+            {disciplina ? "Editar disciplina específica" : "Nova disciplina exclusiva"}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
