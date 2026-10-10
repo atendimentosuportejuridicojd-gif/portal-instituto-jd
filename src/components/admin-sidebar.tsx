@@ -35,7 +35,7 @@ const items = [
   { title: "Acervo Base", url: "/admin/acervo", icon: BookOpen },
   { title: "Trilhas", url: "/admin/trilhas", icon: Target },
   { title: "Concursos", url: "/admin/concursos", icon: FileText },
-  { title: "Disciplinas Específicas", url: "/admin/disciplinas-especificas", icon: BookMarked },
+  { title: "Disciplinas Exclusivas", url: "/admin/disciplinas-especificas", icon: BookMarked },
   { title: "Questões", url: "/admin/questoes", icon: HelpCircle },
   { title: "Recursos", url: "/admin/recursos", icon: Gavel },
   { title: "Cronogramas", url: "/admin/cronogramas", icon: CalendarDays },
