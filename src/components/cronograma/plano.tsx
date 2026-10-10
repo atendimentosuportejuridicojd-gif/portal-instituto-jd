@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, BookOpen, CalendarClock, CheckCircle2, ListChecks, RefreshCw } from "lucide-react";
+import { AlertTriangle, BookOpen, CalendarClock, CheckCircle2, ClipboardCheck, ListChecks, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -321,7 +321,14 @@ function AcaoDoBloco({ bloco }: { bloco: Bloco }) {
     return <RevisaoBloco blocoId={bloco.id} />;
   }
   if (bloco.tipo === "simulado") {
-    return <span className="text-xs text-muted-foreground">Em breve</span>;
+    return (
+      <Button asChild size="sm" variant="outline">
+        <Link to="/simulados">
+          <ClipboardCheck className="mr-1 h-3.5 w-3.5" />
+          Abrir simulados
+        </Link>
+      </Button>
+    );
   }
   if (bloco.tipo === "fase_final") {
     return (

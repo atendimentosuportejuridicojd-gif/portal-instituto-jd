@@ -5,6 +5,7 @@ import {
   FileText,
   User,
   CalendarDays,
+  ClipboardCheck,
   Newspaper,
   LogOut,
   Send,
@@ -31,6 +32,7 @@ const items = [
   { title: "Acervo Base", url: "/acervo", icon: BookOpen },
   { title: "Concursos", url: "/concursos", icon: FileText },
   { title: "Cronogramas", url: "/cronogramas", icon: CalendarDays },
+  { title: "Simulados", url: "/simulados", icon: ClipboardCheck },
   { title: "Fique por Dentro", url: "/noticias", icon: Newspaper },
   { title: "Perfil", url: "/perfil", icon: User },
 ];
