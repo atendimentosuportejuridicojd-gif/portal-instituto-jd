@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { VincularExcecao } from "@/components/vincular-excecao";
 import {
   adminListConcursos,
   adminUpsertConcurso,
@@ -90,10 +91,12 @@ function AdminConcursos() {
                       {c.data_prova ? `prova em ${c.data_prova.split("-").reverse().join("/")}` : "sem data de prova"}
                       {" · "}
                       {c.estrutura?.length ? `${c.estrutura.length} disciplina(s) na prova` : "sem estrutura da prova"}
+                      {(c.excecoes?.length ?? 0) > 0 && ` · ${c.excecoes.length} em exceção`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <EstruturaProva concurso={c} disciplinas={disciplinas} onDone={invalidate} />
+                    <VincularExcecao concurso={c} materiais={materiais} disciplinas={disciplinas} onDone={invalidate} />
                     <VincularConcurso
                       concurso={c}
                       materiais={materiais}
