@@ -59,6 +59,7 @@ describe("telas do cronograma (renderização)", () => {
     expect(html).toContain("TJSC — Técnico Judiciário");
     expect(html).toContain("dias para a prova");
     expect(html).toContain("Atividade em atraso"); // destaque da próxima ação: a atrasada vem primeiro
+    expect(html).toContain("Como funciona o seu cronograma: Método J&amp;D"); // aviso do método (recolhido no servidor)
     expect(html).toContain("Semana");
     expect(html).toContain("Disciplinas");
   });

@@ -27,6 +27,7 @@ import { alunoMarcarBloco, alunoRecalcularCronograma } from "@/lib/cronograma-al
 import { somarDias } from "@/lib/cronograma-motor";
 import { cn } from "@/lib/utils";
 import { formatarData, formatarDia, formatarMinutos, proximosDias } from "./formato";
+import { AvisoMetodo } from "./metodo";
 import { RevisaoBloco } from "./revisao";
 import { AnelProgresso, corDisciplina, ESTILO_TIPO, Kpi, SeloTipo } from "./visual";
 
@@ -162,6 +163,8 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
           </div>
         </div>
       </section>
+
+      <AvisoMetodo cronogramaId={c.id} />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi
