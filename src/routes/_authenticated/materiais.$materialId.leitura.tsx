@@ -16,6 +16,7 @@ import {
   Circle,
 } from "lucide-react";
 import { alunoAbrirMateriaLeitura } from "@/lib/acervo.functions";
+import { BotaoQuestoes } from "@/components/botao-questoes";
 import { EmptyState } from "@/components/page";
 import { MateriaMarkdown, extractHeadings } from "@/lib/materia-markdown";
 import { cn } from "@/lib/utils";
@@ -195,12 +196,7 @@ function LeitorMateria() {
         </div>
         {totalQuestoes > 0 && (
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/materiais/$materialId/questoes" params={{ materialId }}>
-                <PencilLine className="mr-1 h-3.5 w-3.5" />
-                Questões ({totalQuestoes})
-              </Link>
-            </Button>
+            <BotaoQuestoes materialId={materialId} rotulo={`Questões (${totalQuestoes})`} />
             <Button asChild variant="ghost" size="sm">
               <Link to="/materiais/$materialId/desempenho" params={{ materialId }}>
                 <BarChart3 className="mr-1 h-3.5 w-3.5" />

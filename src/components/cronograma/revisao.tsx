@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { alunoRevisaoBloco } from "@/lib/cronograma-aluno.functions";
+import { BotaoQuestoes } from "@/components/botao-questoes";
 import { formatarMinutos } from "./formato";
 
 /** Botão do bloco de revisão: abre a lista das matérias abaixo da meta, calculada no momento. */
@@ -84,12 +85,12 @@ export function RevisaoBloco({ blocoId }: { blocoId: string }) {
                       <Badge variant="destructive">{Math.round(i.percentual)}%</Badge>
                     )}
                     <div className="flex gap-2">
-                      <Button asChild size="sm">
-                        <Link to="/materiais/$materialId/questoes" params={{ materialId: i.material_id }}>
-                          <ListChecks className="mr-1 h-3.5 w-3.5" />
-                          Resolver
-                        </Link>
-                      </Button>
+                      <BotaoQuestoes
+                        materialId={i.material_id}
+                        rotulo="Resolver"
+                        icone={<ListChecks className="mr-1.5 h-3.5 w-3.5" />}
+                        variant="default"
+                      />
                       {i.estado === "abaixo" && (
                         <Button asChild size="sm" variant="ghost">
                           <Link to="/materiais/$materialId/desempenho" params={{ materialId: i.material_id }}>

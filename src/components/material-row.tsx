@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toggleFavorito, toggleMaterialLido } from "@/lib/aluno.functions";
+import { BotaoQuestoes } from "@/components/botao-questoes";
 import { toast } from "sonner";
 
 export function MaterialRow({ m }: { m: any }) {
@@ -117,21 +118,7 @@ export function MaterialRow({ m }: { m: any }) {
           </Link>
         </Button>
         {temQuestoes ? (
-          <Button asChild variant="outline" size="sm">
-            <Link to="/materiais/$materialId/questoes" params={{ materialId: m.id }}>
-              {jaFez ? (
-                <>
-                  <RefreshCw className="mr-1 h-3.5 w-3.5" />
-                  Refazer questões
-                </>
-              ) : (
-                <>
-                  <PencilLine className="mr-1 h-3.5 w-3.5" />
-                  Resolver questões
-                </>
-              )}
-            </Link>
-          </Button>
+          <BotaoQuestoes materialId={m.id} jaFez={jaFez} />
         ) : (
           <Badge variant="secondary" className="text-xs">
             Sem questões

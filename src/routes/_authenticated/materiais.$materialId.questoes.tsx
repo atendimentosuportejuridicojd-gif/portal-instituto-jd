@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMaterialNavegacao } from "@/hooks/use-material-navegacao";
 import { useServerFn } from "@tanstack/react-start";
@@ -40,6 +41,7 @@ function Resolver() {
   const carregar = useServerFn(getSessaoAtual);
   const responder = useServerFn(responderQuestao);
   const enviarRecurso = useServerFn(criarRecurso);
+  const qc = useQueryClient();
 
   const [sessaoId, setSessaoId] = useState<string | null>(null);
   const [state, setState] = useState<any>(null);
@@ -116,6 +118,9 @@ function Resolver() {
       // Refresh state to mark this question answered (stay on the same question)
       const s = await carregar({ data: { sessao_id: sessaoId } });
       setState(s);
+      // Os botões "Resolver/Retomar as questões" das outras telas passam a refletir o andamento.
+      qc.invalidateQueries({ queryKey: ["aluno", "sessoes-andamento"] });
+      qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
       if (r.finalizada) {
         setFinalizada(true);
         toast.success(`Tentativa concluída — ${r.resumo?.percentual}%`);

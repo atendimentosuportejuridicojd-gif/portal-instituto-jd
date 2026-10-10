@@ -28,6 +28,8 @@ import { somarDias } from "@/lib/cronograma-motor";
 import { cn } from "@/lib/utils";
 import { formatarData, formatarDia, formatarMinutos, proximosDias } from "./formato";
 import { AvisoMetodo } from "./metodo";
+import { BotaoQuestoes } from "@/components/botao-questoes";
+import { ExcluirCronograma } from "./excluir";
 import { RevisaoBloco } from "./revisao";
 import { AnelProgresso, corDisciplina, ESTILO_TIPO, Kpi, SeloTipo } from "./visual";
 
@@ -144,6 +146,11 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
                 >
                   Novo cronograma
                 </Button>
+                <ExcluirCronograma
+                  status="ativo"
+                  nome={c.concurso_nome}
+                  className="text-primary-foreground/80 hover:bg-white/10 hover:text-primary-foreground"
+                />
               </div>
             </div>
             <div className="flex items-center gap-6">
@@ -630,12 +637,13 @@ function AcaoDoBloco({ bloco, grande }: { bloco: Bloco; grande?: boolean }) {
   }
   if (bloco.tipo === "questoes" && bloco.material_id) {
     return (
-      <Button asChild size={tamanho} variant={grande ? "default" : "outline"}>
-        <Link to="/materiais/$materialId/questoes" params={{ materialId: bloco.material_id }}>
-          <ListChecks className="mr-1.5 h-4 w-4" />
-          Resolver
-        </Link>
-      </Button>
+      <BotaoQuestoes
+        materialId={bloco.material_id}
+        rotulo="Resolver"
+        icone={<ListChecks className="mr-1.5 h-4 w-4" />}
+        size={tamanho}
+        variant={grande ? "default" : "outline"}
+      />
     );
   }
   if (bloco.tipo === "revisao") {

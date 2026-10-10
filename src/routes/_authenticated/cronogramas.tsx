@@ -8,6 +8,7 @@ import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Assistente } from "@/components/cronograma/assistente";
 import { PlanoDoAluno } from "@/components/cronograma/plano";
+import { ExcluirCronograma } from "@/components/cronograma/excluir";
 import {
   alunoCronogramaAtual,
   alunoDadosAssistente,
@@ -123,6 +124,7 @@ function MeuCronograma() {
           <Button variant="ghost" onClick={() => setCriando(true)}>
             Montar outro cronograma
           </Button>
+          <ExcluirCronograma status="rascunho" nome={q.data.rascunho.concurso_nome} />
         </div>
       </div>
     );
