@@ -1,5 +1,4 @@
-/// <reference types="bun" />
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'vitest';
 import { ambientePagamentos, fimDataProva, validarDataProva } from './simulado-pagamento';
 
 describe('Simulados payment validation', () => {
