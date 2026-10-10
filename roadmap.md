@@ -11,4 +11,6 @@
 - [x] Tornar clicável a faixa dourada "5 dias para conhecer o portal".
 - [x] Igualar os materiais de Disciplinas Específicas ao fluxo escrito do Acervo Base, sem PDFs.
 - [x] Habilitar pagamentos Stripe para a cobrança avulsa de Simulados J&D, mantendo Hotmart.
-- [ ] Implementar produto avulso, checkout e confirmação de acesso: aguarda decisão sobre checkout incorporado, pois pagamentos integrados não permitem o redirecionamento solicitado.
+- [x] Criar produto avulso e checkout incorporado reutilizável, conforme adaptação autorizada, sem conectar às telas.
+- [x] Implementar confirmação de acesso, reembolso e disputa sem alterar o schema ou a Hotmart.
+- [ ] Aceitar pagamentos reais e confirmar Pix: depende da ativação da conta pelo usuário; Pix indisponível na conta de teste.
