@@ -63,13 +63,14 @@ function AdminDisciplinasEspecificas() {
 
   const concursos = q.data?.concursos ?? [];
   const disciplinas = q.data?.disciplinas ?? [];
+  const base = q.data?.base ?? [];
 
   return (
     <>
       <PageHeader
         title="Disciplinas Específicas"
         description="Matérias que não fazem parte do Acervo Base e pertencem a um concurso específico. Elas aparecem para o aluno pelo link do concurso no Cronograma."
-        actions={<DisciplinaDialog concursos={concursos} onDone={invalidate} />}
+        actions={<DisciplinaDialog concursos={concursos} base={base} onDone={invalidate} />}
       />
       <PageContent>
         {q.isLoading ? (
@@ -104,6 +105,7 @@ function AdminDisciplinasEspecificas() {
                           key={d.id}
                           d={d}
                           concursos={concursos}
+                          base={base}
                           onDone={invalidate}
                         />
                       ))}
@@ -120,10 +122,12 @@ function AdminDisciplinasEspecificas() {
 function DisciplinaCard({
   d,
   concursos,
+  base,
   onDone,
 }: {
   d: any;
   concursos: any[];
+  base: any[];
   onDone: () => void;
 }) {
   const removerFn = useServerFn(adminDeleteDisciplinaEspecifica);
@@ -152,13 +156,23 @@ function DisciplinaCard({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <h3 className="truncate text-sm font-semibold">{d.nome}</h3>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <Badge variant="outline">{d.grupo === "especificos" ? "Prova: Específicos" : "Prova: Gerais"}</Badge>
+            {d.disciplina_base_id ? (
+              <Badge variant="secondary">
+                ↳ Acervo Base: {base.find((b: any) => b.id === d.disciplina_base_id)?.nome ?? "—"}
+              </Badge>
+            ) : (
+              <span className="text-[11px] text-muted-foreground">Disciplina própria do concurso</span>
+            )}
+          </div>
           {d.descricao && (
             <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{d.descricao}</p>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MaterialDialog disciplinaId={d.id} onDone={onDone} />
-          <DisciplinaDialog concursos={concursos} disciplina={d} onDone={onDone} />
+          <DisciplinaDialog concursos={concursos} base={base} disciplina={d} onDone={onDone} />
           <Button
             variant="ghost"
             size="icon"
@@ -232,10 +246,12 @@ function DisciplinaCard({
 
 function DisciplinaDialog({
   concursos,
+  base,
   disciplina,
   onDone,
 }: {
   concursos: any[];
+  base: any[];
   disciplina?: any;
   onDone: () => void;
 }) {
@@ -244,6 +260,8 @@ function DisciplinaDialog({
   const [descricao, setDescricao] = useState(disciplina?.descricao ?? "");
   const [concursoId, setConcursoId] = useState<string>(disciplina?.concurso_id ?? "");
   const [ordem, setOrdem] = useState(String(disciplina?.ordem ?? 0));
+  const [grupo, setGrupo] = useState<string>(disciplina?.grupo ?? "gerais");
+  const [baseId, setBaseId] = useState<string>(disciplina?.disciplina_base_id ?? "nenhuma");
   const salvarFn = useServerFn(adminUpsertDisciplinaEspecifica);
 
   const salvar = useMutation({
@@ -255,6 +273,8 @@ function DisciplinaDialog({
           descricao: descricao.trim(),
           concurso_id: concursoId,
           ordem: Number(ordem) || 0,
+          grupo: grupo as "gerais" | "especificos",
+          disciplina_base_id: baseId === "nenhuma" ? null : baseId,
         },
       }),
     onSuccess: () => {
@@ -321,6 +341,40 @@ function DisciplinaDialog({
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Prova do edital</Label>
+            <Select value={grupo} onValueChange={setGrupo}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gerais">Conhecimentos Gerais</SelectItem>
+                <SelectItem value="especificos">Conhecimentos Específicos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Vincular a uma disciplina do Acervo Base (opcional)</Label>
+            <Select value={baseId} onValueChange={setBaseId}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nenhuma">Nenhuma — disciplina própria do concurso</SelectItem>
+                {base.map((b: any) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    {b.codigo ? `${b.codigo} · ` : ""}
+                    {b.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              As matérias desta disciplina continuam fora do Acervo Base (o aluno não as vê lá). O vínculo só diz que,
+              no cronograma e nos simulados, elas fazem parte da disciplina escolhida. Sem equivalente no Acervo Base,
+              deixe em “Nenhuma”.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="ordem-disc">Ordem</Label>

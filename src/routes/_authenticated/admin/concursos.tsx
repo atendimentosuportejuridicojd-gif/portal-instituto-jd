@@ -367,7 +367,11 @@ function EstruturaProva({
   const fn = useServerFn(adminSalvarEstruturaProva);
 
   // Acervo Base + disciplinas específicas deste concurso.
-  const opcoes = disciplinas.filter((d: any) => !d.especifica || d.concurso_id === concurso.id);
+  // Específicas vinculadas a uma disciplina do Acervo Base entram sozinhas nela (no cronograma e no simulado),
+  // então não são escolhidas à parte na estrutura da prova.
+  const opcoes = disciplinas.filter((d: any) =>
+    d.especifica ? d.concurso_id === concurso.id && !d.disciplina_base_id : true,
+  );
   const nomeDe = (id: string) => opcoes.find((d: any) => d.id === id)?.nome ?? "Disciplina";
 
   const abrir = (v: boolean) => {
@@ -426,6 +430,7 @@ function EstruturaProva({
           <DialogTitle>Estrutura da prova — {concurso.nome}</DialogTitle>
           <DialogDescription>
             Informe, por disciplina, quantas questões a prova tem e o peso. É a base para montar os simulados.
+            As disciplinas específicas vinculadas a uma disciplina do Acervo Base entram automaticamente nela.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">

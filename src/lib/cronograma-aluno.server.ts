@@ -57,12 +57,28 @@ export async function carregarDisciplinas(
   if (!estrutura?.length) throw new Error("Este concurso ainda não tem a estrutura da prova cadastrada.");
 
   const ids: string[] = estrutura.map((e: any) => e.disciplina_id);
+
+  // Disciplinas específicas deste concurso vinculadas a uma disciplina do Acervo Base que está na prova: as
+  // matérias delas entram na disciplina-base e a específica não vira uma disciplina à parte. Sem vínculo (ou com
+  // a base fora da prova), a específica continua sendo uma disciplina própria.
+  const { data: especificas } = await supabase
+    .from("disciplinas")
+    .select("id, ordem, disciplina_base_id")
+    .eq("concurso_id", concursoId)
+    .eq("especifica", true);
+  const complementos = (especificas ?? [])
+    .filter((d: any) => d.disciplina_base_id && ids.includes(d.disciplina_base_id))
+    .sort((a: any, b: any) => a.ordem - b.ordem);
+  const idsComplemento = new Set<string>(complementos.map((d: any) => d.id));
+  const estruturaEfetiva = estrutura.filter((e: any) => !idsComplemento.has(e.disciplina_id));
+  const idsMaterias = [...new Set([...ids, ...idsComplemento])];
+
   const [{ data: disciplinas }, { data: materiais }, { data: vinculos }, contagem] = await Promise.all([
     supabase.from("disciplinas").select("id, nome").in("id", ids),
     supabase
       .from("materiais")
       .select("id, titulo, disciplina_id, tempo_leitura, ordem")
-      .in("disciplina_id", ids)
+      .in("disciplina_id", idsMaterias)
       .eq("publicado", true)
       .eq("tipo", "markdown")
       .order("ordem")
@@ -75,7 +91,7 @@ export async function carregarDisciplinas(
   const vinculados = new Set<string>((vinculos ?? []).map((v: any) => v.material_id));
 
   // Ordem das disciplinas: a escolhida pelo aluno; o que faltar, por peso (maior primeiro) e ordem do admin.
-  const padrao = [...estrutura].sort((a: any, b: any) => Number(b.peso) - Number(a.peso) || a.ordem - b.ordem);
+  const padrao = [...estruturaEfetiva].sort((a: any, b: any) => Number(b.peso) - Number(a.peso) || a.ordem - b.ordem);
   const ordenadas: any[] = [];
   for (const id of ordemEscolhida ?? []) {
     const e = padrao.find((x: any) => x.disciplina_id === id);
@@ -90,10 +106,17 @@ export async function carregarDisciplinas(
     : QUESTOES_PADRAO;
 
   return ordenadas.map((e: any) => {
-    const todas = (materiais ?? []).filter((m: any) => m.disciplina_id === e.disciplina_id);
-    // Se o concurso tem matérias vinculadas nesta disciplina, vale só o vínculo; senão, todas as publicadas.
-    const vinc = todas.filter((m: any) => vinculados.has(m.id));
-    const doConcurso = vinc.length ? vinc : todas;
+    // Se o concurso tem matérias vinculadas numa disciplina, vale só o vínculo; senão, todas as publicadas.
+    const selecionar = (lista: any[]) => {
+      const vinc = lista.filter((m: any) => vinculados.has(m.id));
+      return vinc.length ? vinc : lista;
+    };
+    const proprias = selecionar((materiais ?? []).filter((m: any) => m.disciplina_id === e.disciplina_id));
+    // Complementares vinculadas a esta disciplina vêm depois das matérias do Acervo Base.
+    const complementares = complementos
+      .filter((c: any) => c.disciplina_base_id === e.disciplina_id)
+      .flatMap((c: any) => selecionar((materiais ?? []).filter((m: any) => m.disciplina_id === c.id)));
+    const doConcurso = [...proprias, ...complementares];
     const reais = doConcurso.map((m: any) => contagem.get(m.id) ?? 0).filter((n: number) => n > 0);
     const mediaDisciplina = reais.length
       ? Math.round(reais.reduce((a: number, b: number) => a + b, 0) / reais.length)

@@ -13,12 +13,12 @@ export const adminListDisciplinasEspecificas = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
 
-    const [{ data: concursos }, { data: disciplinas }, { data: materiais }, contagem] =
+    const [{ data: concursos }, { data: disciplinas }, { data: materiais }, contagem, { data: base }] =
       await Promise.all([
         supabase.from("concursos").select("id, nome, orgao, publicado").order("nome"),
-        supabase
+        (supabase as any)
           .from("disciplinas")
-          .select("id, nome, descricao, ordem, concurso_id")
+          .select("id, nome, descricao, ordem, concurso_id, grupo, disciplina_base_id")
           .eq("especifica", true)
           .order("ordem"),
         supabase
@@ -26,11 +26,14 @@ export const adminListDisciplinasEspecificas = createServerFn({ method: "GET" })
           .select("id, titulo, descricao, disciplina_id, publicado, ordem, tipo")
           .order("ordem"),
         contarQuestoesPorMaterial(supabase),
+        // Disciplinas do Acervo Base que podem receber matérias complementares.
+        supabase.from("disciplinas").select("id, nome, codigo").eq("especifica", false).order("ordem"),
       ]);
 
 
     return {
       concursos: concursos ?? [],
+      base: base ?? [],
       disciplinas: (disciplinas ?? []).map((d: any) => ({
         ...d,
         materiais: (materiais ?? [])
@@ -50,27 +53,42 @@ export const adminUpsertDisciplinaEspecifica = createServerFn({ method: "POST" }
         descricao: z.string().trim().max(1000).optional().default(""),
         concurso_id: z.string().uuid(),
         ordem: z.number().int().min(0).default(0),
+        // Prova do edital a que a disciplina pertence (Conhecimentos Gerais ou Específicos).
+        grupo: z.enum(["gerais", "especificos"]).optional(),
+        // Disciplina do Acervo Base à qual a específica se junta (null = disciplina própria do concurso).
+        disciplina_base_id: z.string().uuid().nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const payload = {
+    if (data.disciplina_base_id) {
+      const { data: base } = await context.supabase
+        .from("disciplinas")
+        .select("id, especifica")
+        .eq("id", data.disciplina_base_id)
+        .maybeSingle();
+      if (!base || base.especifica) throw new Error("Escolha uma disciplina do Acervo Base.");
+      if (data.id && data.id === data.disciplina_base_id) throw new Error("A disciplina não pode ser base dela mesma.");
+    }
+    const payload: Record<string, unknown> = {
       nome: data.nome,
       descricao: data.descricao || null,
       concurso_id: data.concurso_id,
       ordem: data.ordem,
       especifica: true,
     };
+    if (data.grupo) payload.grupo = data.grupo;
+    if (data.disciplina_base_id !== undefined) payload.disciplina_base_id = data.disciplina_base_id;
     if (data.id) {
-      const { error } = await context.supabase
+      const { error } = await (context.supabase as any)
         .from("disciplinas")
         .update(payload)
         .eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
     }
-    const { data: ins, error } = await context.supabase
+    const { data: ins, error } = await (context.supabase as any)
       .from("disciplinas")
       .insert({ ...payload, slug: gerarSlug(data.nome) })
       .select("id")
