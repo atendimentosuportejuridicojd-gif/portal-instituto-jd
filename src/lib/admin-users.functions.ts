@@ -323,8 +323,6 @@ export const adminExcluirUsuario = createServerFn({ method: "POST" })
       "questao_tentativas",
       "questao_sessoes",
       "questao_recursos",
-      "simulado_respostas",
-      "simulado_tentativas",
       "sessoes_ativas",
       "assinaturas",
       "user_roles",
