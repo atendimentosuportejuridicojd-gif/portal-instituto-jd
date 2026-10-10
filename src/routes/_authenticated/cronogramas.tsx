@@ -1,51 +1,32 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { CalendarDays, Loader2 } from "lucide-react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+import { Assistente } from "@/components/cronograma/assistente";
+import { PlanoDoAluno } from "@/components/cronograma/plano";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { CalendarDays, FileText, Plus, Trash2, Pencil } from "lucide-react";
-import {
-  alunoListPlano,
-  alunoSalvarPlanoItem,
-  alunoTogglePlanoItem,
-  alunoDeletePlanoItem,
-} from "@/lib/cronogramas.functions";
-import { toast } from "sonner";
+  alunoCronogramaAtual,
+  alunoDadosAssistente,
+  alunoFinalizarRascunho,
+} from "@/lib/cronograma-aluno.functions";
 
 export const Route = createFileRoute("/_authenticated/cronogramas")({
   head: () => ({
     meta: [
-      { title: "Meu Cronograma de Estudos — Portal do Aluno | Instituto J&D" },
+      { title: "Meu Cronograma J&D — Portal do Aluno | Instituto J&D" },
       {
         name: "description",
         content:
-          "Monte o seu próprio plano de estudos no Instituto J&D: escolha os materiais, defina as datas conforme sua disponibilidade e marque o que já concluiu.",
+          "Monte o seu cronograma de estudos pelo Método J&D: uma disciplina por vez, revisão pelas questões e a data da sua prova como referência.",
       },
-      { property: "og:title", content: "Meu Cronograma de Estudos — Portal do Aluno" },
+      { property: "og:title", content: "Meu Cronograma J&D — Portal do Aluno" },
       {
         property: "og:description",
-        content: "Você monta o plano de estudos do seu jeito, no seu ritmo.",
+        content: "Do primeiro dia até a véspera da prova, com o seu tempo e o seu ritmo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -54,270 +35,101 @@ export const Route = createFileRoute("/_authenticated/cronogramas")({
   component: MeuCronograma,
 });
 
-type Item = {
-  id: string;
-  titulo: string;
-  material_id: string | null;
-  data: string;
-  observacoes: string | null;
-  concluido: boolean;
-  ordem: number;
-};
-
-const hoje = () => new Date().toISOString().slice(0, 10);
-
-function formatarData(iso: string) {
-  const [a, m, d] = iso.split("-");
-  return `${d}/${m}/${a}`;
-}
-
 function MeuCronograma() {
   const qc = useQueryClient();
-  const listFn = useServerFn(alunoListPlano);
-  const salvarFn = useServerFn(alunoSalvarPlanoItem);
-  const toggleFn = useServerFn(alunoTogglePlanoItem);
-  const deleteFn = useServerFn(alunoDeletePlanoItem);
+  const atualFn = useServerFn(alunoCronogramaAtual);
+  const dadosFn = useServerFn(alunoDadosAssistente);
+  const finalizarFn = useServerFn(alunoFinalizarRascunho);
+  const [criando, setCriando] = useState(false);
 
-  const q = useQuery({ queryKey: ["aluno", "plano"], queryFn: () => listFn() });
-  const itens = (q.data?.itens ?? []) as Item[];
-  const materiais = q.data?.materiais ?? [];
+  const q = useQuery({
+    queryKey: ["aluno", "cronograma"],
+    queryFn: () => atualFn(),
+    // Enquanto espera a confirmação do pagamento dos simulados, confere a cada 5 segundos.
+    refetchInterval: (query) => (query.state.data?.rascunho && !query.state.data?.cronograma ? 5000 : false),
+  });
 
-  const [aberto, setAberto] = useState(false);
-  const [edit, setEdit] = useState<Item | null>(null);
-  const [titulo, setTitulo] = useState("");
-  const [materialId, setMaterialId] = useState<string>("nenhum");
-  const [data, setData] = useState(hoje());
-  const [obs, setObs] = useState("");
+  const precisaAssistente = criando || (!!q.data && !q.data.cronograma);
+  const dadosQ = useQuery({
+    queryKey: ["aluno", "assistente"],
+    queryFn: () => dadosFn(),
+    enabled: precisaAssistente,
+  });
 
-  const invalidar = () => qc.invalidateQueries({ queryKey: ["aluno", "plano"] });
-
-  const abrirNovo = () => {
-    setEdit(null);
-    setTitulo("");
-    setMaterialId("nenhum");
-    setData(hoje());
-    setObs("");
-    setAberto(true);
-  };
-
-  const abrirEdicao = (i: Item) => {
-    setEdit(i);
-    setTitulo(i.titulo);
-    setMaterialId(i.material_id ?? "nenhum");
-    setData(i.data);
-    setObs(i.observacoes ?? "");
-    setAberto(true);
-  };
-
-  const salvar = useMutation({
-    mutationFn: () =>
-      salvarFn({
-        data: {
-          id: edit?.id,
-          titulo: titulo.trim(),
-          material_id: materialId === "nenhum" ? null : materialId,
-          data,
-          observacoes: obs.trim() || null,
-          ordem: edit?.ordem ?? 0,
-        },
-      }),
-    onSuccess: () => {
-      invalidar();
-      setAberto(false);
-      toast.success(edit ? "Sessão de estudo atualizada." : "Sessão adicionada ao seu plano.");
+  // Voltou do pagamento: se o acesso aos simulados já está liberado, ativa o rascunho.
+  const finalizar = useMutation({
+    mutationFn: () => finalizarFn(),
+    onSuccess: (r: any) => {
+      if (r?.estado === "ativo") toast.success("Pagamento confirmado! Seu cronograma está ativo.");
+      qc.invalidateQueries({ queryKey: ["aluno", "cronograma"] });
     },
     onError: (e: any) => toast.error(e.message),
   });
+  const tentou = useRef(false);
+  useEffect(() => {
+    if (q.data?.rascunho && q.data.simuladoLiberado && !tentou.current && !finalizar.isPending) {
+      tentou.current = true;
+      finalizar.mutate();
+    }
+  }, [q.data, finalizar]);
 
-  const toggle = useMutation({
-    mutationFn: (v: { id: string; concluido: boolean }) => toggleFn({ data: v }),
-    onSuccess: () => invalidar(),
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const remover = useMutation({
-    mutationFn: (id: string) => deleteFn({ data: { id } }),
-    onSuccess: () => {
-      invalidar();
-      toast.success("Item removido do seu plano.");
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const dias = [...new Set(itens.map((i) => i.data))].sort();
-  const concluidos = itens.filter((i) => i.concluido).length;
-
-  const escolherMaterial = (id: string) => {
-    setMaterialId(id);
-    const m = materiais.find((x: any) => x.id === id);
-    if (m && !titulo.trim()) setTitulo(m.titulo);
+  const aoCriar = () => {
+    setCriando(false);
+    qc.invalidateQueries({ queryKey: ["aluno", "cronograma"] });
   };
+
+  let conteudo: React.ReactNode;
+  if (q.isLoading) {
+    conteudo = <div className="text-sm text-muted-foreground">Carregando…</div>;
+  } else if (q.error) {
+    conteudo = (
+      <EmptyState icon={CalendarDays} title="Cronograma indisponível" description={(q.error as Error).message} />
+    );
+  } else if (q.data?.cronograma && !criando) {
+    conteudo = <PlanoDoAluno estado={q.data as any} onNovo={() => setCriando(true)} />;
+  } else if (q.data?.rascunho && !criando) {
+    conteudo = (
+      <div className="surface-card mx-auto flex max-w-xl flex-col items-center gap-3 p-8 text-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <h2 className="text-base font-semibold">Aguardando a confirmação do pagamento</h2>
+        <p className="text-sm text-muted-foreground">
+          Seu cronograma de <strong>{q.data.rascunho.concurso_nome}</strong> será ativado assim que o pagamento dos
+          simulados for confirmado. Isso costuma levar alguns instantes.
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => qc.invalidateQueries({ queryKey: ["aluno", "cronograma"] })}>
+            Verificar agora
+          </Button>
+          <Button variant="ghost" onClick={() => setCriando(true)}>
+            Montar outro cronograma
+          </Button>
+        </div>
+      </div>
+    );
+  } else if (dadosQ.isLoading || !dadosQ.data) {
+    conteudo = dadosQ.error ? (
+      <EmptyState icon={CalendarDays} title="Não foi possível carregar" description={(dadosQ.error as Error).message} />
+    ) : (
+      <div className="text-sm text-muted-foreground">Carregando…</div>
+    );
+  } else {
+    conteudo = (
+      <Assistente
+        dados={dadosQ.data as any}
+        rascunho={q.data?.rascunho ?? null}
+        onCriado={aoCriar}
+        onCancelar={q.data?.cronograma ? () => setCriando(false) : undefined}
+      />
+    );
+  }
 
   return (
     <>
       <PageHeader
         title="Meu Cronograma"
-        description="Monte seu plano de estudos de acordo com a sua disponibilidade e o seu ritmo."
-        actions={
-          <Dialog open={aberto} onOpenChange={setAberto}>
-            <DialogTrigger asChild>
-              <Button onClick={abrirNovo}>
-                <Plus className="mr-1 h-4 w-4" />
-                Nova sessão de estudo
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{edit ? "Editar sessão" : "Nova sessão de estudo"}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Material (opcional)</Label>
-                  <Select value={materialId} onValueChange={escolherMaterial}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Escolher material" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="nenhum">Sem material vinculado</SelectItem>
-                      {materiais.map((m: any) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          {m.disciplina} — {m.titulo}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="titulo">O que você vai estudar</Label>
-                  <Input
-                    id="titulo"
-                    value={titulo}
-                    onChange={(e) => setTitulo(e.target.value)}
-                    placeholder="Ex.: Ler capítulo 1 e resolver questões"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="data">Data</Label>
-                  <Input
-                    id="data"
-                    type="date"
-                    value={data}
-                    onChange={(e) => setData(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="obs">Observações (opcional)</Label>
-                  <Textarea
-                    id="obs"
-                    value={obs}
-                    onChange={(e) => setObs(e.target.value)}
-                    placeholder="Ex.: estudar das 19h às 21h"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={() => salvar.mutate()}
-                  disabled={!titulo.trim() || !data || salvar.isPending}
-                >
-                  Salvar
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        }
+        description="Pelo Método J&D: uma disciplina por vez, revisão pelas questões e a data da prova como referência."
       />
-      <PageContent>
-        {q.isLoading ? (
-          <div className="text-sm text-muted-foreground">Carregando…</div>
-        ) : itens.length === 0 ? (
-          <EmptyState
-            icon={CalendarDays}
-            title="Seu plano de estudos está vazio"
-            description="Clique em “Nova sessão de estudo” para montar o cronograma do seu jeito, escolhendo os materiais e as datas que cabem na sua rotina."
-          />
-        ) : (
-          <div className="space-y-6">
-            <p className="text-xs text-muted-foreground">
-              {concluidos} de {itens.length} sessões concluídas.
-            </p>
-            {dias.map((dia) => (
-              <section key={dia} className="surface-card p-5">
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  <h2 className="text-sm font-semibold">{formatarData(dia)}</h2>
-                  {dia === hoje() && <Badge>Hoje</Badge>}
-                </div>
-                <div className="mt-4 space-y-2">
-                  {itens
-                    .filter((i) => i.data === dia)
-                    .map((i) => (
-                      <div
-                        key={i.id}
-                        className="flex flex-col gap-2 rounded-md border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <div className="flex min-w-0 items-start gap-3">
-                          <Checkbox
-                            checked={i.concluido}
-                            onCheckedChange={(v) =>
-                              toggle.mutate({ id: i.id, concluido: v === true })
-                            }
-                            aria-label="Marcar sessão como concluída"
-                            className="mt-0.5"
-                          />
-                          <div className="min-w-0">
-                            <p
-                              className={`truncate text-sm font-medium ${
-                                i.concluido ? "text-muted-foreground line-through" : ""
-                              }`}
-                            >
-                              {i.titulo}
-                            </p>
-                            {i.observacoes && (
-                              <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                                {i.observacoes}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1">
-                          {i.material_id && (
-                            <Button asChild variant="outline" size="sm">
-                              <Link
-                                to="/materiais/$materialId/pdf"
-                                params={{ materialId: i.material_id }}
-                              >
-                                <FileText className="mr-1 h-3.5 w-3.5" />
-                                Abrir PDF
-                              </Link>
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Editar sessão"
-                            onClick={() => abrirEdicao(i)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Remover sessão"
-                            onClick={() => remover.mutate(i.id)}
-                            disabled={remover.isPending}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        )}
-      </PageContent>
+      <PageContent>{conteudo}</PageContent>
     </>
   );
 }

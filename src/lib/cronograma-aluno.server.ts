@@ -154,6 +154,26 @@ export async function acessoSimuladoLiberado(supabase: any, userId: string): Pro
   return data?.ativo === true && (!data.fim || new Date(data.fim).getTime() > Date.now());
 }
 
+// ---------- leitura paginada (o banco devolve no máximo 1000 linhas por consulta) ----------
+
+async function lerBlocos(supabase: any, cronogramaId: string, colunas: string): Promise<any[]> {
+  const todos: any[] = [];
+  for (let de = 0; ; de += 1000) {
+    const { data, error } = await supabase
+      .from("cronograma_blocos")
+      .select(colunas)
+      .eq("cronograma_id", cronogramaId)
+      .order("data")
+      .order("ordem")
+      .order("id")
+      .range(de, de + 999);
+    if (error) throw new Error(error.message);
+    todos.push(...(data ?? []));
+    if ((data ?? []).length < 1000) break;
+  }
+  return todos;
+}
+
 // ---------- casos de uso ----------
 
 /** Dados para montar o assistente: concursos com estrutura da prova cadastrada e o acesso aos simulados. */
@@ -344,19 +364,20 @@ export async function cronogramaAtual(ctx: Ctx) {
   const ativo = (linhas ?? []).find((c: any) => c.status === "ativo") ?? null;
   const rascunho = (linhas ?? []).find((c: any) => c.status === "rascunho") ?? null;
 
-  const [simuladoLiberado, blocosRes] = await Promise.all([
+  const [simuladoLiberado, blocos] = await Promise.all([
     acessoSimuladoLiberado(supabase, userId),
     ativo
-      ? supabase
-          .from("cronograma_blocos")
-          .select("id, data, ordem, tipo, disciplina_id, material_id, titulo, minutos, continuacao, concluido")
-          .eq("cronograma_id", ativo.id)
-          .order("data")
-          .order("ordem")
-          .limit(5000)
-      : Promise.resolve({ data: [] as any[] }),
+      ? lerBlocos(
+          supabase,
+          ativo.id,
+          "id, data, ordem, tipo, disciplina_id, material_id, titulo, minutos, continuacao, concluido",
+        )
+      : Promise.resolve([] as any[]),
   ]);
-  const blocos = blocosRes.data ?? [];
+  const idsDisciplina = [...new Set(blocos.map((b: any) => b.disciplina_id).filter(Boolean))] as string[];
+  const { data: nomesDisciplinas } = idsDisciplina.length
+    ? await supabase.from("disciplinas").select("id, nome").in("id", idsDisciplina)
+    : { data: [] as any[] };
   const total = blocos.reduce((a: number, b: any) => a + b.minutos, 0);
   const feito = blocos.filter((b: any) => b.concluido).reduce((a: number, b: any) => a + b.minutos, 0);
 
@@ -368,6 +389,7 @@ export async function cronogramaAtual(ctx: Ctx) {
     cronograma: ativo,
     rascunho: rascunho ? { id: rascunho.id, concurso_nome: rascunho.concurso_nome } : null,
     blocos,
+    disciplinas: (nomesDisciplinas ?? []) as { id: string; nome: string }[],
     progresso: { totalMinutos: total, feitoMinutos: feito, percentual: total ? Math.round((feito / total) * 100) : 0 },
     diasAteProva: ativo ? diferencaDias(hoje, ativo.data_prova) : null,
     diasAtrasados: new Set(atrasados.map((b: any) => b.data)).size,
@@ -401,14 +423,10 @@ export async function recalcularCronograma(ctx: Ctx) {
   const hoje = hojeBrasilia();
   if (c.data_prova <= hoje) throw new Error("A data da prova já chegou.");
 
-  const { data: blocos } = await supabase
-    .from("cronograma_blocos")
-    .select("id, tipo, material_id, concluido, data")
-    .eq("cronograma_id", c.id)
-    .limit(5000);
+  const blocos = await lerBlocos(supabase, c.id, "id, tipo, material_id, concluido, data");
 
   const porMateria = new Map<string, { total: number; feitos: number }>();
-  for (const b of blocos ?? []) {
+  for (const b of blocos) {
     if (!b.material_id || (b.tipo !== "estudo" && b.tipo !== "questoes")) continue;
     const m = porMateria.get(b.material_id) ?? { total: 0, feitos: 0 };
     m.total++;
