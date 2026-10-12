@@ -451,7 +451,7 @@ export const alunoAbrirMateriaLeitura = createServerFn({ method: "POST" })
     const { data: material, error } = await supabase
       .from("materiais")
       .select(
-        "id, titulo, tipo, conteudo_md, resumo, tempo_leitura, publicado, disciplina_id, disciplinas(nome)",
+        "id, titulo, tipo, conteudo_md, resumo, tempo_leitura, publicado, updated_at, disciplina_id, disciplinas(nome)",
       )
       .eq("id", data.material_id)
       .maybeSingle();
@@ -481,6 +481,7 @@ export const alunoAbrirMateriaLeitura = createServerFn({ method: "POST" })
         conteudo_md: material.conteudo_md,
         resumo: material.resumo,
         tempo_leitura: material.tempo_leitura,
+        atualizado_em: material.updated_at,
         disciplina: (material as any).disciplinas?.nome ?? "Sem disciplina",
         disciplina_id: material.disciplina_id,
       },

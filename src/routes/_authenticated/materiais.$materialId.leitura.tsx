@@ -193,6 +193,14 @@ function LeitorMateria() {
             {m.disciplina}
             {m.tempo_leitura ? ` · ${m.tempo_leitura} min de leitura` : ""}
           </p>
+          {m.atualizado_em && (
+            <p className="truncate text-xs text-muted-foreground">
+              Artigo atualizado em{" "}
+              {new Date(m.atualizado_em).toLocaleDateString("pt-BR", {
+                timeZone: "America/Sao_Paulo",
+              })}
+            </p>
+          )}
         </div>
         {totalQuestoes > 0 && (
           <div className="flex items-center gap-2">
