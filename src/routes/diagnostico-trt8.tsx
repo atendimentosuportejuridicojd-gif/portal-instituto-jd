@@ -15,6 +15,9 @@ const EBOOK_URL = "https://e-book.institutojd.ia.br/";
 
 export const Route = createFileRoute("/diagnostico-trt8")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): { inicio?: boolean } => ({
+    inicio: search.inicio === "1" || search.inicio === 1,
+  }),
   head: () => ({
     meta: [
       { title: "Diagnóstico: você está preparado para o TRT8? — Instituto J&D" },
@@ -44,8 +47,9 @@ const TOTAL_PASSOS = 7;
 function DiagnosticoTrt8() {
   const navigate = useNavigate();
   const criarFn = useServerFn(criarLeadDiagnostico);
+  const { inicio } = Route.useSearch();
 
-  const [passo, setPasso] = useState(0);
+  const [passo, setPasso] = useState(inicio ? 1 : 0);
   const [respostas, setRespostas] = useState<Respostas>({});
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
