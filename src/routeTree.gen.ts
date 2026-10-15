@@ -24,6 +24,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedNoticiasRouteImport } from './routes/_authenticated/noticias'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedSimuladosRouteImport } from './routes/_authenticated/simulados'
+import { Route as DiagnosticoSlugRouteImport } from './routes/diagnostico.$slug'
 import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
@@ -48,6 +49,7 @@ import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './route
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
 import { Route as ApiPublicHotmartWebhookRouteImport } from './routes/api/public/hotmart/webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicPistasSlugRouteImport } from './routes/api/public/pistas.$slug'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as AuthenticatedAdminMateriaisMaterialIdEditarRouteImport } from './routes/_authenticated/admin/materiais.$materialId.editar'
@@ -127,6 +129,11 @@ const AuthenticatedSimuladosRoute = AuthenticatedSimuladosRouteImport.update({
   id: '/simulados',
   path: '/simulados',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const DiagnosticoSlugRoute = DiagnosticoSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DiagnosticoRoute,
 } as any)
 const AuthenticatedAcervoIndexRoute =
   AuthenticatedAcervoIndexRouteImport.update({
@@ -270,6 +277,11 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPistasSlugRoute = ApiPublicPistasSlugRouteImport.update({
+  id: '/api/public/pistas/$slug',
+  path: '/api/public/pistas/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -291,7 +303,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
-  '/diagnostico': typeof DiagnosticoRoute
+  '/diagnostico': typeof DiagnosticoRouteWithChildren
   '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
@@ -302,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
+  '/diagnostico/$slug': typeof DiagnosticoSlugRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -325,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/pistas/$slug': typeof ApiPublicPistasSlugRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/acervo/$cargoId/': typeof AuthenticatedAcervoCargoIdIndexRoute
@@ -334,7 +348,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
-  '/diagnostico': typeof DiagnosticoRoute
+  '/diagnostico': typeof DiagnosticoRouteWithChildren
   '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
@@ -345,6 +359,7 @@ export interface FileRoutesByTo {
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
+  '/diagnostico/$slug': typeof DiagnosticoSlugRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -368,6 +383,7 @@ export interface FileRoutesByTo {
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/pistas/$slug': typeof ApiPublicPistasSlugRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/acervo/$cargoId': typeof AuthenticatedAcervoCargoIdIndexRoute
@@ -379,7 +395,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
-  '/diagnostico': typeof DiagnosticoRoute
+  '/diagnostico': typeof DiagnosticoRouteWithChildren
   '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
@@ -390,6 +406,7 @@ export interface FileRoutesById {
   '/_authenticated/noticias': typeof AuthenticatedNoticiasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/simulados': typeof AuthenticatedSimuladosRouteWithChildren
+  '/diagnostico/$slug': typeof DiagnosticoSlugRoute
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -413,6 +430,7 @@ export interface FileRoutesById {
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
   '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/pistas/$slug': typeof ApiPublicPistasSlugRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/_authenticated/acervo/$cargoId/': typeof AuthenticatedAcervoCargoIdIndexRoute
@@ -435,6 +453,7 @@ export interface FileRouteTypes {
     | '/noticias'
     | '/perfil'
     | '/simulados'
+    | '/diagnostico/$slug'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -458,6 +477,7 @@ export interface FileRouteTypes {
     | '/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
     | '/api/public/payments/webhook'
+    | '/api/public/pistas/$slug'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/acervo/$cargoId/'
@@ -478,6 +498,7 @@ export interface FileRouteTypes {
     | '/noticias'
     | '/perfil'
     | '/simulados'
+    | '/diagnostico/$slug'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -501,6 +522,7 @@ export interface FileRouteTypes {
     | '/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
     | '/api/public/payments/webhook'
+    | '/api/public/pistas/$slug'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/acervo/$cargoId'
@@ -522,6 +544,7 @@ export interface FileRouteTypes {
     | '/_authenticated/noticias'
     | '/_authenticated/perfil'
     | '/_authenticated/simulados'
+    | '/diagnostico/$slug'
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
     | '/_authenticated/admin/configuracoes'
@@ -545,6 +568,7 @@ export interface FileRouteTypes {
     | '/_authenticated/materiais/$materialId/questoes'
     | '/api/public/hotmart/webhook'
     | '/api/public/payments/webhook'
+    | '/api/public/pistas/$slug'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/_authenticated/acervo/$cargoId/'
@@ -556,13 +580,14 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CursoCarreiraJudiciariaRoute: typeof CursoCarreiraJudiciariaRoute
-  DiagnosticoRoute: typeof DiagnosticoRoute
+  DiagnosticoRoute: typeof DiagnosticoRouteWithChildren
   DiagnosticoTrt8Route: typeof DiagnosticoTrt8Route
   ResetPasswordRoute: typeof ResetPasswordRoute
   TesteRoute: typeof TesteRoute
   ApiPublicConversoesGoogleAdsRoute: typeof ApiPublicConversoesGoogleAdsRoute
   ApiPublicHotmartWebhookRoute: typeof ApiPublicHotmartWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicPistasSlugRoute: typeof ApiPublicPistasSlugRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -673,6 +698,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/simulados'
       preLoaderRoute: typeof AuthenticatedSimuladosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/diagnostico/$slug': {
+      id: '/diagnostico/$slug'
+      path: '/$slug'
+      fullPath: '/diagnostico/$slug'
+      preLoaderRoute: typeof DiagnosticoSlugRouteImport
+      parentRoute: typeof DiagnosticoRoute
     }
     '/_authenticated/acervo/': {
       id: '/_authenticated/acervo/'
@@ -842,6 +874,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/pistas/$slug': {
+      id: '/api/public/pistas/$slug'
+      path: '/api/public/pistas/$slug'
+      fullPath: '/api/public/pistas/$slug'
+      preLoaderRoute: typeof ApiPublicPistasSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -954,18 +993,31 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface DiagnosticoRouteChildren {
+  DiagnosticoSlugRoute: typeof DiagnosticoSlugRoute
+}
+
+const DiagnosticoRouteChildren: DiagnosticoRouteChildren = {
+  DiagnosticoSlugRoute: DiagnosticoSlugRoute,
+}
+
+const DiagnosticoRouteWithChildren = DiagnosticoRoute._addFileChildren(
+  DiagnosticoRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CursoCarreiraJudiciariaRoute: CursoCarreiraJudiciariaRoute,
-  DiagnosticoRoute: DiagnosticoRoute,
+  DiagnosticoRoute: DiagnosticoRouteWithChildren,
   DiagnosticoTrt8Route: DiagnosticoTrt8Route,
   ResetPasswordRoute: ResetPasswordRoute,
   TesteRoute: TesteRoute,
   ApiPublicConversoesGoogleAdsRoute: ApiPublicConversoesGoogleAdsRoute,
   ApiPublicHotmartWebhookRoute: ApiPublicHotmartWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicPistasSlugRoute: ApiPublicPistasSlugRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }

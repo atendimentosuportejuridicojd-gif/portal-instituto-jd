@@ -83,6 +83,57 @@ export type Database = {
         }
         Relationships: []
       }
+      pistas_diagnostico: {
+        Row: {
+          ativo: boolean
+          concurso: string | null
+          criado_em: string
+          cta_texto: string
+          gancho_subtexto: string
+          gancho_titulo: string
+          id: string
+          mensagens: Json
+          nome: string
+          pergunta_fechamento: Json
+          perguntas_perfil: Json
+          questao1: Json
+          questao2: Json
+          slug: string
+        }
+        Insert: {
+          ativo?: boolean
+          concurso?: string | null
+          criado_em?: string
+          cta_texto?: string
+          gancho_subtexto: string
+          gancho_titulo: string
+          id?: string
+          mensagens: Json
+          nome: string
+          pergunta_fechamento?: Json
+          perguntas_perfil?: Json
+          questao1: Json
+          questao2: Json
+          slug: string
+        }
+        Update: {
+          ativo?: boolean
+          concurso?: string | null
+          criado_em?: string
+          cta_texto?: string
+          gancho_subtexto?: string
+          gancho_titulo?: string
+          id?: string
+          mensagens?: Json
+          nome?: string
+          pergunta_fechamento?: Json
+          perguntas_perfil?: Json
+          questao1?: Json
+          questao2?: Json
+          slug?: string
+        }
+        Relationships: []
+      }
       assinaturas: {
         Row: {
           cancelada_em: string | null

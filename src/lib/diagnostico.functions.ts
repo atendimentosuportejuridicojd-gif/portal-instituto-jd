@@ -10,16 +10,11 @@ const gclidSchema = z.preprocess((value) => {
 }, z.string().optional());
 
 const schema = z.object({
-  pista: z.enum(["trt8", "erro_concurseiro"]),
-  cargo: z.enum(["tecnico", "analista", "oficial_justica", "indeciso"]).optional(),
-  area: z.enum(["tribunais", "mps", "indeciso", "outra"]).optional(),
-  habito_estudo: z.enum(["so_edital", "de_vez_em_quando", "todos_dias", "nao_comecei"]).optional(),
-  tempo_estudo: z.enum(["nunca", "menos_6m", "6_12m", "mais_1ano"]).optional(),
-  tempo_semanal: z.enum(["menos_5h", "5_10h", "10_20h", "mais_20h"]).optional(),
-  dificuldade: z.enum(["nao_sei_comecar", "falta_tempo", "nao_sei_o_que_cai", "sem_evolucao"]).optional(),
-  questao1: z.enum(["a", "b", "c", "d"]),
-  questao2: z.enum(["a", "b", "c", "d"]),
-  meta_vida: z.enum(["sim", "nao_certeza"]),
+  pista_slug: z.string().trim().min(1).max(60),
+  respostas_perfil: z.record(z.string(), z.string()).default({}),
+  questao1: z.string().min(1).max(10),
+  questao2: z.string().min(1).max(10),
+  fechamento: z.string().min(1).max(60),
   nome: z.string().trim().min(3).max(120),
   telefone: z
     .string()
@@ -30,58 +25,62 @@ const schema = z.object({
   gclid: gclidSchema,
 });
 
-const GABARITO = { questao1: "d", questao2: "b" } as const;
-
 /**
- * Cadastro público do Diagnóstico de Preparação (duas pistas: "trt8" — específico de um
- * concurso — e "erro_concurseiro" — amplo, sem concurso definido). Não cria conta nem usuário:
- * é só um lead, com pontuação calculada aqui (nunca confiar em pontuação vinda do cliente).
+ * Cadastro público do Diagnóstico de Preparação. Não cria conta nem usuário: é só um lead.
+ * A pontuação é sempre recalculada aqui a partir da configuração real da pista (nunca confiar
+ * em pontuação ou gabarito vindo do cliente).
  */
 export const criarLeadDiagnostico = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => schema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    let pontos = 0;
-    if (data.pista === "trt8") {
-      if (data.cargo && data.cargo !== "indeciso") pontos += 2;
-      if (data.tempo_estudo === "6_12m" || data.tempo_estudo === "mais_1ano") pontos += 2;
-    } else {
-      if (data.area === "tribunais" || data.area === "mps") pontos += 2;
-      if (data.habito_estudo === "todos_dias") pontos += 1;
-      if (data.tempo_semanal && data.tempo_semanal !== "menos_5h") pontos += 1;
-    }
-    if (data.questao1 === GABARITO.questao1) pontos += 1;
-    if (data.questao2 === GABARITO.questao2) pontos += 1;
-    if (data.meta_vida === "sim") pontos += 1;
+    const { data: pista, error: errPista } = await supabaseAdmin
+      .from("pistas_diagnostico")
+      .select("slug, concurso, perguntas_perfil, questao1, questao2, pergunta_fechamento, mensagens")
+      .eq("slug", data.pista_slug)
+      .eq("ativo", true)
+      .maybeSingle();
+    if (errPista) throw new Error(errPista.message);
+    if (!pista) throw new Error("Diagnóstico não encontrado ou não está mais disponível.");
 
-    const segmento = pontos >= 5 ? "quente" : pontos >= 3 ? "morno" : "frio";
-    const confirmouErro = data.pista === "erro_concurseiro" && (data.habito_estudo === "so_edital" || data.habito_estudo === "de_vez_em_quando");
+    let pontos = 0;
+    let pontosMax = 0;
+
+    for (const pergunta of pista.perguntas_perfil as any[]) {
+      const max = Math.max(...pergunta.opcoes.map((o: any) => o.pontos));
+      pontosMax += max;
+      const escolhida = pergunta.opcoes.find((o: any) => o.valor === data.respostas_perfil[pergunta.campo]);
+      pontos += escolhida?.pontos ?? 0;
+    }
+
+    const fechamentoOpcoes = (pista.pergunta_fechamento as any).opcoes as any[];
+    pontosMax += Math.max(...fechamentoOpcoes.map((o) => o.pontos));
+    const fechamentoEscolhido = fechamentoOpcoes.find((o) => o.valor === data.fechamento);
+    pontos += fechamentoEscolhido?.pontos ?? 0;
+
+    pontosMax += 2;
+    if (data.questao1 === (pista.questao1 as any).gabarito) pontos += 1;
+    if (data.questao2 === (pista.questao2 as any).gabarito) pontos += 1;
+
+    const percentual = pontosMax > 0 ? pontos / pontosMax : 0;
+    const segmento = percentual >= 0.7 ? "quente" : percentual >= 0.4 ? "morno" : "frio";
 
     const telefoneDigitos = data.telefone.replace(/\D/g, "");
     const gclidInformado = data.gclid?.trim() ?? "";
     const gclid = gclidInformado.length <= 200 && /^[A-Za-z0-9_-]+$/.test(gclidInformado) ? gclidInformado : undefined;
 
     await supabaseAdmin.from("leads_diagnostico").insert({
-      pista: data.pista,
-      concurso: data.pista === "trt8" ? "trt8" : null,
+      pista: pista.slug,
+      concurso: pista.concurso,
       nome: data.nome,
       telefone: telefoneDigitos,
-      respostas: {
-        cargo: data.cargo ?? null,
-        area: data.area ?? null,
-        habito_estudo: data.habito_estudo ?? null,
-        tempo_estudo: data.tempo_estudo ?? null,
-        tempo_semanal: data.tempo_semanal ?? null,
-        dificuldade: data.dificuldade ?? null,
-        questao1: data.questao1,
-        questao2: data.questao2,
-        meta_vida: data.meta_vida,
-      },
+      respostas: { ...data.respostas_perfil, questao1: data.questao1, questao2: data.questao2, fechamento: data.fechamento },
       pontuacao: pontos,
       segmento,
       gclid: gclid ?? null,
     });
 
-    return { pontuacao: pontos, segmento, metaVidaSim: data.meta_vida === "sim", confirmouErro };
+    const mensagem = (pista.mensagens as any)[segmento];
+    return { pontuacao: pontos, pontosMax, segmento, mensagem };
   });
