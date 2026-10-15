@@ -11,15 +11,16 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Scale, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 
-const ORIGENS_RASTREADAS = ["curso-carreira-judiciaria", "diagnostico-trt8", "diagnostico-erro-concurseiro"] as const;
-type OrigemRastreada = (typeof ORIGENS_RASTREADAS)[number];
+// "curso-carreira-judiciaria" (fixo) ou "diagnostico-<slug-da-pista>" (pistas são dinâmicas,
+// cadastradas pelo admin — por isso aceitamos qualquer slug em vez de uma lista fechada).
+function origemValida(v: unknown): v is string {
+  return typeof v === "string" && (v === "curso-carreira-judiciaria" || /^diagnostico-[a-z0-9_-]+$/.test(v));
+}
 
 export const Route = createFileRoute("/teste")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { origem?: OrigemRastreada } => {
-    const origem = ORIGENS_RASTREADAS.find((o) => o === search.origem);
-    return origem ? { origem } : {};
-  },
+  validateSearch: (search: Record<string, unknown>): { origem?: string } =>
+    origemValida(search.origem) ? { origem: search.origem } : {},
   head: () => ({
     meta: [
       { title: "Teste grátis — Portal do Aluno J&D" },
