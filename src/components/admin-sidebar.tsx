@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   BookMarked,
   Gavel,
+  UserCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const items = [
   { title: "Cronogramas", url: "/admin/cronogramas", icon: CalendarDays },
   { title: "Notícias", url: "/admin/noticias", icon: Newspaper },
   { title: "Usuários", url: "/admin/usuarios", icon: Users },
+  { title: "Leads Qualificados", url: "/admin/leads", icon: UserCheck },
   { title: "Configurações", url: "/admin/configuracoes", icon: Settings },
 ];
 
