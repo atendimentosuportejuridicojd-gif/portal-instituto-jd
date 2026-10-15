@@ -37,7 +37,6 @@ type Respostas = {
   area?: "tribunais" | "mps" | "indeciso" | "outra";
   habito_estudo?: "so_edital" | "de_vez_em_quando" | "todos_dias" | "nao_comecei";
   tempo_semanal?: "menos_5h" | "5_10h" | "10_20h" | "mais_20h";
-  dificuldade?: "nao_sei_comecar" | "falta_tempo" | "nao_sei_o_que_cai" | "sem_evolucao";
   questao1?: "a" | "b" | "c" | "d";
   questao2?: "a" | "b" | "c" | "d";
   meta_vida?: "sim" | "nao_certeza";
@@ -66,7 +65,6 @@ function DiagnosticoErroConcurseiro() {
           area: respostas.area,
           habito_estudo: respostas.habito_estudo,
           tempo_semanal: respostas.tempo_semanal,
-          dificuldade: respostas.dificuldade!,
           questao1: respostas.questao1!,
           questao2: respostas.questao2!,
           meta_vida: respostas.meta_vida!,
