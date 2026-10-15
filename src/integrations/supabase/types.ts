@@ -44,96 +44,6 @@ export type Database = {
         }
         Relationships: []
       }
-      leads_diagnostico: {
-        Row: {
-          concurso: string | null
-          criado_em: string
-          gclid: string | null
-          id: string
-          nome: string
-          pista: string
-          pontuacao: number
-          respostas: Json
-          segmento: string
-          telefone: string
-        }
-        Insert: {
-          concurso?: string | null
-          criado_em?: string
-          gclid?: string | null
-          id?: string
-          nome: string
-          pista: string
-          pontuacao: number
-          respostas: Json
-          segmento: string
-          telefone: string
-        }
-        Update: {
-          concurso?: string | null
-          criado_em?: string
-          gclid?: string | null
-          id?: string
-          nome?: string
-          pista?: string
-          pontuacao?: number
-          respostas?: Json
-          segmento?: string
-          telefone?: string
-        }
-        Relationships: []
-      }
-      pistas_diagnostico: {
-        Row: {
-          ativo: boolean
-          concurso: string | null
-          criado_em: string
-          cta_texto: string
-          gancho_subtexto: string
-          gancho_titulo: string
-          id: string
-          mensagens: Json
-          nome: string
-          pergunta_fechamento: Json
-          perguntas_perfil: Json
-          questao1: Json
-          questao2: Json
-          slug: string
-        }
-        Insert: {
-          ativo?: boolean
-          concurso?: string | null
-          criado_em?: string
-          cta_texto?: string
-          gancho_subtexto: string
-          gancho_titulo: string
-          id?: string
-          mensagens: Json
-          nome: string
-          pergunta_fechamento?: Json
-          perguntas_perfil?: Json
-          questao1: Json
-          questao2: Json
-          slug: string
-        }
-        Update: {
-          ativo?: boolean
-          concurso?: string | null
-          criado_em?: string
-          cta_texto?: string
-          gancho_subtexto?: string
-          gancho_titulo?: string
-          id?: string
-          mensagens?: Json
-          nome?: string
-          pergunta_fechamento?: Json
-          perguntas_perfil?: Json
-          questao1?: Json
-          questao2?: Json
-          slug?: string
-        }
-        Relationships: []
-      }
       assinaturas: {
         Row: {
           cancelada_em: string | null
@@ -830,6 +740,45 @@ export type Database = {
         }
         Relationships: []
       }
+      leads_diagnostico: {
+        Row: {
+          concurso: string | null
+          criado_em: string
+          gclid: string | null
+          id: string
+          nome: string
+          pista: string
+          pontuacao: number
+          respostas: Json
+          segmento: string
+          telefone: string
+        }
+        Insert: {
+          concurso?: string | null
+          criado_em?: string
+          gclid?: string | null
+          id?: string
+          nome: string
+          pista: string
+          pontuacao: number
+          respostas: Json
+          segmento: string
+          telefone: string
+        }
+        Update: {
+          concurso?: string | null
+          criado_em?: string
+          gclid?: string | null
+          id?: string
+          nome?: string
+          pista?: string
+          pontuacao?: number
+          respostas?: Json
+          segmento?: string
+          telefone?: string
+        }
+        Relationships: []
+      }
       materiais: {
         Row: {
           arquivo_url: string | null
@@ -1152,6 +1101,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pistas_diagnostico: {
+        Row: {
+          ativo: boolean
+          concurso: string | null
+          criado_em: string
+          cta_texto: string
+          gancho_subtexto: string
+          gancho_titulo: string
+          id: string
+          mensagens: Json
+          nome: string
+          pergunta_fechamento: Json
+          perguntas_perfil: Json
+          questao1: Json
+          questao2: Json
+          slug: string
+        }
+        Insert: {
+          ativo?: boolean
+          concurso?: string | null
+          criado_em?: string
+          cta_texto?: string
+          gancho_subtexto: string
+          gancho_titulo: string
+          id?: string
+          mensagens: Json
+          nome: string
+          pergunta_fechamento?: Json
+          perguntas_perfil?: Json
+          questao1: Json
+          questao2: Json
+          slug: string
+        }
+        Update: {
+          ativo?: boolean
+          concurso?: string | null
+          criado_em?: string
+          cta_texto?: string
+          gancho_subtexto?: string
+          gancho_titulo?: string
+          id?: string
+          mensagens?: Json
+          nome?: string
+          pergunta_fechamento?: Json
+          perguntas_perfil?: Json
+          questao1?: Json
+          questao2?: Json
+          slug?: string
+        }
+        Relationships: []
       }
       plano_estudo_itens: {
         Row: {
