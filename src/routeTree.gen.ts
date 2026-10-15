@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CursoCarreiraJudiciariaRouteImport } from './routes/curso-carreira-judiciaria'
+import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
+import { Route as DiagnosticoTrt8RouteImport } from './routes/diagnostico-trt8'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TesteRouteImport } from './routes/teste'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
@@ -66,6 +68,16 @@ const AuthRoute = AuthRouteImport.update({
 const CursoCarreiraJudiciariaRoute = CursoCarreiraJudiciariaRouteImport.update({
   id: '/curso-carreira-judiciaria',
   path: '/curso-carreira-judiciaria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnosticoRoute = DiagnosticoRouteImport.update({
+  id: '/diagnostico',
+  path: '/diagnostico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnosticoTrt8Route = DiagnosticoTrt8RouteImport.update({
+  id: '/diagnostico-trt8',
+  path: '/diagnostico-trt8',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -273,6 +285,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -313,6 +327,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -355,6 +371,8 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -397,6 +415,8 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/curso-carreira-judiciaria'
+    | '/diagnostico'
+    | '/diagnostico-trt8'
     | '/reset-password'
     | '/teste'
     | '/assinatura-bloqueada'
@@ -437,6 +457,8 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/curso-carreira-judiciaria'
+    | '/diagnostico'
+    | '/diagnostico-trt8'
     | '/reset-password'
     | '/teste'
     | '/assinatura-bloqueada'
@@ -478,6 +500,8 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/curso-carreira-judiciaria'
+    | '/diagnostico'
+    | '/diagnostico-trt8'
     | '/reset-password'
     | '/teste'
     | '/_authenticated/assinatura-bloqueada'
@@ -520,6 +544,8 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CursoCarreiraJudiciariaRoute: typeof CursoCarreiraJudiciariaRoute
+  DiagnosticoRoute: typeof DiagnosticoRoute
+  DiagnosticoTrt8Route: typeof DiagnosticoTrt8Route
   ResetPasswordRoute: typeof ResetPasswordRoute
   TesteRoute: typeof TesteRoute
   ApiPublicConversoesGoogleAdsRoute: typeof ApiPublicConversoesGoogleAdsRoute
@@ -557,6 +583,20 @@ declare module '@tanstack/react-router' {
       path: '/curso-carreira-judiciaria'
       fullPath: '/curso-carreira-judiciaria'
       preLoaderRoute: typeof CursoCarreiraJudiciariaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnostico': {
+      id: '/diagnostico'
+      path: '/diagnostico'
+      fullPath: '/diagnostico'
+      preLoaderRoute: typeof DiagnosticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnostico-trt8': {
+      id: '/diagnostico-trt8'
+      path: '/diagnostico-trt8'
+      fullPath: '/diagnostico-trt8'
+      preLoaderRoute: typeof DiagnosticoTrt8RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -898,6 +938,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CursoCarreiraJudiciariaRoute: CursoCarreiraJudiciariaRoute,
+  DiagnosticoRoute: DiagnosticoRoute,
+  DiagnosticoTrt8Route: DiagnosticoTrt8Route,
   ResetPasswordRoute: ResetPasswordRoute,
   TesteRoute: TesteRoute,
   ApiPublicConversoesGoogleAdsRoute: ApiPublicConversoesGoogleAdsRoute,

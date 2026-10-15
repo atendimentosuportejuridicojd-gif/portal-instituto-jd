@@ -44,6 +44,45 @@ export type Database = {
         }
         Relationships: []
       }
+      leads_diagnostico: {
+        Row: {
+          concurso: string | null
+          criado_em: string
+          gclid: string | null
+          id: string
+          nome: string
+          pista: string
+          pontuacao: number
+          respostas: Json
+          segmento: string
+          telefone: string
+        }
+        Insert: {
+          concurso?: string | null
+          criado_em?: string
+          gclid?: string | null
+          id?: string
+          nome: string
+          pista: string
+          pontuacao: number
+          respostas: Json
+          segmento: string
+          telefone: string
+        }
+        Update: {
+          concurso?: string | null
+          criado_em?: string
+          gclid?: string | null
+          id?: string
+          nome?: string
+          pista?: string
+          pontuacao?: number
+          respostas?: Json
+          segmento?: string
+          telefone?: string
+        }
+        Relationships: []
+      }
       assinaturas: {
         Row: {
           cancelada_em: string | null
