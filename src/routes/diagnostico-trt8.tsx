@@ -3,9 +3,8 @@ import { DiagnosticoRuntime } from "@/components/diagnostico-runtime";
 
 export const Route = createFileRoute("/diagnostico-trt8")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { inicio?: boolean } => ({
-    inicio: search.inicio === "1" || search.inicio === 1,
-  }),
+  validateSearch: (search: Record<string, unknown>): { inicio?: boolean } =>
+    search.inicio === "1" || search.inicio === 1 ? { inicio: true } : {},
   head: () => ({
     meta: [
       { title: "Diagnóstico: você está preparado para o TRT8? — Instituto J&D" },
