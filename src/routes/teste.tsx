@@ -11,12 +11,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Scale, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 
+const ORIGENS_RASTREADAS = ["curso-carreira-judiciaria", "diagnostico-trt8", "diagnostico-erro-concurseiro"] as const;
+type OrigemRastreada = (typeof ORIGENS_RASTREADAS)[number];
+
 export const Route = createFileRoute("/teste")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { origem?: "curso-carreira-judiciaria" } =>
-    search.origem === "curso-carreira-judiciaria"
-      ? { origem: "curso-carreira-judiciaria" }
-      : {},
+  validateSearch: (search: Record<string, unknown>): { origem?: OrigemRastreada } => {
+    const origem = ORIGENS_RASTREADAS.find((o) => o === search.origem);
+    return origem ? { origem } : {};
+  },
   head: () => ({
     meta: [
       { title: "Teste grátis — Portal do Aluno J&D" },
@@ -51,7 +54,7 @@ function TestePage() {
   const criar = useMutation({
     mutationFn: () => criarFn({ data: { nome, email, telefone, senha, gclid: getStoredClickId() } }),
     onSuccess: async (r: any) => {
-      if (origem === "curso-carreira-judiciaria") {
+      if (origem) {
         trackConversion("AW-18069973013/QELhCPrwpowdEJXQt6hD");
       }
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
