@@ -28,7 +28,7 @@ export const adminListAcervo = createServerFn({ method: "GET" })
     ] = await Promise.all([
         supabase
           .from("disciplinas")
-          .select("id, nome, descricao, ordem, grupo, protegida")
+          .select("id, nome, descricao, ordem, grupo, protegida, carreiras")
           .eq("especifica", false)
           .order("ordem"),
         supabase.from("modulos").select("id, nome, disciplina_id, ordem").order("ordem"),
@@ -75,6 +75,7 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
         ordem: z.number().int().min(0).default(0),
         grupo: z.enum(["gerais", "especificos"]).default("gerais"),
         senha: z.string().trim().max(100).optional().default(""),
+        carreiras: z.array(z.enum(["judiciaria", "fiscal", "policial"])).min(1).optional(),
       })
       .parse(d),
   )
@@ -85,7 +86,8 @@ export const adminUpsertDisciplina = createServerFn({ method: "POST" })
       descricao: data.descricao || null,
       ordem: data.ordem,
       grupo: data.grupo,
-    };
+      ...(data.carreiras ? { carreiras: data.carreiras } : {}),
+    } as any;
     const senha = data.senha.trim();
 
     const gravarSenha = async (disciplinaId: string) => {

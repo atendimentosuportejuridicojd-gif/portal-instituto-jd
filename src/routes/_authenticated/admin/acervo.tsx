@@ -1,3 +1,4 @@
+import { CARREIRAS } from "@/lib/carreiras";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -306,6 +307,7 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
   const [ordem, setOrdem] = useState(String(disciplina?.ordem ?? 0));
   const [grupo, setGrupo] = useState<string>(disciplina?.grupo ?? "gerais");
   const [senha, setSenha] = useState(disciplina?.senha ?? "");
+  const [carreiras, setCarreiras] = useState<string[]>(disciplina?.carreiras ?? ["judiciaria"]);
   const fn = useServerFn(adminUpsertDisciplina);
 
   const mut = useMutation({
@@ -318,6 +320,7 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           ordem: Number(ordem) || 0,
           grupo: grupo as "gerais" | "especificos",
           senha,
+          carreiras: carreiras as any,
         },
       }),
     onSuccess: () => {
@@ -371,6 +374,28 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
                 <SelectItem value="especificos">Conhecimentos Específicos</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Aparece nas carreiras</Label>
+            <div className="flex flex-wrap gap-3">
+              {CARREIRAS.map((c) => (
+                <label key={c.id} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={carreiras.includes(c.id)}
+                    onChange={(e) =>
+                      setCarreiras((prev) =>
+                        e.target.checked ? [...prev, c.id] : prev.filter((x) => x !== c.id),
+                      )
+                    }
+                  />
+                  {c.nome}
+                </label>
+              ))}
+            </div>
+            {carreiras.length === 0 && (
+              <p className="text-xs text-destructive">Escolha pelo menos uma carreira.</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="d-ordem">Ordem</Label>

@@ -39,7 +39,8 @@ function AuthenticatedLayout() {
   const { user } = Route.useRouteContext();
   const location = useLocation();
   const inAdmin = location.pathname.startsWith("/admin");
-  const isBlockedPage = location.pathname === "/assinatura-bloqueada";
+  const isEscolha = location.pathname === "/escolher-carreira";
+  const isBlockedPage = location.pathname === "/assinatura-bloqueada" || isEscolha;
 
   // "Voltar" em todas as páginas (menos na inicial): volta para a página anterior; sem histórico, vai para o início.
   const router = useRouter();
@@ -74,6 +75,11 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     if (!q.data || redirecting || isBlockedPage) return;
+    if (!q.data.isAdmin && !q.data.carreira) {
+      setRedirecting(true);
+      window.location.replace("/escolher-carreira");
+      return;
+    }
     if (!q.data.acessoLiberado) {
       setRedirecting(true);
       window.location.replace("/assinatura-bloqueada");
