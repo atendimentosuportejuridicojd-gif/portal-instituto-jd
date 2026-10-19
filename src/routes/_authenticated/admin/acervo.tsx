@@ -416,7 +416,7 @@ function DisciplinaDialog({ disciplina, onDone }: { disciplina?: any; onDone: ()
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !nome.trim()}>
+          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !nome.trim() || carreiras.length === 0}>
             {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
           </Button>
