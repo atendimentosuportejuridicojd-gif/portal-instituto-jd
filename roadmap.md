@@ -15,3 +15,6 @@
 - [x] Criar produto avulso e checkout incorporado reutilizável, conforme adaptação autorizada, sem conectar às telas.
 - [x] Implementar confirmação de acesso, reembolso e disputa sem alterar o schema ou a Hotmart.
 - [ ] Aceitar pagamentos reais e confirmar Pix: depende da ativação da conta pelo usuário; Pix indisponível na conta de teste.
+- [x] Multi-carreira: escolha única, filtros por carreira, "Sua Carreira 360"
+- [ ] Links/produtos Hotmart das carreiras Fiscal e Policial (aguardando usuário) e bloqueio por carreira da assinatura
+- [ ] Seletor de carreiras nos cadastros de Trilhas e Concursos no admin
