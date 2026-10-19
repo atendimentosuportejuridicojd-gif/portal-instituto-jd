@@ -57,8 +57,8 @@ export function AppSidebar({ isAdmin, assinaturaAtiva }: { isAdmin: boolean; ass
           </div>
           <div className="min-w-0 leading-tight group-data-[collapsible=icon]:hidden">
             <p className="truncate text-sm font-bold text-sidebar-foreground">Instituto J&D</p>
-            <p className="text-[10px] uppercase tracking-widest text-sidebar-foreground/60">
-              Portal do Aluno
+            <p className="truncate text-[10px] uppercase tracking-widest text-sidebar-foreground/60">
+              {carreira ? nomeCarreira(carreira) : "Portal do Aluno"}
             </p>
           </div>
         </div>

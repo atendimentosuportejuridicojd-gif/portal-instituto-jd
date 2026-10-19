@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Scale, Target, FileText, Newspaper, CalendarDays } from "lucide-react";
-import lockupAsset from "@/assets/lockup-jd.png.asset.json";
+import lockupSrc from "@/assets/lockup-sua-carreira.png";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -34,8 +34,8 @@ function Landing() {
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <img
-            src={lockupAsset.url}
-            alt="Instituto J&D — Carreira Judiciária 360"
+            src={lockupSrc}
+            alt="Instituto J&D — Sua Carreira 360"
             width={280}
             height={92}
             loading="eager"
