@@ -21,6 +21,7 @@ import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_
 import { Route as AuthenticatedConcursosRouteImport } from './routes/_authenticated/concursos'
 import { Route as AuthenticatedCronogramasRouteImport } from './routes/_authenticated/cronogramas'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedEscolherCarreiraRouteImport } from './routes/_authenticated/escolher-carreira'
 import { Route as AuthenticatedNoticiasRouteImport } from './routes/_authenticated/noticias'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedSimuladosRouteImport } from './routes/_authenticated/simulados'
@@ -115,6 +116,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEscolherCarreiraRoute =
+  AuthenticatedEscolherCarreiraRouteImport.update({
+    id: '/escolher-carreira',
+    path: '/escolher-carreira',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedNoticiasRoute = AuthenticatedNoticiasRouteImport.update({
   id: '/noticias',
   path: '/noticias',
@@ -311,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/escolher-carreira': typeof AuthenticatedEscolherCarreiraRoute
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
@@ -356,6 +364,7 @@ export interface FileRoutesByTo {
   '/concursos': typeof AuthenticatedConcursosRoute
   '/cronogramas': typeof AuthenticatedCronogramasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/escolher-carreira': typeof AuthenticatedEscolherCarreiraRoute
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
@@ -403,6 +412,7 @@ export interface FileRoutesById {
   '/_authenticated/concursos': typeof AuthenticatedConcursosRoute
   '/_authenticated/cronogramas': typeof AuthenticatedCronogramasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/escolher-carreira': typeof AuthenticatedEscolherCarreiraRoute
   '/_authenticated/noticias': typeof AuthenticatedNoticiasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/simulados': typeof AuthenticatedSimuladosRouteWithChildren
@@ -450,6 +460,7 @@ export interface FileRouteTypes {
     | '/concursos'
     | '/cronogramas'
     | '/dashboard'
+    | '/escolher-carreira'
     | '/noticias'
     | '/perfil'
     | '/simulados'
@@ -495,6 +506,7 @@ export interface FileRouteTypes {
     | '/concursos'
     | '/cronogramas'
     | '/dashboard'
+    | '/escolher-carreira'
     | '/noticias'
     | '/perfil'
     | '/simulados'
@@ -541,6 +553,7 @@ export interface FileRouteTypes {
     | '/_authenticated/concursos'
     | '/_authenticated/cronogramas'
     | '/_authenticated/dashboard'
+    | '/_authenticated/escolher-carreira'
     | '/_authenticated/noticias'
     | '/_authenticated/perfil'
     | '/_authenticated/simulados'
@@ -676,6 +689,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/escolher-carreira': {
+      id: '/_authenticated/escolher-carreira'
+      path: '/escolher-carreira'
+      fullPath: '/escolher-carreira'
+      preLoaderRoute: typeof AuthenticatedEscolherCarreiraRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/noticias': {
@@ -925,6 +945,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConcursosRoute: typeof AuthenticatedConcursosRoute
   AuthenticatedCronogramasRoute: typeof AuthenticatedCronogramasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEscolherCarreiraRoute: typeof AuthenticatedEscolherCarreiraRoute
   AuthenticatedNoticiasRoute: typeof AuthenticatedNoticiasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedSimuladosRoute: typeof AuthenticatedSimuladosRouteWithChildren
@@ -956,6 +977,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConcursosRoute: AuthenticatedConcursosRoute,
   AuthenticatedCronogramasRoute: AuthenticatedCronogramasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEscolherCarreiraRoute: AuthenticatedEscolherCarreiraRoute,
   AuthenticatedNoticiasRoute: AuthenticatedNoticiasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedSimuladosRoute: AuthenticatedSimuladosRouteWithChildren,

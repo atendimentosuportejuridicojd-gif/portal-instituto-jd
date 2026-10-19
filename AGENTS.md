@@ -16,3 +16,4 @@
 - Test payment webhooks must not write simulado_acessos because this shared entitlement table has no environment discriminator.
 - Recover stale dynamic route assets with one guarded browser reload per minute and a full-page manual retry; router invalidation alone reuses the failed module reference.
 - Prebundle lazy cronograma React dependencies at Vite startup to avoid replacing the optimized React graph during navigation in an already-open tab.
+- Multi-career portal: content is never duplicated per career; `disciplinas`/`trilhas`/`concursos.carreiras` arrays link shared content to careers and student lists filter by `profiles.carreira` (locked after first choice by trigger, admins may switch).

@@ -70,3 +70,9 @@ export function montarStoragePath(materialId: string, versao: number, nomeArquiv
     .slice(-80);
   return `${materialId}/v${versao}-${Date.now()}-${limpo}`;
 }
+
+/** Carreira escolhida pelo aluno (padrão: judiciária). */
+export async function getCarreiraUsuario(ctx: { supabase: any; userId: string }): Promise<string> {
+  const { data } = await ctx.supabase.from("profiles").select("carreira").eq("id", ctx.userId).maybeSingle();
+  return (data?.carreira as string) || "judiciaria";
+}
