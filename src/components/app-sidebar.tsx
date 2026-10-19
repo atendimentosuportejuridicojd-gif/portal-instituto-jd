@@ -1,3 +1,4 @@
+import { nomeCarreira } from "@/lib/carreiras";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -38,7 +39,7 @@ const items = [
 ];
 
 
-export function AppSidebar({ isAdmin, assinaturaAtiva }: { isAdmin: boolean; assinaturaAtiva: boolean }) {
+export function AppSidebar({ isAdmin, assinaturaAtiva, carreira }: { isAdmin: boolean; assinaturaAtiva: boolean; carreira?: string | null }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
 

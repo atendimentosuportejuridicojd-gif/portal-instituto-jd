@@ -93,7 +93,7 @@ function AuthenticatedLayout() {
           (inAdmin && isAdmin ? (
             <AdminSidebar />
           ) : (
-            <AppSidebar isAdmin={isAdmin} assinaturaAtiva={!!q.data?.ativa} />
+            <AppSidebar isAdmin={isAdmin} assinaturaAtiva={!!q.data?.ativa} carreira={q.data?.carreira} />
           ))}
         <SidebarInset>
           {mostrarFita && (
