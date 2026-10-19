@@ -47,6 +47,7 @@ export type Database = {
       assinaturas: {
         Row: {
           cancelada_em: string | null
+          carreira: string
           created_at: string
           fim: string | null
           hotmart_subscriber_code: string | null
@@ -64,6 +65,7 @@ export type Database = {
         }
         Insert: {
           cancelada_em?: string | null
+          carreira?: string
           created_at?: string
           fim?: string | null
           hotmart_subscriber_code?: string | null
@@ -81,6 +83,7 @@ export type Database = {
         }
         Update: {
           cancelada_em?: string | null
+          carreira?: string
           created_at?: string
           fim?: string | null
           hotmart_subscriber_code?: string | null
@@ -226,6 +229,7 @@ export type Database = {
         Row: {
           ano: number | null
           banca: string | null
+          carreiras: string[]
           created_at: string
           data_prova: string | null
           descricao: string | null
@@ -242,6 +246,7 @@ export type Database = {
         Insert: {
           ano?: number | null
           banca?: string | null
+          carreiras?: string[]
           created_at?: string
           data_prova?: string | null
           descricao?: string | null
@@ -258,6 +263,7 @@ export type Database = {
         Update: {
           ano?: number | null
           banca?: string | null
+          carreiras?: string[]
           created_at?: string
           data_prova?: string | null
           descricao?: string | null
@@ -655,6 +661,7 @@ export type Database = {
       }
       disciplinas: {
         Row: {
+          carreiras: string[]
           codigo: string | null
           concurso_id: string | null
           created_at: string
@@ -670,6 +677,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          carreiras?: string[]
           codigo?: string | null
           concurso_id?: string | null
           created_at?: string
@@ -685,6 +693,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          carreiras?: string[]
           codigo?: string | null
           concurso_id?: string | null
           created_at?: string
@@ -1205,6 +1214,7 @@ export type Database = {
           avatar_url: string | null
           bloqueado: boolean
           bloqueado_motivo: string | null
+          carreira: string | null
           created_at: string
           email: string
           gclid: string | null
@@ -1223,6 +1233,7 @@ export type Database = {
           avatar_url?: string | null
           bloqueado?: boolean
           bloqueado_motivo?: string | null
+          carreira?: string | null
           created_at?: string
           email?: string
           gclid?: string | null
@@ -1241,6 +1252,7 @@ export type Database = {
           avatar_url?: string | null
           bloqueado?: boolean
           bloqueado_motivo?: string | null
+          carreira?: string | null
           created_at?: string
           email?: string
           gclid?: string | null
@@ -1776,6 +1788,7 @@ export type Database = {
       }
       trilhas: {
         Row: {
+          carreiras: string[]
           created_at: string
           descricao: string | null
           id: string
@@ -1785,6 +1798,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          carreiras?: string[]
           created_at?: string
           descricao?: string | null
           id?: string
@@ -1794,6 +1808,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          carreiras?: string[]
           created_at?: string
           descricao?: string | null
           id?: string
