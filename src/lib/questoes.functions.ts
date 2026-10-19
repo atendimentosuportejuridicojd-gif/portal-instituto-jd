@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertAcessoAluno } from "@/lib/acervo.server";
+import { assertAcessoAluno, getCarreiraUsuario } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 
 // ============ Admin ============
