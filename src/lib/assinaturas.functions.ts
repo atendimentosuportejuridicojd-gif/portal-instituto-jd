@@ -21,7 +21,7 @@ export const getMinhaAssinatura = createServerFn({ method: "GET" })
     const [{ data: profile }, { data: roleTeste }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("bloqueado, bloqueado_motivo, telefone, teste_solicitado_em")
+        .select("bloqueado, bloqueado_motivo, telefone, teste_solicitado_em, carreira")
         .eq("id", userId)
         .maybeSingle(),
       supabase
@@ -72,6 +72,7 @@ export const getMinhaAssinatura = createServerFn({ method: "GET" })
       trialExpiraEm,
       trialDiasRestantes,
       podeAtivarTeste,
+      carreira: ((profile as any)?.carreira as string | null) ?? null,
     };
   });
 
@@ -157,5 +158,21 @@ export const registrarUltimoAcesso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await context.supabase.rpc("registrar_ultimo_acesso");
+    return { ok: true };
+  });
+
+export const definirCarreira = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { carreira: string }) => {
+    if (!["judiciaria", "fiscal", "policial"].includes(d?.carreira)) throw new Error("Carreira inválida.");
+    return { carreira: d.carreira };
+  })
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "administrador" });
+    const { data: prof } = await supabase.from("profiles").select("carreira").eq("id", userId).maybeSingle();
+    if ((prof as any)?.carreira && !isAdmin) throw new Error("Sua carreira já foi escolhida.");
+    const { error } = await supabase.from("profiles").update({ carreira: data.carreira } as any).eq("id", userId);
+    if (error) throw new Error("Não foi possível salvar sua carreira.");
     return { ok: true };
   });

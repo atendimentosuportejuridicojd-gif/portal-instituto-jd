@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertAdmin, gerarSlug } from "@/lib/acervo.server";
+import { assertAdmin, gerarSlug, getCarreiraUsuario } from "@/lib/acervo.server";
 
 // ===================== ADMIN =====================
 
@@ -393,9 +393,10 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    const carreira = await getCarreiraUsuario(context);
     const [{ data: trilhas }, { data: vinculos }, { data: materiais }, { data: favs }] =
       await Promise.all([
-        supabase.from("trilhas").select("id, nome, descricao, ordem").order("ordem"),
+        (supabase as any).from("trilhas").select("id, nome, descricao, ordem").contains("carreiras", [carreira]).order("ordem"),
         supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
         supabase
           .from("materiais")
@@ -431,11 +432,13 @@ export const alunoListConcursos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    const carreira = await getCarreiraUsuario(context);
     const [{ data: concursos }, { data: favs }] = await Promise.all([
-      supabase
+      (supabase as any)
         .from("concursos")
         .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes")
         .eq("publicado", true)
+        .contains("carreiras", [carreira])
         .order("created_at", { ascending: false }),
       supabase.from("favoritos").select("item_id").eq("user_id", userId).eq("tipo", "concurso"),
     ]);

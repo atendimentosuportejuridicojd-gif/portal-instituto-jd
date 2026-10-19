@@ -133,12 +133,14 @@ export const alunoListMateriaisComProgresso = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAcessoAluno(context);
     const { supabase, userId } = context;
-    const { data: materiais, error } = await supabase
+    const carreira = await getCarreiraUsuario(context);
+    const { data: materiais, error } = await (supabase as any)
       .from("materiais")
       .select(
-        "id, titulo, tipo, descricao, ordem, disciplina_id, modulo_id, versao, publicado_em, atualizado_em, disciplinas(id, nome, ordem, especifica, grupo, protegida), modulos(id, nome, ordem)",
+        "id, titulo, tipo, descricao, ordem, disciplina_id, modulo_id, versao, publicado_em, atualizado_em, disciplinas!inner(id, nome, ordem, especifica, grupo, protegida, carreiras), modulos(id, nome, ordem)",
       )
       .eq("publicado", true)
+      .contains("disciplinas.carreiras", [carreira])
       .order("ordem", { ascending: true })
       .order("titulo", { ascending: true });
     if (error) throw new Error(error.message);
