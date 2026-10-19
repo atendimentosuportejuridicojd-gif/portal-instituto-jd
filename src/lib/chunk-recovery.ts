@@ -26,8 +26,10 @@ let installed = false;
 export function installChunkRecovery(): void {
   if (typeof window === 'undefined' || installed) return;
   installed = true;
+  // Never call preventDefault here: Vite then resolves the dynamic import with
+  // `undefined`, and the router crashes reading `.component` before the reload.
   window.addEventListener('vite:preloadError', (event) => {
     const payload = (event as Event & { payload?: unknown }).payload;
-    if (recoverChunkLoad(payload)) event.preventDefault();
+    recoverChunkLoad(payload);
   });
 }
