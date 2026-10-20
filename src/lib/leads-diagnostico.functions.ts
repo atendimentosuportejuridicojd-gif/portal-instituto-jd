@@ -14,6 +14,7 @@ export const adminListLeadsDiagnostico = createServerFn({ method: "GET" })
       .object({
         pista: z.enum(["todas", "trt8", "erro_concurseiro"]).default("todas"),
         segmento: z.enum(["todos", "quente", "morno", "frio"]).default("todos"),
+        origem: z.enum(["todas", "diagnostico", "meta_form"]).default("todas"),
       })
       .parse(d ?? {}),
   )
@@ -21,12 +22,15 @@ export const adminListLeadsDiagnostico = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
 
-    let query = supabase
+    let query = (supabase as any)
       .from("leads_diagnostico")
-      .select("id, pista, concurso, nome, telefone, respostas, pontuacao, segmento, gclid, criado_em")
+      .select(
+        "id, pista, concurso, nome, email, telefone, respostas, pontuacao, segmento, gclid, criado_em, origem, carreira, como_estuda, horas_dia, prazo_prova, avisos",
+      )
       .order("criado_em", { ascending: false })
       .limit(200);
     if (data.pista !== "todas") query = query.eq("pista", data.pista);
+    if (data.origem !== "todas") query = query.eq("origem", data.origem);
     if (data.segmento !== "todos") query = query.eq("segmento", data.segmento);
 
     const { data: leads, error } = await query;
