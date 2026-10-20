@@ -72,10 +72,30 @@ function telefoneInternacional(telefone: string) {
   return d.startsWith("55") ? d : `55${d}`;
 }
 
-function linkWhatsApp(telefone: string, nome: string) {
-  const primeiro = nome.trim().split(/\s+/)[0] || "tudo bem";
-  const texto = `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você fez nosso diagnóstico de preparação para a carreira judiciária — posso te ajudar a dar o próximo passo?`;
-  return `https://wa.me/${telefoneInternacional(telefone)}?text=${encodeURIComponent(texto)}`;
+function linkWhatsApp(lead: { telefone: string; nome: string; origem?: string; carreira?: string | null }) {
+  const primeiro = lead.nome.trim().split(/\s+/)[0] || "tudo bem";
+  let texto: string;
+  if (lead.origem === "meta_form") {
+    const carreiraDefinida = lead.carreira && !/ainda n[aã]o defini/i.test(lead.carreira.replace(/_/g, " "));
+    texto = carreiraDefinida
+      ? `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você preencheu nosso formulário e escolheu a carreira ${lead.carreira!.replace(/_/g, " ")}. Posso te ajudar com os próximos passos?`
+      : `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você preencheu nosso formulário. Posso te ajudar com os próximos passos?`;
+  } else {
+    texto = `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você fez nosso diagnóstico de preparação para a carreira judiciária — posso te ajudar a dar o próximo passo?`;
+  }
+  return `https://wa.me/${telefoneInternacional(lead.telefone)}?text=${encodeURIComponent(texto)}`;
+}
+
+const ORIGEM_LABEL: Record<string, string> = {
+  diagnostico: "Diagnóstico",
+  meta_form: "Formulário Meta",
+};
+
+function resumoLead(lead: any): string {
+  if (lead.origem === "meta_form") {
+    return [lead.carreira, lead.como_estuda, lead.horas_dia, lead.prazo_prova].filter(Boolean).join(" · ") || "—";
+  }
+  return resumoRespostas(lead.respostas);
 }
 
 function resumoRespostas(respostas: Record<string, unknown>): string {
@@ -124,11 +144,12 @@ function AbaLeads() {
   const pistasFn = useServerFn(adminListPistasDiagnostico);
   const [pista, setPista] = useState<string>("todas");
   const [segmento, setSegmento] = useState<"todos" | "quente" | "morno" | "frio">("todos");
+  const [origem, setOrigem] = useState<"todas" | "diagnostico" | "meta_form">("todas");
 
   const pistasQuery = useQuery({ queryKey: ["admin", "pistas-diagnostico"], queryFn: () => pistasFn() });
   const query = useQuery({
-    queryKey: ["admin", "leads-diagnostico", pista, segmento],
-    queryFn: () => listFn({ data: { pista: pista === "todas" ? "todas" : (pista as any), segmento } }),
+    queryKey: ["admin", "leads-diagnostico", pista, segmento, origem],
+    queryFn: () => listFn({ data: { pista: pista === "todas" ? "todas" : (pista as any), segmento, origem } }),
   });
 
   const leads = query.data ?? [];
@@ -184,6 +205,16 @@ function AbaLeads() {
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
+        <Select value={origem} onValueChange={(v) => setOrigem(v as any)}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Origem" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas as origens</SelectItem>
+            <SelectItem value="diagnostico">Diagnóstico</SelectItem>
+            <SelectItem value="meta_form">Formulário Meta</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={pista} onValueChange={setPista}>
           <SelectTrigger className="w-[220px]">
             <SelectValue placeholder="Pista" />
@@ -224,6 +255,7 @@ function AbaLeads() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
+                <TableHead>Origem</TableHead>
                 <TableHead>Pista</TableHead>
                 <TableHead>Perfil</TableHead>
                 <TableHead className="text-center">Pontuação</TableHead>
@@ -238,9 +270,12 @@ function AbaLeads() {
                 return (
                   <TableRow key={lead.id}>
                     <TableCell className="font-medium">{lead.nome}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{nomePista(lead.pista)}</TableCell>
-                    <TableCell className="max-w-[220px] truncate text-sm text-muted-foreground" title={resumoRespostas(lead.respostas)}>
-                      {resumoRespostas(lead.respostas)}
+                    <TableCell>
+                      <Badge variant="outline">{ORIGEM_LABEL[lead.origem] ?? lead.origem}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{lead.pista ? nomePista(lead.pista) : "—"}</TableCell>
+                    <TableCell className="max-w-[220px] truncate text-sm text-muted-foreground" title={resumoLead(lead)}>
+                      {resumoLead(lead)}
                     </TableCell>
                     <TableCell className="text-center font-semibold">{lead.pontuacao} pts</TableCell>
                     <TableCell>
@@ -250,11 +285,15 @@ function AbaLeads() {
                       {new Date(lead.criado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm" variant="outline" className="gap-1.5">
-                        <a href={linkWhatsApp(lead.telefone, lead.nome)} target="_blank" rel="noreferrer">
-                          <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
-                        </a>
-                      </Button>
+                      {lead.telefone ? (
+                        <Button asChild size="sm" variant="outline" className="gap-1.5">
+                          <a href={linkWhatsApp(lead)} target="_blank" rel="noreferrer">
+                            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                          </a>
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">{lead.email ?? "sem contato"}</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
