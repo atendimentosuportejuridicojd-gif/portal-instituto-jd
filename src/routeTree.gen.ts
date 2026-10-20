@@ -13,8 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CursoCarreiraJudiciariaRouteImport } from './routes/curso-carreira-judiciaria'
-import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
-import { Route as DiagnosticoTrt8RouteImport } from './routes/diagnostico-trt8'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TesteRouteImport } from './routes/teste'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
@@ -25,7 +23,6 @@ import { Route as AuthenticatedEscolherCarreiraRouteImport } from './routes/_aut
 import { Route as AuthenticatedNoticiasRouteImport } from './routes/_authenticated/noticias'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedSimuladosRouteImport } from './routes/_authenticated/simulados'
-import { Route as DiagnosticoSlugRouteImport } from './routes/diagnostico.$slug'
 import { Route as AuthenticatedAcervoIndexRouteImport } from './routes/_authenticated/acervo.index'
 import { Route as AuthenticatedAdminAcervoRouteImport } from './routes/_authenticated/admin/acervo'
 import { Route as AuthenticatedAdminConcursosRouteImport } from './routes/_authenticated/admin/concursos'
@@ -73,16 +70,6 @@ const AuthRoute = AuthRouteImport.update({
 const CursoCarreiraJudiciariaRoute = CursoCarreiraJudiciariaRouteImport.update({
   id: '/curso-carreira-judiciaria',
   path: '/curso-carreira-judiciaria',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiagnosticoRoute = DiagnosticoRouteImport.update({
-  id: '/diagnostico',
-  path: '/diagnostico',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiagnosticoTrt8Route = DiagnosticoTrt8RouteImport.update({
-  id: '/diagnostico-trt8',
-  path: '/diagnostico-trt8',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -137,11 +124,6 @@ const AuthenticatedSimuladosRoute = AuthenticatedSimuladosRouteImport.update({
   id: '/simulados',
   path: '/simulados',
   getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const DiagnosticoSlugRoute = DiagnosticoSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => DiagnosticoRoute,
 } as any)
 const AuthenticatedAcervoIndexRoute =
   AuthenticatedAcervoIndexRouteImport.update({
@@ -316,8 +298,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
-  '/diagnostico': typeof DiagnosticoRouteWithChildren
-  '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -328,7 +308,6 @@ export interface FileRoutesByFullPath {
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
-  '/diagnostico/$slug': typeof DiagnosticoSlugRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -363,8 +342,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
-  '/diagnostico': typeof DiagnosticoRouteWithChildren
-  '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -375,7 +352,6 @@ export interface FileRoutesByTo {
   '/noticias': typeof AuthenticatedNoticiasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/simulados': typeof AuthenticatedSimuladosRouteWithChildren
-  '/diagnostico/$slug': typeof DiagnosticoSlugRoute
   '/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -412,8 +388,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
-  '/diagnostico': typeof DiagnosticoRouteWithChildren
-  '/diagnostico-trt8': typeof DiagnosticoTrt8Route
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -424,7 +398,6 @@ export interface FileRoutesById {
   '/_authenticated/noticias': typeof AuthenticatedNoticiasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/simulados': typeof AuthenticatedSimuladosRouteWithChildren
-  '/diagnostico/$slug': typeof DiagnosticoSlugRoute
   '/_authenticated/admin/acervo': typeof AuthenticatedAdminAcervoRoute
   '/_authenticated/admin/concursos': typeof AuthenticatedAdminConcursosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -461,8 +434,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/curso-carreira-judiciaria'
-    | '/diagnostico'
-    | '/diagnostico-trt8'
     | '/reset-password'
     | '/teste'
     | '/assinatura-bloqueada'
@@ -473,7 +444,6 @@ export interface FileRouteTypes {
     | '/noticias'
     | '/perfil'
     | '/simulados'
-    | '/diagnostico/$slug'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -508,8 +478,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/curso-carreira-judiciaria'
-    | '/diagnostico'
-    | '/diagnostico-trt8'
     | '/reset-password'
     | '/teste'
     | '/assinatura-bloqueada'
@@ -520,7 +488,6 @@ export interface FileRouteTypes {
     | '/noticias'
     | '/perfil'
     | '/simulados'
-    | '/diagnostico/$slug'
     | '/admin/acervo'
     | '/admin/concursos'
     | '/admin/configuracoes'
@@ -556,8 +523,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/curso-carreira-judiciaria'
-    | '/diagnostico'
-    | '/diagnostico-trt8'
     | '/reset-password'
     | '/teste'
     | '/_authenticated/assinatura-bloqueada'
@@ -568,7 +533,6 @@ export interface FileRouteTypes {
     | '/_authenticated/noticias'
     | '/_authenticated/perfil'
     | '/_authenticated/simulados'
-    | '/diagnostico/$slug'
     | '/_authenticated/admin/acervo'
     | '/_authenticated/admin/concursos'
     | '/_authenticated/admin/configuracoes'
@@ -605,8 +569,6 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CursoCarreiraJudiciariaRoute: typeof CursoCarreiraJudiciariaRoute
-  DiagnosticoRoute: typeof DiagnosticoRouteWithChildren
-  DiagnosticoTrt8Route: typeof DiagnosticoTrt8Route
   ResetPasswordRoute: typeof ResetPasswordRoute
   TesteRoute: typeof TesteRoute
   ApiPublicConversoesGoogleAdsRoute: typeof ApiPublicConversoesGoogleAdsRoute
@@ -646,20 +608,6 @@ declare module '@tanstack/react-router' {
       path: '/curso-carreira-judiciaria'
       fullPath: '/curso-carreira-judiciaria'
       preLoaderRoute: typeof CursoCarreiraJudiciariaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/diagnostico': {
-      id: '/diagnostico'
-      path: '/diagnostico'
-      fullPath: '/diagnostico'
-      preLoaderRoute: typeof DiagnosticoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/diagnostico-trt8': {
-      id: '/diagnostico-trt8'
-      path: '/diagnostico-trt8'
-      fullPath: '/diagnostico-trt8'
-      preLoaderRoute: typeof DiagnosticoTrt8RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -731,13 +679,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/simulados'
       preLoaderRoute: typeof AuthenticatedSimuladosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/diagnostico/$slug': {
-      id: '/diagnostico/$slug'
-      path: '/$slug'
-      fullPath: '/diagnostico/$slug'
-      preLoaderRoute: typeof DiagnosticoSlugRouteImport
-      parentRoute: typeof DiagnosticoRoute
     }
     '/_authenticated/acervo/': {
       id: '/_authenticated/acervo/'
@@ -1035,25 +976,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface DiagnosticoRouteChildren {
-  DiagnosticoSlugRoute: typeof DiagnosticoSlugRoute
-}
-
-const DiagnosticoRouteChildren: DiagnosticoRouteChildren = {
-  DiagnosticoSlugRoute: DiagnosticoSlugRoute,
-}
-
-const DiagnosticoRouteWithChildren = DiagnosticoRoute._addFileChildren(
-  DiagnosticoRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CursoCarreiraJudiciariaRoute: CursoCarreiraJudiciariaRoute,
-  DiagnosticoRoute: DiagnosticoRouteWithChildren,
-  DiagnosticoTrt8Route: DiagnosticoTrt8Route,
   ResetPasswordRoute: ResetPasswordRoute,
   TesteRoute: TesteRoute,
   ApiPublicConversoesGoogleAdsRoute: ApiPublicConversoesGoogleAdsRoute,
