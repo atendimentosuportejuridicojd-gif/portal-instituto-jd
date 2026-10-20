@@ -1,21 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { DiagnosticoRuntime } from "@/components/diagnostico-runtime";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Diagnóstico de Preparação aposentado: os endereços antigos levam à página inicial.
 export const Route = createFileRoute("/diagnostico/$slug")({
-  ssr: false,
-  validateSearch: (search: Record<string, unknown>): { inicio?: boolean } =>
-    search.inicio === "1" || search.inicio === 1 ? { inicio: true } : {},
-  head: () => ({
-    meta: [
-      { title: "Diagnóstico de Preparação — Instituto J&D" },
-      { name: "description", content: "Responda algumas perguntas rápidas e descubra seu nível de preparação para a carreira judiciária." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: () => {
-    const { slug } = Route.useParams();
-    const { inicio } = Route.useSearch();
-    return <DiagnosticoRuntime slug={slug} inicio={inicio} />;
+  beforeLoad: () => {
+    throw redirect({ to: "/", statusCode: 301 });
   },
 });
