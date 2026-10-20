@@ -260,7 +260,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !form.nome.trim()}>
+          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !form.nome.trim() || carreiras.length === 0}>
             {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
           </Button>
