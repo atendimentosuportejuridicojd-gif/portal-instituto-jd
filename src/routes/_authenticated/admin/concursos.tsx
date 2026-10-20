@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { CarreirasPicker } from "@/components/carreiras-picker";
 import { VincularExcecao } from "@/components/vincular-excecao";
 import {
   adminListConcursos,
@@ -168,6 +169,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
     observacoes: concurso?.observacoes ?? "",
   });
   const [publicado, setPublicado] = useState(concurso?.publicado ?? true);
+  const [carreiras, setCarreiras] = useState<string[]>(concurso?.carreiras ?? ["judiciaria"]);
   const fn = useServerFn(adminUpsertConcurso);
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -179,6 +181,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
           ...form,
           ano: form.ano ? Number(form.ano) : null,
           publicado,
+          carreiras: carreiras as any,
         },
       }),
     onSuccess: () => {
@@ -247,6 +250,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
               onChange={(e) => set("observacoes", e.target.value)}
             />
           </div>
+          <CarreirasPicker value={carreiras} onChange={setCarreiras} />
           <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
             <div>
               <p className="text-sm font-medium">Publicado</p>
@@ -256,7 +260,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !form.nome.trim()}>
+          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !form.nome.trim() || carreiras.length === 0}>
             {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
           </Button>
