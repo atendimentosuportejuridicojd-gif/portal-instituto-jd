@@ -26,6 +26,8 @@ import {
   adminDeleteTrilha,
   adminToggleMaterialTrilha,
 } from "@/lib/trilhas.functions";
+import { CarreirasPicker } from "@/components/carreiras-picker";
+import { nomeCarreira } from "@/lib/carreiras";
 
 export const Route = createFileRoute("/_authenticated/admin/trilhas")({
   head: () => ({
@@ -70,7 +72,8 @@ function AdminTrilhas() {
                   <div className="min-w-0">
                     <h2 className="truncate text-base font-semibold">{t.nome}</h2>
                     <p className="text-xs text-muted-foreground">
-                      {t.materiais.length} material(is) vinculado(s)
+                      {t.materiais.length} material(is) vinculado(s) ·{" "}
+                      {(t.carreiras ?? []).map((c: string) => nomeCarreira(c)).join(", ")}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -145,11 +148,12 @@ function TrilhaDialog({ trilha, onDone }: { trilha?: any; onDone: () => void }) 
   const [nome, setNome] = useState(trilha?.nome ?? "");
   const [descricao, setDescricao] = useState(trilha?.descricao ?? "");
   const [ordem, setOrdem] = useState(String(trilha?.ordem ?? 0));
+  const [carreiras, setCarreiras] = useState<string[]>(trilha?.carreiras ?? ["judiciaria"]);
   const fn = useServerFn(adminUpsertTrilha);
 
   const mut = useMutation({
     mutationFn: () =>
-      fn({ data: { id: trilha?.id, nome, descricao, ordem: Number(ordem) || 0 } }),
+      fn({ data: { id: trilha?.id, nome, descricao, ordem: Number(ordem) || 0, carreiras: carreiras as any } }),
     onSuccess: () => {
       toast.success("Trilha salva.");
       setOpen(false);
@@ -195,9 +199,10 @@ function TrilhaDialog({ trilha, onDone }: { trilha?: any; onDone: () => void }) 
             <Label htmlFor="t-ordem">Ordem</Label>
             <Input id="t-ordem" value={ordem} onChange={(e) => setOrdem(e.target.value)} />
           </div>
+          <CarreirasPicker value={carreiras} onChange={setCarreiras} />
         </div>
         <DialogFooter>
-          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !nome.trim()}>
+          <Button onClick={() => mut.mutate()} disabled={mut.isPending || !nome.trim() || carreiras.length === 0}>
             {mut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
           </Button>

@@ -11,7 +11,7 @@ export const adminListTrilhas = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
     const [{ data: trilhas }, { data: vinculos }, { data: materiais }] = await Promise.all([
-      supabase.from("trilhas").select("id, nome, descricao, ordem, slug").order("ordem"),
+      supabase.from("trilhas").select("id, nome, descricao, ordem, slug, carreiras").order("ordem"),
       supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
       supabase
         .from("materiais")
@@ -50,12 +50,13 @@ export const adminUpsertTrilha = createServerFn({ method: "POST" })
         nome: z.string().trim().min(1).max(200),
         descricao: z.string().trim().max(2000).optional().default(""),
         ordem: z.number().int().min(0).default(0),
+        carreiras: z.array(z.enum(["judiciaria", "fiscal", "policial"])).min(1).default(["judiciaria"]),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const payload = { nome: data.nome, descricao: data.descricao || null, ordem: data.ordem };
+    const payload = { nome: data.nome, descricao: data.descricao || null, ordem: data.ordem, carreiras: data.carreiras };
     if (data.id) {
       const { error } = await context.supabase.from("trilhas").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
@@ -121,7 +122,7 @@ export const adminListConcursos = createServerFn({ method: "GET" })
       await Promise.all([
       supabase
         .from("concursos")
-        .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes, publicado")
+        .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes, publicado, carreiras")
         .order("created_at", { ascending: false }),
       supabase
         .from("concurso_materiais")
@@ -179,6 +180,7 @@ export const adminUpsertConcurso = createServerFn({ method: "POST" })
         // Data da prova (YYYY-MM-DD); vazio = ainda sem data.
         data_prova: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).or(z.literal("")).optional().default(""),
         publicado: z.boolean().default(true),
+        carreiras: z.array(z.enum(["judiciaria", "fiscal", "policial"])).min(1).default(["judiciaria"]),
       })
       .parse(d),
   )
@@ -194,6 +196,7 @@ export const adminUpsertConcurso = createServerFn({ method: "POST" })
       observacoes: data.observacoes || null,
       data_prova: data.data_prova || null,
       publicado: data.publicado,
+      carreiras: data.carreiras,
     };
     if (data.id) {
       const { error } = await context.supabase.from("concursos").update(payload).eq("id", data.id);
