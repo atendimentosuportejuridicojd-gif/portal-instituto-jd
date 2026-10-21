@@ -1,4 +1,4 @@
-import { assertAcessoAluno } from "@/lib/acervo.server";
+import { assertAcessoAluno, getCarreiraUsuario } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 import { hojeBrasilia } from "@/lib/simulado-pagamento";
 import {
@@ -247,11 +247,13 @@ async function lerBlocos(supabase: any, cronogramaId: string, colunas: string): 
 export async function dadosAssistente(ctx: Ctx) {
   await assertAcessoAluno(ctx);
   const { supabase, userId } = ctx;
+  const carreira = await getCarreiraUsuario(ctx);
   const [{ data: concursos }, { data: estruturas }, simuladoLiberado] = await Promise.all([
     supabase
       .from("concursos")
       .select("id, nome, orgao, banca, estado, ano, data_prova")
       .eq("publicado", true)
+      .contains("carreiras", [carreira])
       .order("created_at", { ascending: false }),
     supabase.from("concurso_prova_estrutura").select("concurso_id"),
     acessoSimuladoLiberado(supabase, userId),
@@ -423,13 +425,20 @@ export async function finalizarRascunho(ctx: Ctx) {
 export async function cronogramaAtual(ctx: Ctx) {
   await assertAcessoAluno(ctx);
   const { supabase, userId } = ctx;
-  const { data: linhas } = await supabase
-    .from("cronogramas_aluno")
-    .select("*")
-    .eq("user_id", userId)
-    .in("status", ["ativo", "rascunho"]);
-  const ativo = (linhas ?? []).find((c: any) => c.status === "ativo") ?? null;
-  const rascunho = (linhas ?? []).find((c: any) => c.status === "rascunho") ?? null;
+  const [{ data: brutas }, carreira] = await Promise.all([
+    supabase
+      .from("cronogramas_aluno")
+      .select("*, concursos(carreiras)")
+      .eq("user_id", userId)
+      .in("status", ["ativo", "rascunho"]),
+    getCarreiraUsuario(ctx),
+  ]);
+  // Cronogramas only appear in the portal of the career their concurso belongs to.
+  const linhas = (brutas ?? [])
+    .filter((c: any) => !c.concursos?.carreiras || c.concursos.carreiras.includes(carreira))
+    .map(({ concursos: _c, ...c }: any) => c);
+  const ativo = linhas.find((c: any) => c.status === "ativo") ?? null;
+  const rascunho = linhas.find((c: any) => c.status === "rascunho") ?? null;
 
   const [simuladoLiberado, blocos] = await Promise.all([
     acessoSimuladoLiberado(supabase, userId),
