@@ -1,5 +1,7 @@
 // Plan catalog (amounts live in Stripe; values here are display copy only).
 export const ASSINATURA_SERVICE = "assinatura_portal";
+/** Internal admin-only test plan (low-value monthly). */
+export const TESTE_PRICE_ID = "judiciaria_teste_mensal";
 
 export type Periodo = "mensal" | "anual";
 export type CarreiraPlano = "judiciaria" | "fiscal" | "policial";

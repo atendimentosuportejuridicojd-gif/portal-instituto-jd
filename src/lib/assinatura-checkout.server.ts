@@ -1,5 +1,5 @@
 import { createStripeClient, type StripeEnv } from "@/lib/stripe.server";
-import { ASSINATURA_SERVICE, parsePriceId, priceIdPlano, type Periodo } from "@/lib/assinatura-planos";
+import { ASSINATURA_SERVICE, parsePriceId, priceIdPlano, TESTE_PRICE_ID, type Periodo } from "@/lib/assinatura-planos";
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -29,7 +29,7 @@ async function resolveOrCreateCustomer(
 
 export async function criarSessaoAssinatura(
   context: { supabase: any; userId: string },
-  data: { periodo: Periodo; environment: StripeEnv },
+  data: { periodo: Periodo | "teste"; environment: StripeEnv },
   origin: string,
 ) {
   const [{ data: profile, error }, { data: ativa }] = await Promise.all([
@@ -38,10 +38,20 @@ export async function criarSessaoAssinatura(
   ]);
   if (error || !profile) throw new Error("Perfil não encontrado.");
   if (profile.bloqueado) throw new Error("Conta bloqueada. Fale com o suporte.");
-  if (ativa) throw new Error("Você já possui uma assinatura ativa.");
-  // Career comes from the profile, never from the client.
-  const priceId = priceIdPlano(profile.carreira, data.periodo);
-  const plano = parsePriceId(priceId)!;
+  let priceId: string;
+  let plano: { carreira: string; periodo: string };
+  if (data.periodo === "teste") {
+    // Internal low-value test plan: admins only.
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Plano de teste disponível apenas para administradores.");
+    priceId = TESTE_PRICE_ID;
+    plano = { carreira: "judiciaria", periodo: "mensal" };
+  } else {
+    if (ativa) throw new Error("Você já possui uma assinatura ativa.");
+    // Career comes from the profile, never from the client.
+    priceId = priceIdPlano(profile.carreira, data.periodo);
+    plano = parsePriceId(priceId)!;
+  }
   const stripe = createStripeClient(data.environment);
   const prices = await stripe.prices.list({ lookup_keys: [priceId], active: true, limit: 1 });
   const price = prices.data[0];
