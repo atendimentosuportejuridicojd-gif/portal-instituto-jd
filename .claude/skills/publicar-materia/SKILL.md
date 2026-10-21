@@ -206,14 +206,21 @@ vez de cada auditoria redescobrir do zero): `planalto.gov.br` está
 inacessível a partir deste ambiente no nível de rede (confirmado via
 `WebFetch` e via `curl` direto pelo shell — timeout puro). Também
 confirmados bloqueados com 403 (mesmo tratamento): `portal.stf.jus.br`,
-`www.stf.jus.br`, `jurisprudencia.stf.jus.br`, `scon.stj.jus.br`, e o
-endpoint específico `processo.stj.jus.br/processo/pesquisa/...` (o resto
-de `processo.stj.jus.br`, como `/SCON/`, responde normalmente). Domínios
-confirmados funcionando e que devem ser testados de verdade: `stj.jus.br`
-e demais subdomínios (exceto os listados), `lexml.gov.br`,
-`camara.leg.br` (`www2.camara.leg.br/legin`), `dizerodireito.com.br`,
-`buscadordizerodireito.com.br`, `migalhas.com.br`,
-`arquivocidadao.stj.jus.br`.
+`www.stf.jus.br`, `jurisprudencia.stf.jus.br`, `noticias.stf.jus.br`,
+`scon.stj.jus.br`, `atos.cnj.jus.br`, e o endpoint específico
+`processo.stj.jus.br/processo/pesquisa/...` (o resto de
+`processo.stj.jus.br`, como `/SCON/`, responde normalmente). `in.gov.br`
+(Diário Oficial da União) também confirmado bloqueado (timeout/socket
+hang up, mesmo tratamento do `planalto.gov.br`). Como `atos.cnj.jus.br` é
+a fonte oficial de Resoluções do CNJ e `in.gov.br` é onde se confirmaria
+a publicação de decretos/instruções normativas recentes, confirme o teor
+dessas normas por fonte independente (WebSearch cruzando notícias do CNJ,
+JusBrasil, sites de cursinho que transcrevem o texto) em vez de tentar o
+fetch direto. Domínios confirmados funcionando e que devem ser testados
+de verdade: `stj.jus.br` e demais subdomínios (exceto os listados),
+`lexml.gov.br`, `camara.leg.br` (`www2.camara.leg.br/legin`),
+`dizerodireito.com.br`, `buscadordizerodireito.com.br`,
+`migalhas.com.br`, `arquivocidadao.stj.jus.br`, `cnmp.mp.br`.
 
 **Camada 4 — Relatório**
 Para cada arquivo, reportar: o que foi verificado, o que foi corrigido
