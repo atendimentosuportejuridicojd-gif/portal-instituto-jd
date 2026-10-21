@@ -44,14 +44,17 @@ export function TrialRibbon({ dias, expiraEm }: { dias: number; expiraEm?: strin
       <span className="absolute left-1/2 -translate-x-1/2 text-center">{texto}</span>
 
       {/* Botão de assinatura — canto direito */}
-      <a
-        href="https://carreira360.institutojd.ia.br"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="rounded-full bg-gold-foreground px-3.5 py-1 font-semibold text-gold shadow-sm transition hover:opacity-90"
-      >
-        Quero assinar
-      </a>
+      <Dialog>
+        <DialogTrigger asChild>
+          <button className="rounded-full bg-gold-foreground px-3.5 py-1 font-semibold text-gold shadow-sm transition hover:opacity-90">
+            Quero assinar
+          </button>
+        </DialogTrigger>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogTitle className="sr-only">Planos de assinatura</DialogTitle>
+          <PlanosAssinatura carreira={carreira} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
