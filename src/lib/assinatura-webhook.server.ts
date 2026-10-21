@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import { createStripeClient, type StripeEnv } from "@/lib/stripe.server";
-import { ASSINATURA_SERVICE, fimAnual, statusPortal } from "@/lib/assinatura-planos";
+import { ASSINATURA_SERVICE, fimPlano, statusPortal } from "@/lib/assinatura-planos";
 
 const EVENTS = new Set([
   "checkout.session.completed",
@@ -56,7 +56,7 @@ export async function processarEventoAssinatura(event: Stripe.Event, env: Stripe
       const pago = new Date(event.created * 1000);
       return gravar(db, pi, {
         user_id: obj.metadata.user_id, status: "ativa", plano: obj.metadata.plano, carreira: obj.metadata.carreira,
-        inicio: pago.toISOString(), fim: fimAnual(pago), ultimo_evento: event.type,
+        inicio: pago.toISOString(), fim: fimPlano(obj.metadata.plano, pago), ultimo_evento: event.type,
       });
     }
     return;
