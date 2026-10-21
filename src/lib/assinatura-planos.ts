@@ -41,4 +41,15 @@ export function fimAnual(pagoEm: Date): string {
   return d.toISOString();
 }
 
+/** Monthly plan is a one-time payment (Pix-friendly, no auto-renewal): one month of access. */
+export function fimMensal(pagoEm: Date): string {
+  const d = new Date(pagoEm);
+  d.setUTCMonth(d.getUTCMonth() + 1);
+  return d.toISOString();
+}
+
+export function fimPlano(plano: string | undefined, pagoEm: Date): string {
+  return plano?.endsWith("_mensal") ? fimMensal(pagoEm) : fimAnual(pagoEm);
+}
+
 export const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

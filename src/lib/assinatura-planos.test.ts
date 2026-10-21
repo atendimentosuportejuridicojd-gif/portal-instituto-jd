@@ -22,3 +22,13 @@ describe("planos de assinatura", () => {
     expect(fimAnual(new Date("2026-10-21T12:00:00Z"))).toBe("2027-10-21T12:00:00.000Z");
   });
 });
+
+import { fimPlano } from "@/lib/assinatura-planos";
+describe("mensal via pagamento único", () => {
+  it("mensal libera 1 mês, anual 1 ano", () => {
+    const d = new Date("2026-10-21T12:00:00Z");
+    expect(fimPlano("judiciaria_mensal", d)).toBe("2026-11-21T12:00:00.000Z");
+    expect(fimPlano("judiciaria_teste_mensal", d)).toBe("2026-11-21T12:00:00.000Z");
+    expect(fimPlano("fiscal_anual", d)).toBe("2027-10-21T12:00:00.000Z");
+  });
+});
