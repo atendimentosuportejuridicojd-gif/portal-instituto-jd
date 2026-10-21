@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Check, Crown, Loader2, ShieldCheck, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,15 @@ const BENEFICIOS = [
 
 export function PlanosAssinatura({ carreira }: { carreira?: string | null }) {
   const checkoutFn = useServerFn(criarCheckoutAssinatura);
-  const [carregando, setCarregando] = useState<Periodo | null>(null);
+  const [carregando, setCarregando] = useState<Periodo | "teste" | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [modoTeste, setModoTeste] = useState(false);
+  useEffect(() => {
+    setModoTeste(new URLSearchParams(window.location.search).get("teste") === "1");
+  }, []);
   const p = precosPlano(carreira);
 
-  const escolher = async (periodo: Periodo) => {
+  const escolher = async (periodo: Periodo | "teste") => {
     setCarregando(periodo);
     try {
       const environment = ambientePagamentos(import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN);
@@ -104,6 +108,13 @@ export function PlanosAssinatura({ carreira }: { carreira?: string | null }) {
       <p className="mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5" /> Pagamento seguro processado pela Stripe.
       </p>
+      {modoTeste && (
+        <div className="mt-3 text-center">
+          <Button variant="ghost" size="sm" disabled={!!carregando} onClick={() => escolher("teste")}>
+            {carregando === "teste" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Plano de teste (R$ 0,50/mês) — só admin"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

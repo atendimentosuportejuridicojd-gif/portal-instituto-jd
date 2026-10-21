@@ -6,7 +6,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const criarCheckoutAssinatura = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ periodo: z.enum(["mensal", "anual"]), environment: z.enum(["sandbox", "live"]) }).parse(input),
+    z.object({ periodo: z.enum(["mensal", "anual", "teste"]), environment: z.enum(["sandbox", "live"]) }).parse(input),
   )
   .handler(async ({ context, data }): Promise<{ clientSecret: string } | { error: string }> => {
     const { getStripeErrorMessage } = await import("@/lib/stripe.server");
