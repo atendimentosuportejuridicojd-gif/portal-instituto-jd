@@ -111,7 +111,7 @@ export function PlanosAssinatura({ carreira }: { carreira?: string | null }) {
       {modoTeste && (
         <div className="mt-3 text-center">
           <Button variant="ghost" size="sm" disabled={!!carregando} onClick={() => escolher("teste")}>
-            {carregando === "teste" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Plano de teste (R$ 0,50/mês) — só admin"}
+            {carregando === "teste" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Plano de teste (R$ 0,50/mês)"}
           </Button>
         </div>
       )}
