@@ -11,7 +11,9 @@ export const Route = createFileRoute('/api/public/payments/webhook')({
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     try {
       const { processarEventoSimulado } = await import('@/lib/simulado-webhook.server');
+      const { processarEventoAssinatura } = await import('@/lib/assinatura-webhook.server');
       await processarEventoSimulado(event, env, supabaseAdmin);
+      await processarEventoAssinatura(event, env, supabaseAdmin);
       return Response.json({ received: true });
     } catch {
       try {
