@@ -41,9 +41,8 @@ export async function criarSessaoAssinatura(
   let priceId: string;
   let plano: { carreira: string; periodo: string };
   if (data.periodo === "teste") {
-    // Internal low-value test plan: admins only.
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Plano de teste disponível apenas para administradores.");
+    // Internal low-value test plan, reachable only via ?teste=1 link.
+    if (ativa) throw new Error("Você já possui uma assinatura ativa.");
     priceId = TESTE_PRICE_ID;
     plano = { carreira: "judiciaria", periodo: "mensal" };
   } else {
