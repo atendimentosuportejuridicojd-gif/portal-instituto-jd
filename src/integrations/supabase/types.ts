@@ -751,40 +751,82 @@ export type Database = {
       }
       leads_diagnostico: {
         Row: {
+          ad_id: string | null
+          adgroup_id: string | null
+          avisos: string[]
+          campanha: string | null
+          carreira: string | null
+          como_estuda: string | null
           concurso: string | null
+          consentimento: boolean | null
           criado_em: string
+          email: string | null
+          form_id: string | null
           gclid: string | null
+          horas_dia: string | null
           id: string
+          meta_lead_id: string | null
           nome: string
-          pista: string
+          origem: string
+          payload_bruto: Json | null
+          pista: string | null
           pontuacao: number
+          prazo_prova: string | null
           respostas: Json
           segmento: string
-          telefone: string
+          telefone: string | null
         }
         Insert: {
+          ad_id?: string | null
+          adgroup_id?: string | null
+          avisos?: string[]
+          campanha?: string | null
+          carreira?: string | null
+          como_estuda?: string | null
           concurso?: string | null
+          consentimento?: boolean | null
           criado_em?: string
+          email?: string | null
+          form_id?: string | null
           gclid?: string | null
+          horas_dia?: string | null
           id?: string
+          meta_lead_id?: string | null
           nome: string
-          pista: string
+          origem?: string
+          payload_bruto?: Json | null
+          pista?: string | null
           pontuacao: number
-          respostas: Json
+          prazo_prova?: string | null
+          respostas?: Json
           segmento: string
-          telefone: string
+          telefone?: string | null
         }
         Update: {
+          ad_id?: string | null
+          adgroup_id?: string | null
+          avisos?: string[]
+          campanha?: string | null
+          carreira?: string | null
+          como_estuda?: string | null
           concurso?: string | null
+          consentimento?: boolean | null
           criado_em?: string
+          email?: string | null
+          form_id?: string | null
           gclid?: string | null
+          horas_dia?: string | null
           id?: string
+          meta_lead_id?: string | null
           nome?: string
-          pista?: string
+          origem?: string
+          payload_bruto?: Json | null
+          pista?: string | null
           pontuacao?: number
+          prazo_prova?: string | null
           respostas?: Json
           segmento?: string
-          telefone?: string
+          telefone?: string | null
         }
         Relationships: []
       }
