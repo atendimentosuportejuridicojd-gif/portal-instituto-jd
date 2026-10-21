@@ -62,8 +62,6 @@ export async function criarSessaoAssinatura(
     line_items: [{ price: price.id, quantity: 1 }],
     metadata,
     ...(recorrente ? { subscription_data: { metadata } } : { payment_intent_data: { metadata, description } }),
-    automatic_tax: { enabled: true },
-    customer_update: { address: "auto" },
   });
   if (!session.client_secret) throw new Error("O pagamento não retornou uma sessão válida.");
   return { clientSecret: session.client_secret };

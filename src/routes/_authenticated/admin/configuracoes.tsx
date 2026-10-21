@@ -75,7 +75,7 @@ function Configuracoes() {
             </Row>
             <Row>
               <Field label="WhatsApp"><Input {...bind("whatsapp")} placeholder="https://wa.me/…" /></Field>
-              <Field label="URL de regularização (Hotmart)">
+              <Field label="URL de regularização de pagamento">
                 <Input {...bind("hotmart_regularizacao_url")} placeholder="https://…" />
               </Field>
             </Row>
