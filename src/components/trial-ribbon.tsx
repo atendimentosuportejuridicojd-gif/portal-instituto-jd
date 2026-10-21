@@ -1,5 +1,7 @@
 import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PlanosAssinatura } from "@/components/planos-assinatura";
 
 function restante(expiraEm: string) {
   const ms = new Date(expiraEm).getTime() - Date.now();
@@ -13,7 +15,7 @@ function restante(expiraEm: string) {
 }
 
 /** Fita fixa no topo do portal com os dias restantes e o cronômetro do teste gratuito. */
-export function TrialRibbon({ dias, expiraEm }: { dias: number; expiraEm?: string | null }) {
+export function TrialRibbon({ dias, expiraEm, carreira }: { dias: number; expiraEm?: string | null; carreira?: string | null }) {
   const [tempo, setTempo] = useState<string | null>(() => (expiraEm ? restante(expiraEm) : null));
 
   useEffect(() => {
@@ -44,14 +46,17 @@ export function TrialRibbon({ dias, expiraEm }: { dias: number; expiraEm?: strin
       <span className="absolute left-1/2 -translate-x-1/2 text-center">{texto}</span>
 
       {/* Botão de assinatura — canto direito */}
-      <a
-        href="https://carreira360.institutojd.ia.br"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="rounded-full bg-gold-foreground px-3.5 py-1 font-semibold text-gold shadow-sm transition hover:opacity-90"
-      >
-        Quero assinar
-      </a>
+      <Dialog>
+        <DialogTrigger asChild>
+          <button className="rounded-full bg-gold-foreground px-3.5 py-1 font-semibold text-gold shadow-sm transition hover:opacity-90">
+            Quero assinar
+          </button>
+        </DialogTrigger>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogTitle className="sr-only">Planos de assinatura</DialogTitle>
+          <PlanosAssinatura carreira={carreira} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, LogOut, ExternalLink, CreditCard, Gift } from "lucide-react";
+import { Lock, LogOut, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlataformaConfig } from "@/lib/config.functions";
 import { getMinhaAssinatura, ativarTesteComWhatsapp } from "@/lib/assinaturas.functions";
 import { toast } from "sonner";
+import { PlanosAssinatura } from "@/components/planos-assinatura";
 
 export const Route = createFileRoute("/_authenticated/assinatura-bloqueada")({
   head: () => ({ meta: [{ title: "Acesso bloqueado — Portal J&D" }] }),
@@ -100,8 +101,6 @@ function AssinaturaBloqueada() {
   const status = ass.data?.assinatura?.status ?? "sem_assinatura";
   const bloqueado = ass.data?.bloqueado;
   const motivo = ass.data?.bloqueado_motivo;
-  const regularizarUrl =
-    cfg.data?.hotmart_regularizacao_url || "https://pay.hotmart.com/W105831049I";
 
   if (ass.data?.podeAtivarTeste) return <AtivarTeste />;
 
@@ -115,11 +114,11 @@ function AssinaturaBloqueada() {
 
   const descricao = bloqueado
     ? motivo || "Entre em contato com o suporte para mais informações."
-    : "Para continuar acessando o conteúdo do Portal do Aluno, regularize sua assinatura na Hotmart. Assim que o pagamento for confirmado, seu acesso será liberado automaticamente.";
+    : "Para continuar acessando o conteúdo do Portal do Aluno, escolha um dos planos abaixo. Assim que o pagamento for confirmado, seu acesso é liberado automaticamente.";
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4">
-      <div className="w-full max-w-md text-center">
+      <div className="w-full max-w-3xl text-center">
         <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-destructive/10 text-destructive">
           <Lock className="h-6 w-6" />
         </div>
@@ -127,21 +126,12 @@ function AssinaturaBloqueada() {
         <p className="mt-3 text-sm text-muted-foreground">{descricao}</p>
 
         {!bloqueado && (
-          <p className="mt-6 text-sm font-medium">
-            Regularize sua assinatura para liberar o acesso imediatamente.
-          </p>
+          <div className="mt-8">
+            <PlanosAssinatura carreira={ass.data?.carreira} />
+          </div>
         )}
 
-        <div className="mt-4 flex flex-col gap-2">
-          {regularizarUrl && !bloqueado && (
-            <Button asChild size="lg">
-              <a href={regularizarUrl} target="_blank" rel="noopener noreferrer">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Pagar agora
-                <ExternalLink className="ml-2 h-3.5 w-3.5 opacity-70" />
-              </a>
-            </Button>
-          )}
+        <div className="mt-6 flex flex-col gap-2">
           <Button variant="outline" onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sair da conta

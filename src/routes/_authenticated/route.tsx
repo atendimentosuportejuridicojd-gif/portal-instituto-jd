@@ -97,7 +97,7 @@ function AuthenticatedLayout() {
           ))}
         <SidebarInset>
           {mostrarFita && (
-            <TrialRibbon dias={q.data!.trialDiasRestantes!} expiraEm={q.data!.trialExpiraEm} />
+            <TrialRibbon dias={q.data!.trialDiasRestantes!} expiraEm={q.data!.trialExpiraEm} carreira={q.data!.carreira} />
           )}
           <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             {!isBlockedPage && <SidebarTrigger />}
