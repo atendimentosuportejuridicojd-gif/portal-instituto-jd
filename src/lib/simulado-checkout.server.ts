@@ -31,13 +31,13 @@ async function resolveOrCreateCustomer(
 export async function criarSessaoSimulado(context: { supabase: any; userId: string }, data: { data_prova: string; environment: StripeEnv }, origin: string) {
   validarDataProva(data.data_prova);
   await assertAcessoAluno(context);
-  // assertAcessoAluno also allows trials/admins; paid Hotmart is mandatory here.
+  // assertAcessoAluno also allows trials/admins; an active paid subscription is mandatory here.
   const [{ data: assinatura, error }, { data: profile, error: profileError }] = await Promise.all([
     context.supabase.from('assinaturas').select('status, fim').eq('user_id', context.userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     context.supabase.from('profiles').select('bloqueado, email').eq('id', context.userId).single(),
   ]);
   if (error || profileError || profile?.bloqueado || assinatura?.status !== 'ativa' || (assinatura.fim && new Date(assinatura.fim).getTime() <= Date.now())) {
-    throw new Error('Este serviço exige uma assinatura Hotmart ativa.');
+    throw new Error('Este serviço exige uma assinatura ativa.');
   }
   const stripe = createStripeClient(data.environment);
   const prices = await stripe.prices.list({ lookup_keys: [SIMULADO_PRICE_ID], active: true, limit: 1 });
@@ -51,7 +51,7 @@ export async function criarSessaoSimulado(context: { supabase: any; userId: stri
     return_url: `${origin}/cronogramas`,
     line_items: [{ price: price.id, quantity: 1 }],
     metadata, payment_intent_data: { metadata, description: product.name },
-    automatic_tax: { enabled: true }, customer_update: { address: 'auto' },
+
     // Dynamic payment methods: Stripe displays card and Pix only when eligible/enabled.
   });
   if (!session.client_secret) throw new Error('O pagamento não retornou uma sessão válida.');

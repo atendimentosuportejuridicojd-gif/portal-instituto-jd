@@ -53,7 +53,7 @@ const FAQ = [
   { question: "Quanto custa? Tem fidelidade?", answer: "R$ 76,90 por mês, sem fidelidade." },
   {
     question: "Como cancelo ou peço reembolso?",
-    answer: "Tudo pela Hotmart, dentro da garantia de 7 dias.",
+    answer: "Tudo direto pelo portal, dentro da garantia de 7 dias.",
   },
   { question: "O conteúdo é atualizado?", answer: "Sim, todos os dias e em tempo real." },
   { question: "Tem suporte?", answer: "Sim, você pode tirar dúvidas sobre as questões." },
@@ -163,7 +163,7 @@ function CursoCarreiraJudiciariaPage() {
             <div>
               <p className="text-sm font-bold uppercase text-gold">Depois do teste</p>
               <p className="mt-3 max-w-4xl text-lg leading-8 text-sidebar-foreground/80">
-                Se gostar, assine por R$ 76,90 por mês, sem fidelidade. A assinatura tem garantia de 7 dias e o seu progresso fica salvo. Assinatura, cancelamento e reembolso são feitos pela Hotmart.
+                Se gostar, assine por R$ 76,90 por mês, sem fidelidade. A assinatura tem garantia de 7 dias e o seu progresso fica salvo. Assinatura, cancelamento e reembolso são feitos direto pelo portal, com pagamento seguro pela Stripe.
               </p>
             </div>
             <CheckCircle2 className="hidden size-12 text-gold md:block" />
