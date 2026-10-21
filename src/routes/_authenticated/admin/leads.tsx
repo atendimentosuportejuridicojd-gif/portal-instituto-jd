@@ -47,8 +47,8 @@ function linkWhatsApp(lead: { telefone: string; nome: string; origem?: string; c
   if (lead.origem === "meta_form") {
     const carreiraDefinida = lead.carreira && !/ainda n[aã]o defini/i.test(lead.carreira.replace(/_/g, " "));
     texto = carreiraDefinida
-      ? `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você preencheu nosso formulário e escolheu a carreira ${lead.carreira!.replace(/_/g, " ")}. Posso te ajudar com os próximos passos?`
-      : `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você preencheu nosso formulário. Posso te ajudar com os próximos passos?`;
+      ? `Olá, ${primeiro}! Aqui é da equipe do Instituto J&D.\n\nVi que você preencheu nosso formulário e tem foco na carreira ${lead.carreira!.replace(/_/g, " ")}. Vamos te ajudar com os próximos passos!\n\nVocê já tem algum concurso em vista que tenha interesse em fazer? Se sim, qual o cargo?`
+      : `Olá, ${primeiro}! Aqui é da equipe do Instituto J&D.\n\nVi que você preencheu nosso formulário. Vamos te ajudar com os próximos passos!\n\nVocê já tem algum concurso em vista que tenha interesse em prestar ou ainda está decidindo qual área e cargo seguir?`;
   } else {
     texto = `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você fez nosso diagnóstico de preparação para a carreira judiciária — posso te ajudar a dar o próximo passo?`;
   }
