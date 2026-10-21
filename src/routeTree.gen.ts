@@ -46,7 +46,6 @@ import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from '
 import { Route as AuthenticatedMateriaisMaterialIdLeituraRouteImport } from './routes/_authenticated/materiais.$materialId.leitura'
 import { Route as AuthenticatedMateriaisMaterialIdPdfRouteImport } from './routes/_authenticated/materiais.$materialId.pdf'
 import { Route as AuthenticatedMateriaisMaterialIdQuestoesRouteImport } from './routes/_authenticated/materiais.$materialId.questoes'
-import { Route as ApiPublicHotmartWebhookRouteImport } from './routes/api/public/hotmart/webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicPistasSlugRouteImport } from './routes/api/public/pistas.$slug'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -261,11 +260,6 @@ const AuthenticatedMateriaisMaterialIdQuestoesRoute =
     path: '/materiais/$materialId/questoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiPublicHotmartWebhookRoute = ApiPublicHotmartWebhookRouteImport.update({
-  id: '/api/public/hotmart/webhook',
-  path: '/api/public/hotmart/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -330,7 +324,6 @@ export interface FileRoutesByFullPath {
   '/materiais/$materialId/leitura': typeof AuthenticatedMateriaisMaterialIdLeituraRoute
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
-  '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/pistas/$slug': typeof ApiPublicPistasSlugRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -374,7 +367,6 @@ export interface FileRoutesByTo {
   '/materiais/$materialId/leitura': typeof AuthenticatedMateriaisMaterialIdLeituraRoute
   '/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
-  '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/pistas/$slug': typeof ApiPublicPistasSlugRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -420,7 +412,6 @@ export interface FileRoutesById {
   '/_authenticated/materiais/$materialId/leitura': typeof AuthenticatedMateriaisMaterialIdLeituraRoute
   '/_authenticated/materiais/$materialId/pdf': typeof AuthenticatedMateriaisMaterialIdPdfRoute
   '/_authenticated/materiais/$materialId/questoes': typeof AuthenticatedMateriaisMaterialIdQuestoesRoute
-  '/api/public/hotmart/webhook': typeof ApiPublicHotmartWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/pistas/$slug': typeof ApiPublicPistasSlugRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -466,7 +457,6 @@ export interface FileRouteTypes {
     | '/materiais/$materialId/leitura'
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
-    | '/api/public/hotmart/webhook'
     | '/api/public/payments/webhook'
     | '/api/public/pistas/$slug'
     | '/lovable/email/auth/preview'
@@ -510,7 +500,6 @@ export interface FileRouteTypes {
     | '/materiais/$materialId/leitura'
     | '/materiais/$materialId/pdf'
     | '/materiais/$materialId/questoes'
-    | '/api/public/hotmart/webhook'
     | '/api/public/payments/webhook'
     | '/api/public/pistas/$slug'
     | '/lovable/email/auth/preview'
@@ -555,7 +544,6 @@ export interface FileRouteTypes {
     | '/_authenticated/materiais/$materialId/leitura'
     | '/_authenticated/materiais/$materialId/pdf'
     | '/_authenticated/materiais/$materialId/questoes'
-    | '/api/public/hotmart/webhook'
     | '/api/public/payments/webhook'
     | '/api/public/pistas/$slug'
     | '/lovable/email/auth/preview'
@@ -573,7 +561,6 @@ export interface RootRouteChildren {
   TesteRoute: typeof TesteRoute
   ApiPublicConversoesGoogleAdsRoute: typeof ApiPublicConversoesGoogleAdsRoute
   ApiPublicMetaLeadsRoute: typeof ApiPublicMetaLeadsRoute
-  ApiPublicHotmartWebhookRoute: typeof ApiPublicHotmartWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicPistasSlugRoute: typeof ApiPublicPistasSlugRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -841,13 +828,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMateriaisMaterialIdQuestoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/public/hotmart/webhook': {
-      id: '/api/public/hotmart/webhook'
-      path: '/api/public/hotmart/webhook'
-      fullPath: '/api/public/hotmart/webhook'
-      preLoaderRoute: typeof ApiPublicHotmartWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -985,7 +965,6 @@ const rootRouteChildren: RootRouteChildren = {
   TesteRoute: TesteRoute,
   ApiPublicConversoesGoogleAdsRoute: ApiPublicConversoesGoogleAdsRoute,
   ApiPublicMetaLeadsRoute: ApiPublicMetaLeadsRoute,
-  ApiPublicHotmartWebhookRoute: ApiPublicHotmartWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicPistasSlugRoute: ApiPublicPistasSlugRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
