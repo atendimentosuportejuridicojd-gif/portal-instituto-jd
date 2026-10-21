@@ -143,10 +143,13 @@ export function prepararLeadFormulario(
     return valor;
   };
 
+  // Ordem importa: horas/prazo antes de "estud", pois "quanto tempo por dia consegue estudar" contém "estud".
+  const ehHoras = (k: string) => k.includes("hora") || (k.includes("tempo") && k.includes("dia"));
+  const ehPrazo = (k: string) => k.includes("prazo") || k.includes("prova") || k.includes("prestar");
   const carreira = achar("carreira", (k) => k.includes("carreira"));
-  const comoEstuda = achar("como_estuda", (k) => k.includes("estud"));
-  const horasDia = achar("horas_dia", (k) => k.includes("hora"));
-  const prazoProva = achar("prazo_prova", (k) => k.includes("prazo"));
+  const horasDia = achar("horas_dia", (k) => ehHoras(k));
+  const prazoProva = achar("prazo_prova", (k) => !ehHoras(k) && ehPrazo(k));
+  const comoEstuda = achar("como_estuda", (k) => k.includes("estud") && !ehHoras(k) && !ehPrazo(k) && !k.includes("carreira"));
 
   const pontuacao =
     pontuar("carreira", carreira, PONTOS_CARREIRA, avisos) +
