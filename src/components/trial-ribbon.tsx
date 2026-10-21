@@ -1,5 +1,7 @@
 import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PlanosAssinatura } from "@/components/planos-assinatura";
 
 function restante(expiraEm: string) {
   const ms = new Date(expiraEm).getTime() - Date.now();
@@ -13,7 +15,7 @@ function restante(expiraEm: string) {
 }
 
 /** Fita fixa no topo do portal com os dias restantes e o cronômetro do teste gratuito. */
-export function TrialRibbon({ dias, expiraEm }: { dias: number; expiraEm?: string | null }) {
+export function TrialRibbon({ dias, expiraEm, carreira }: { dias: number; expiraEm?: string | null; carreira?: string | null }) {
   const [tempo, setTempo] = useState<string | null>(() => (expiraEm ? restante(expiraEm) : null));
 
   useEffect(() => {
