@@ -23,8 +23,8 @@ export const BRAND = {
   border: '#e5e7eb',
 }
 
-export const LOGO_URL =
-  'https://portal.institutojd.ia.br/__l5e/assets-v1/37ed9c29-1b7a-48bf-98d0-dea61641d5aa/logo-jd.png'
+// Banner horizontal único, sem referência a uma carreira específica (vale para Judiciária, Fiscal e Policial).
+export const BANNER_URL = 'https://portal.institutojd.ia.br/email-banner.png'
 
 export const SITE_LABEL = 'Instituto J&D — Sua Carreira 360'
 
@@ -47,7 +47,7 @@ export function EmailLayout({
         <Container style={container}>
           <Section style={header}>
             <Link href={siteUrl}>
-              <Img src={LOGO_URL} alt={SITE_LABEL} width="180" style={logo} />
+              <Img src={BANNER_URL} alt={SITE_LABEL} width="528" style={logo} />
             </Link>
           </Section>
           <Section style={card}>
@@ -76,8 +76,8 @@ export function CtaButton({ href, children }: { href: string; children: React.Re
 
 export const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif' }
 export const container = { padding: '24px 16px', maxWidth: '560px', margin: '0 auto' }
-const header = { backgroundColor: BRAND.navy, borderRadius: '10px', padding: '18px 20px', textAlign: 'center' as const }
-const logo = { display: 'block', margin: '0 auto', maxWidth: '100%' }
+const header = { backgroundColor: BRAND.navy, borderRadius: '10px', padding: 0, textAlign: 'center' as const, overflow: 'hidden' as const }
+const logo = { display: 'block', width: '100%', height: 'auto', borderRadius: '10px' }
 const card = { padding: '28px 4px 8px' }
 export const h1 = {
   fontSize: '21px',

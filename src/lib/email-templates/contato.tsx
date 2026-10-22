@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Body, Container, Head, Hr, Html, Img, Link, Preview, Section, Text } from '@react-email/components'
-import { BRAND, LOGO_URL, SITE_LABEL, main, container, text } from './_layout'
+import { BRAND, BANNER_URL, SITE_LABEL, main, container, text } from './_layout'
 
 interface ContatoEmailProps {
   assunto: string
@@ -22,7 +22,7 @@ export const ContatoEmail = ({ assunto, mensagem }: ContatoEmailProps) => {
         <Container style={container}>
           <Section style={header}>
             <Link href="https://portal.institutojd.ia.br">
-              <Img src={LOGO_URL} alt={SITE_LABEL} width="180" style={logo} />
+              <Img src={BANNER_URL} alt={SITE_LABEL} width="528" style={logo} />
             </Link>
           </Section>
           <Section style={{ padding: '28px 4px 8px' }}>
@@ -49,7 +49,7 @@ export const ContatoEmail = ({ assunto, mensagem }: ContatoEmailProps) => {
   )
 }
 
-const header = { backgroundColor: BRAND.navy, borderRadius: '10px', padding: '18px 20px', textAlign: 'center' as const }
-const logo = { display: 'block', margin: '0 auto', maxWidth: '100%' }
+const header = { backgroundColor: BRAND.navy, borderRadius: '10px', padding: 0, textAlign: 'center' as const, overflow: 'hidden' as const }
+const logo = { display: 'block', width: '100%', height: 'auto', borderRadius: '10px' }
 
 export default ContatoEmail
