@@ -763,6 +763,7 @@ export type Database = {
           email: string | null
           form_id: string | null
           gclid: string | null
+          google_lead_id: string | null
           horas_dia: string | null
           id: string
           meta_lead_id: string | null
@@ -789,6 +790,7 @@ export type Database = {
           email?: string | null
           form_id?: string | null
           gclid?: string | null
+          google_lead_id?: string | null
           horas_dia?: string | null
           id?: string
           meta_lead_id?: string | null
@@ -815,6 +817,7 @@ export type Database = {
           email?: string | null
           form_id?: string | null
           gclid?: string | null
+          google_lead_id?: string | null
           horas_dia?: string | null
           id?: string
           meta_lead_id?: string | null
