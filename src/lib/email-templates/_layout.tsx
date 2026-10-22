@@ -26,7 +26,7 @@ export const BRAND = {
 export const LOGO_URL =
   'https://portal.institutojd.ia.br/__l5e/assets-v1/37ed9c29-1b7a-48bf-98d0-dea61641d5aa/logo-jd.png'
 
-export const SITE_LABEL = 'Instituto J&D — Especialistas na Carreira Judiciária'
+export const SITE_LABEL = 'Instituto J&D — Sua Carreira 360'
 
 export function EmailLayout({
   preview,

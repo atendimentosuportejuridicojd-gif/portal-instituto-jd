@@ -12,13 +12,13 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
+      { title: "Portal do Aluno — Instituto J&D Sua Carreira 360" },
       {
         name: "description",
         content:
           "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
       },
-      { property: "og:title", content: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
+      { property: "og:title", content: "Portal do Aluno — Instituto J&D Sua Carreira 360" },
       {
         property: "og:description",
         content: "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
@@ -93,7 +93,7 @@ function Landing() {
 
       <footer className="border-t border-border/60 py-8">
         <p className="text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Instituto J&D Especialistas na Carreira Judiciária
+          © {new Date().getFullYear()} Instituto J&D Sua Carreira 360
         </p>
       </footer>
     </div>

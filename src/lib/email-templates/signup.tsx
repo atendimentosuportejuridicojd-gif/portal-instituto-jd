@@ -16,8 +16,7 @@ export const SignupEmail = ({ siteUrl, recipient, confirmationUrl }: SignupEmail
     siteUrl={siteUrl}
   >
     <Text style={text}>
-      Seja bem-vindo(a) ao Portal do Aluno do Instituto J&amp;D — Especialistas na Carreira
-      Judiciária.
+      Seja bem-vindo(a) ao Portal do Aluno do Instituto J&amp;D — Sua Carreira 360.
     </Text>
     <Text style={text}>
       Para ativar o acesso de{' '}

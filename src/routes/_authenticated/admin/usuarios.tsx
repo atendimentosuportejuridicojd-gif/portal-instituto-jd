@@ -600,7 +600,7 @@ function formatarTelefone(telefone: string) {
 }
 
 const MENSAGEM_WHATSAPP =
-  "Olá, {nome}! Aqui é do Instituto J&D — Especialistas na Carreira Judiciária. " +
+  "Olá, {nome}! Aqui é do Instituto J&D — Sua Carreira 360. " +
   "Vimos que você já começou seus estudos no Portal do Aluno e não queremos que você perca o ritmo. " +
   "Ao assinar, você mantém acesso completo ao acervo, às questões comentadas, ao seu cronograma e ao seu histórico de desempenho — tudo exatamente de onde você parou. " +
   "Quer que eu te envie o link da assinatura e tire suas dúvidas?";
