@@ -108,7 +108,7 @@ function AuthPage() {
             "A aprovação é resultado de um estudo silencioso, disciplinado e constante."
           </h2>
           <p className="mt-6 text-sm opacity-70">
-            Portal do Aluno — preparação para Tribunais e Ministérios Públicos.
+            Portal do Aluno — preparação para as carreiras Judiciária, Fiscal e Policial.
           </p>
         </div>
       </div>

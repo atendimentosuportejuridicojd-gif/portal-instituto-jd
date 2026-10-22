@@ -72,7 +72,7 @@ function Dashboard() {
         icone={LayoutDashboard}
         rotulo="Portal do Aluno"
         title="Bem-vindo(a) de volta"
-        description="Sua central de estudos para Tribunais e Ministérios Públicos."
+        description={carreira ? `Sua central de estudos da ${nomeCarreira(carreira)}.` : "Sua central de estudos para concursos públicos."}
       />
       <PageContent>
         <div className="space-y-9">

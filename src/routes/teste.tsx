@@ -27,7 +27,7 @@ export const Route = createFileRoute("/teste")({
       {
         name: "description",
         content:
-          "Resgate seu período de teste gratuito no Portal do Aluno do Instituto J&D e acesse o acervo de preparação para a carreira judiciária.",
+          "Resgate seu período de teste gratuito no Portal do Aluno do Instituto J&D e acesse o acervo de preparação para as carreiras judiciária, fiscal e policial.",
       },
       { property: "og:title", content: "Teste grátis — Portal do Aluno J&D" },
       {
