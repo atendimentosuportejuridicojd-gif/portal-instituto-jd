@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UserCheck, Flame, Gauge, Snowflake, MessageCircle, Loader2 } from "lucide-react";
 import { adminListLeadsDiagnostico } from "@/lib/leads-diagnostico.functions";
 
@@ -72,6 +73,7 @@ function Leads() {
   const listFn = useServerFn(adminListLeadsDiagnostico);
   const [segmento, setSegmento] = useState<"todos" | "quente" | "morno" | "frio">("todos");
   const [origem, setOrigem] = useState<"todas" | "meta_form" | "google_form" | "site_form">("todas");
+  const [detalhe, setDetalhe] = useState<any | null>(null);
 
   const query = useQuery({
     queryKey: ["admin", "leads-diagnostico", segmento, origem],
@@ -189,7 +191,11 @@ function Leads() {
                   const seg = SEGMENTO_CONFIG[lead.segmento] ?? SEGMENTO_CONFIG.frio;
                   return (
                     <TableRow key={lead.id}>
-                      <TableCell className="font-medium">{lead.nome}</TableCell>
+                      <TableCell className="font-medium">
+                        <button type="button" onClick={() => setDetalhe(lead)} className="text-left hover:text-primary hover:underline">
+                          {lead.nome}
+                        </button>
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline">{ORIGEM_LABEL[lead.origem] ?? lead.origem}</Badge>
                       </TableCell>
@@ -222,6 +228,47 @@ function Leads() {
           )}
         </div>
       </PageContent>
+      <Dialog open={!!detalhe} onOpenChange={(o) => !o && setDetalhe(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{detalhe?.nome}</DialogTitle>
+            <DialogDescription>Dados do lead</DialogDescription>
+          </DialogHeader>
+          {detalhe && (
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+              {[
+                ["E-mail", detalhe.email],
+                ["Telefone", detalhe.telefone],
+                ["Origem", ORIGEM_LABEL[detalhe.origem] ?? detalhe.origem],
+                ["Carreira", detalhe.carreira],
+                ["Como estuda", detalhe.como_estuda],
+                ["Horas por dia", detalhe.horas_dia],
+                ["Prazo da prova", detalhe.prazo_prova],
+                ["Pontuação", `${detalhe.pontuacao} pts`],
+                ["Classificação", (SEGMENTO_CONFIG[detalhe.segmento] ?? SEGMENTO_CONFIG.frio).label],
+                ["Recebido em", new Date(detalhe.criado_em).toLocaleString("pt-BR")],
+                ...Object.entries(detalhe.respostas ?? {})
+                  .filter(([, v]) => v)
+                  .map(([k, v]) => [k.replace(/_/g, " "), String(v).replace(/_/g, " ")]),
+              ]
+                .filter(([, v]) => v)
+                .map(([k, v]) => (
+                  <div key={String(k)} className="contents">
+                    <dt className="font-medium capitalize text-muted-foreground">{k}</dt>
+                    <dd className="break-words">{v}</dd>
+                  </div>
+                ))}
+            </dl>
+          )}
+          {detalhe?.telefone && (
+            <Button asChild className="gap-1.5">
+              <a href={linkWhatsApp(detalhe)} target="_blank" rel="noreferrer">
+                <MessageCircle className="h-4 w-4" /> Chamar no WhatsApp
+              </a>
+            </Button>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
