@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import { createStripeClient, type StripeEnv } from "@/lib/stripe.server";
-import { ASSINATURA_SERVICE, fimPlano, statusPortal } from "@/lib/assinatura-planos";
+import { ASSINATURA_SERVICE, TESTE_PRICE_ID, fimPlano, statusPortal } from "@/lib/assinatura-planos";
 
 const EVENTS = new Set([
   "checkout.session.completed",
@@ -40,6 +40,40 @@ async function syncSubscription(db: any, stripe: Stripe, subId: string, evento: 
   });
 }
 
+/**
+ * Fila de conversões offline do Google Ads: uma linha na primeira compra paga de quem tem gclid no
+ * perfil (o índice único por aluno barra as seguintes). Falha aqui nunca derruba o webhook do Stripe.
+ */
+async function registrarConversaoGoogle(db: any, obj: any, userId: string, ref: string, evento: string) {
+  try {
+    if (obj.metadata?.plano === TESTE_PRICE_ID) return;
+    const { data: perfil } = await db.from("profiles").select("gclid, gclid_captured_at").eq("id", userId).maybeSingle();
+    if (!perfil?.gclid) return;
+    const { data: ja } = await db.from("conversoes_google_ads").select("id").eq("user_id", userId).maybeSingle();
+    if (ja) return;
+    const valor = Number(obj.amount_total) / 100;
+    const { error } = await db.from("conversoes_google_ads").upsert(
+      {
+        user_id: userId,
+        gclid: perfil.gclid,
+        gclid_capturado_em: perfil.gclid_captured_at,
+        hotmart_transaction_id: ref, // nome legado da coluna: guarda o id do pagamento/assinatura
+        valor: Number.isFinite(valor) && valor > 0 ? valor : null,
+        moeda: String(obj.currency ?? "brl").toUpperCase(),
+        convertido_em: new Date().toISOString(),
+      },
+      { onConflict: "hotmart_transaction_id", ignoreDuplicates: true },
+    );
+    if (error) throw error;
+  } catch (e) {
+    await db.from("admin_logs").insert({
+      acao: "stripe.conversao_google_erro",
+      entidade: "assinaturas",
+      metadata: { ref, evento, mensagem: e instanceof Error ? e.message : "erro" },
+    });
+  }
+}
+
 export async function processarEventoAssinatura(event: Stripe.Event, env: StripeEnv, db: any, stripe = createStripeClient(env)) {
   if (!EVENTS.has(event.type)) return;
   // assinaturas has no environment column: test payments never grant real access.
@@ -49,15 +83,18 @@ export async function processarEventoAssinatura(event: Stripe.Event, env: Stripe
   if (event.type.startsWith("checkout.session.")) {
     if (obj.metadata?.service !== ASSINATURA_SERVICE || obj.payment_status === "unpaid") return;
     if (obj.mode === "subscription" && obj.subscription) {
-      return syncSubscription(db, stripe, typeof obj.subscription === "string" ? obj.subscription : obj.subscription.id, event.type);
+      const subId = typeof obj.subscription === "string" ? obj.subscription : obj.subscription.id;
+      await syncSubscription(db, stripe, subId, event.type);
+      return registrarConversaoGoogle(db, obj, obj.metadata.user_id, subId, event.type);
     }
     if (obj.mode === "payment" && obj.payment_intent) {
       const pi = typeof obj.payment_intent === "string" ? obj.payment_intent : obj.payment_intent.id;
       const pago = new Date(event.created * 1000);
-      return gravar(db, pi, {
+      await gravar(db, pi, {
         user_id: obj.metadata.user_id, status: "ativa", plano: obj.metadata.plano, carreira: obj.metadata.carreira,
         inicio: pago.toISOString(), fim: fimPlano(obj.metadata.plano, pago), ultimo_evento: event.type,
       });
+      return registrarConversaoGoogle(db, obj, obj.metadata.user_id, pi, event.type);
     }
     return;
   }
