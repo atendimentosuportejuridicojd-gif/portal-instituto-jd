@@ -17,12 +17,12 @@ export const Route = createFileRoute("/_authenticated/noticias")({
       {
         name: "description",
         content:
-          "Notícias e avisos sobre editais, bancas e concursos da carreira judiciária, publicados pelo Instituto J&D.",
+          "Notícias e avisos sobre editais, bancas e concursos das carreiras judiciária, fiscal e policial, publicados pelo Instituto J&D.",
       },
       { property: "og:title", content: "Fique por Dentro — Notícias | Instituto J&D" },
       {
         property: "og:description",
-        content: "Acompanhe editais, bancas e novidades dos concursos da carreira judiciária.",
+        content: "Acompanhe editais, bancas e novidades dos concursos das carreiras judiciária, fiscal e policial.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

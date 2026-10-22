@@ -16,12 +16,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
+          "Preparação estruturada para as carreiras Judiciária, Fiscal e Policial. Materiais, questões e cronogramas em um só lugar.",
       },
       { property: "og:title", content: "Portal do Aluno — Instituto J&D Especialistas na Carreira Judiciária" },
       {
         property: "og:description",
-        content: "Preparação estruturada para Tribunais e Ministérios Públicos. Materiais, questões e cronogramas em um só lugar.",
+        content: "Preparação estruturada para as carreiras Judiciária, Fiscal e Policial. Materiais, questões e cronogramas em um só lugar.",
       },
     ],
   }),
@@ -53,14 +53,14 @@ function Landing() {
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-              Preparação para Tribunais e Ministérios Públicos
+              Carreiras Judiciária, Fiscal e Policial
             </span>
             <h1 className="mt-6 text-5xl font-bold tracking-tight md:text-6xl">
               Uma plataforma séria, para uma preparação séria.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-              Materiais em PDF, sistema inteligente de questões, cronogramas e trilhas de estudo —
-              tudo pensado para quem busca aprovação em Tribunais e MPs de todo o Brasil.
+              Material de estudo, sistema inteligente de questões, cronogramas e trilhas —
+              tudo pensado para quem busca aprovação nas carreiras Judiciária, Fiscal e Policial.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -76,11 +76,11 @@ function Landing() {
         <section className="grid gap-4 pb-24 md:grid-cols-3">
           {[
             { icon: BookOpen, title: "Acervo Base", desc: "Biblioteca organizada por disciplinas." },
-            { icon: Target, title: "Trilhas", desc: "Técnico e Analista Judiciário." },
+            { icon: Target, title: "Trilhas", desc: "Roteiros de estudo por carreira e cargo." },
             { icon: FileText, title: "Concursos específicos", desc: "Materiais por edital." },
             { icon: Newspaper, title: "Fique por dentro", desc: "Notícias e atualizações." },
             { icon: CalendarDays, title: "Cronogramas", desc: "Organização diária dos estudos." },
-            { icon: Scale, title: "Foco jurídico", desc: "Tribunais e MPs do Brasil todo." },
+            { icon: Scale, title: "Três carreiras", desc: "Judiciária, Fiscal e Policial, com conteúdo sob medida." },
           ].map((f) => (
             <div key={f.title} className="surface-card p-6">
               <f.icon className="h-5 w-5 text-primary" />
