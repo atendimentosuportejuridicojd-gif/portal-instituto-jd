@@ -14,7 +14,6 @@ const configSchema = z.object({
   facebook_url: z.string().trim().max(300).nullable().optional(),
   youtube_url: z.string().trim().max(300).nullable().optional(),
   linkedin_url: z.string().trim().max(300).nullable().optional(),
-  hotmart_regularizacao_url: z.string().trim().max(500).nullable().optional(),
   texto_rodape: z.string().trim().max(2000).nullable().optional(),
   sobre: z.string().trim().max(5000).nullable().optional(),
 });
