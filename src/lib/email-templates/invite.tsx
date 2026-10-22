@@ -15,8 +15,7 @@ export const InviteEmail = ({ siteUrl, confirmationUrl }: InviteEmailProps) => (
     siteUrl={siteUrl}
   >
     <Text style={text}>
-      Você foi convidado(a) a acessar o Portal do Aluno do Instituto J&amp;D — Especialistas na
-      Carreira Judiciária.
+      Você foi convidado(a) a acessar o Portal do Aluno do Instituto J&amp;D — Sua Carreira 360.
     </Text>
     <Text style={text}>Clique abaixo para criar sua senha e ativar seu acesso:</Text>
     <CtaButton href={confirmationUrl}>Aceitar convite</CtaButton>

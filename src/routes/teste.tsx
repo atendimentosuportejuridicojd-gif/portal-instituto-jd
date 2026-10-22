@@ -85,7 +85,7 @@ function TestePage() {
           <div>
             <p className="text-sm font-bold">Instituto J&D</p>
             <p className="text-[10px] uppercase tracking-widest opacity-70">
-              Especialistas na Carreira Judiciária
+              Sua Carreira 360
             </p>
           </div>
         </Link>

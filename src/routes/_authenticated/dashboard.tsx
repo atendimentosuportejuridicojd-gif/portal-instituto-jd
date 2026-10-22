@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       {
         name: "description",
         content:
-          "Central de estudos do Instituto J&D Especialistas na Carreira Judiciária: continue de onde parou nas questões e na leitura, revise conteúdos e acesse seus favoritos.",
+          "Central de estudos do Instituto J&D Sua Carreira 360: continue de onde parou nas questões e na leitura, revise conteúdos e acesse seus favoritos.",
       },
       { property: "og:title", content: "Dashboard — Portal do Aluno J&D" },
       {

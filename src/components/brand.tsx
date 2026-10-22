@@ -1,9 +1,9 @@
 import logoAsset from "@/assets/logo-jd.png.asset.json";
 import { cn } from "@/lib/utils";
 
-export const BRAND_NAME = "Instituto J&D Especialistas na Carreira Judiciária";
+export const BRAND_NAME = "Instituto J&D Sua Carreira 360";
 export const BRAND_SHORT = "Instituto J&D";
-export const PORTAL_NAME = "Portal do Aluno – Instituto J&D Especialistas na Carreira Judiciária";
+export const PORTAL_NAME = "Portal do Aluno – Instituto J&D Sua Carreira 360";
 export const LOGO_URL = logoAsset.url;
 
 export function BrandLogo({
