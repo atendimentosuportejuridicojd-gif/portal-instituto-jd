@@ -71,7 +71,7 @@ function resumoRespostas(respostas: Record<string, unknown>): string {
 function Leads() {
   const listFn = useServerFn(adminListLeadsDiagnostico);
   const [segmento, setSegmento] = useState<"todos" | "quente" | "morno" | "frio">("todos");
-  const [origem, setOrigem] = useState<"todas" | "diagnostico" | "meta_form" | "google_form" | "site_form">("todas");
+  const [origem, setOrigem] = useState<"todas" | "meta_form" | "google_form" | "site_form">("todas");
 
   const query = useQuery({
     queryKey: ["admin", "leads-diagnostico", segmento, origem],
@@ -142,7 +142,6 @@ function Leads() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas as origens</SelectItem>
-              <SelectItem value="diagnostico">Diagnóstico</SelectItem>
               <SelectItem value="meta_form">Formulário Meta</SelectItem>
               <SelectItem value="google_form">Formulário Google</SelectItem>
               <SelectItem value="site_form">Formulário do site</SelectItem>
