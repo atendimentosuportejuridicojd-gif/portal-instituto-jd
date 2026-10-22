@@ -59,5 +59,10 @@ export const verificarSessao = createServerFn({ method: "POST" })
       return { valida: true };
     }
 
-    return { valida: atual.device_id === data.device_id };
+    const valida = atual.device_id === data.device_id;
+    // Presença: cada verificação (a cada ~25 s, aba visível) renova o carimbo que o painel do ADM usa para "online".
+    if (valida) {
+      await supabase.from("sessoes_ativas").update({ updated_at: new Date().toISOString() }).eq("user_id", userId);
+    }
+    return { valida };
   });

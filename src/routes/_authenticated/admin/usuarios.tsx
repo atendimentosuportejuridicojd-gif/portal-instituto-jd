@@ -26,6 +26,7 @@ import {
 import { Search, Lock, Unlock, Mail, Pencil, MessageCircle, Trash2, ClipboardCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { CARREIRAS } from "@/lib/carreiras";
 import {
   adminListUsuarios,
   adminEditarUsuario,
@@ -69,6 +70,8 @@ function Usuarios() {
 
   const [q, setQ] = useState("");
   const [filtro, setFiltro] = useState<"ativa" | "sem" | "todos">("todos");
+  const [carreiraFiltro, setCarreiraFiltro] = useState<string>("todas");
+  const [soOnline, setSoOnline] = useState(false);
   const [detalhe, setDetalhe] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [blockDialog, setBlockDialog] = useState<any | null>(null);
@@ -81,6 +84,7 @@ function Usuarios() {
   const query = useQuery({
     queryKey: ["admin", "usuarios", q],
     queryFn: () => listFn({ data: { q } }),
+    refetchInterval: 30_000,
   });
 
   const edit = useMutation({
@@ -136,13 +140,19 @@ function Usuarios() {
 
 
   const all = query.data ?? [];
-  const rows = all.filter((r: any) =>
-    filtro === "todos"
-      ? true
-      : filtro === "ativa"
-        ? r.assinatura_status === "ativa"
-        : r.assinatura_status !== "ativa",
-  );
+  const rows = all
+    .filter((r: any) =>
+      filtro === "todos"
+        ? true
+        : filtro === "ativa"
+          ? r.assinatura_status === "ativa"
+          : r.assinatura_status !== "ativa",
+    )
+    .filter((r: any) =>
+      carreiraFiltro === "todas" ? true : carreiraFiltro === "sem" ? !r.carreira : r.carreira === carreiraFiltro,
+    )
+    .filter((r: any) => (soOnline ? r.online : true));
+  const totalOnline = all.filter((r: any) => r.online).length;
 
   return (
     <>
@@ -168,6 +178,32 @@ function Usuarios() {
                 </Button>
               ))}
             </div>
+            <div className="inline-flex rounded-md border border-border p-0.5">
+              {[
+                { key: "todas", label: "Todas as carreiras" },
+                ...CARREIRAS.map((c) => ({ key: c.id as string, label: c.nome.replace("Carreira ", "") })),
+                { key: "sem", label: "Sem carreira" },
+              ].map((f) => (
+                <Button
+                  key={f.key}
+                  size="sm"
+                  variant={carreiraFiltro === f.key ? "secondary" : "ghost"}
+                  className="h-8"
+                  onClick={() => setCarreiraFiltro(f.key)}
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
+            <Button
+              size="sm"
+              variant={soOnline ? "secondary" : "outline"}
+              className="h-8 gap-2"
+              onClick={() => setSoOnline((v) => !v)}
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+              Online ({totalOnline})
+            </Button>
             <div className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -187,6 +223,7 @@ function Usuarios() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>E-mail</TableHead>
+                <TableHead>Carreira</TableHead>
                 <TableHead>Assinatura</TableHead>
                 <TableHead>Cadastro</TableHead>
                 <TableHead>Último acesso</TableHead>
@@ -197,15 +234,21 @@ function Usuarios() {
             <TableBody>
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={8} className="py-12 text-center text-sm text-muted-foreground">
                     {query.isLoading ? "Carregando…" : "Nenhum usuário encontrado."}
                   </TableCell>
                 </TableRow>
               )}
               {rows.map((r: any) => (
-                <TableRow key={r.id}>
+                <TableRow key={r.id} className={r.online ? "bg-green-500/10" : undefined}>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      {r.online && (
+                        <span className="relative flex h-2.5 w-2.5" title="Online agora">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60" />
+                          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
+                        </span>
+                      )}
                       <button
                         type="button"
                         className="font-medium underline-offset-4 hover:underline"
@@ -213,6 +256,7 @@ function Usuarios() {
                       >
                         {r.nome_completo || "—"}
                       </button>
+                      {r.online && <span className="text-xs font-semibold text-green-600">Online</span>}
                       {r.bloqueado && <Badge variant="destructive">Bloqueado</Badge>}
                       {r.simulado_liberado && <Badge variant="secondary">Simulados</Badge>}
                       {r.roles?.includes("administrador") && <Badge>Admin</Badge>}
@@ -233,6 +277,15 @@ function Usuarios() {
                     {r.telefone && <div className="text-xs tabular-nums">{r.telefone}</div>}
                     {r.origem === "teste_gratis" && (
                       <div className="text-xs text-muted-foreground/70">via página de teste</div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {r.carreira ? (
+                      <Badge variant="outline">
+                        {CARREIRAS.find((c) => c.id === r.carreira)?.nome.replace("Carreira ", "") ?? r.carreira}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
                     )}
                   </TableCell>
                   <TableCell>
