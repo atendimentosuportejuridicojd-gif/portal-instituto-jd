@@ -1,3 +1,4 @@
+import { ehFormulario, mensagemPrimeiroContato } from "@/lib/leads-mensagem";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -41,23 +42,8 @@ function telefoneInternacional(telefone: string) {
   return d.startsWith("55") ? d : `55${d}`;
 }
 
-/** Leads de formulário (Meta, Google ou do site) têm as 4 respostas em colunas; o Diagnóstico não. */
-function ehFormulario(origem?: string) {
-  return origem === "meta_form" || origem === "google_form" || origem === "site_form";
-}
-
 function linkWhatsApp(lead: { telefone: string; nome: string; origem?: string; carreira?: string | null }) {
-  const primeiro = lead.nome.trim().split(/\s+/)[0] || "tudo bem";
-  let texto: string;
-  if (ehFormulario(lead.origem)) {
-    const carreiraDefinida = lead.carreira && !/ainda n[aã]o defini/i.test(lead.carreira.replace(/_/g, " "));
-    texto = carreiraDefinida
-      ? `Olá, ${primeiro}! Aqui é da equipe do Instituto J&D.\n\nVi que você preencheu nosso formulário e tem foco na carreira ${lead.carreira!.replace(/_/g, " ")}. Vamos te ajudar com os próximos passos!\n\nVocê já tem algum concurso em vista que tenha interesse em fazer? Se sim, qual o cargo?`
-      : `Olá, ${primeiro}! Aqui é da equipe do Instituto J&D.\n\nVi que você preencheu nosso formulário. Vamos te ajudar com os próximos passos!\n\nVocê já tem algum concurso em vista que tenha interesse em prestar ou ainda está decidindo qual área e cargo seguir?`;
-  } else {
-    texto = `Olá, ${primeiro}! Aqui é do Instituto J&D. Vi que você fez nosso diagnóstico de preparação para a carreira judiciária — posso te ajudar a dar o próximo passo?`;
-  }
-  return `https://wa.me/${telefoneInternacional(lead.telefone)}?text=${encodeURIComponent(texto)}`;
+  return `https://wa.me/${telefoneInternacional(lead.telefone)}?text=${encodeURIComponent(mensagemPrimeiroContato(lead))}`;
 }
 
 const ORIGEM_LABEL: Record<string, string> = {
