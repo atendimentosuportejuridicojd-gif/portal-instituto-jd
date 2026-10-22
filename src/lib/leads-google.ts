@@ -57,6 +57,7 @@ export function prepararLeadGoogle(lead: LeadGoogle): LinhaLead {
     "google_form",
     semChave(lead),
   );
+  if (lead.is_test === true) linha.avisos.push("lead de teste do Google (is_test)");
   // Idempotência pelo google_lead_id; meta_lead_id fica NULL (a restrição UNIQUE ignora NULL).
   return { ...linha, meta_lead_id: null, google_lead_id: id, gclid: texto(lead.gcl_id) };
 }
