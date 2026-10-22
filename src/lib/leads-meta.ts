@@ -11,7 +11,7 @@
  */
 
 export type Segmento = "quente" | "morno" | "frio";
-export type OrigemFormulario = "meta_form" | "google_form";
+export type OrigemFormulario = "meta_form" | "google_form" | "site_form";
 
 export type CampoFormulario = { name: string; values?: string[] };
 

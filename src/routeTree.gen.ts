@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CursoCarreiraJudiciariaRouteImport } from './routes/curso-carreira-judiciaria'
+import { Route as EscolhaSuaCarreiraRouteImport } from './routes/escolha-sua-carreira'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TesteRouteImport } from './routes/teste'
 import { Route as AuthenticatedAssinaturaBloqueadaRouteImport } from './routes/_authenticated/assinatura-bloqueada'
@@ -70,6 +71,11 @@ const AuthRoute = AuthRouteImport.update({
 const CursoCarreiraJudiciariaRoute = CursoCarreiraJudiciariaRouteImport.update({
   id: '/curso-carreira-judiciaria',
   path: '/curso-carreira-judiciaria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EscolhaSuaCarreiraRoute = EscolhaSuaCarreiraRouteImport.update({
+  id: '/escolha-sua-carreira',
+  path: '/escolha-sua-carreira',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
+  '/escolha-sua-carreira': typeof EscolhaSuaCarreiraRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -342,6 +349,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
+  '/escolha-sua-carreira': typeof EscolhaSuaCarreiraRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -388,6 +396,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/curso-carreira-judiciaria': typeof CursoCarreiraJudiciariaRoute
+  '/escolha-sua-carreira': typeof EscolhaSuaCarreiraRoute
   '/reset-password': typeof ResetPasswordRoute
   '/teste': typeof TesteRoute
   '/_authenticated/assinatura-bloqueada': typeof AuthenticatedAssinaturaBloqueadaRoute
@@ -434,6 +443,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/curso-carreira-judiciaria'
+    | '/escolha-sua-carreira'
     | '/reset-password'
     | '/teste'
     | '/assinatura-bloqueada'
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/curso-carreira-judiciaria'
+    | '/escolha-sua-carreira'
     | '/reset-password'
     | '/teste'
     | '/assinatura-bloqueada'
@@ -523,6 +534,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/curso-carreira-judiciaria'
+    | '/escolha-sua-carreira'
     | '/reset-password'
     | '/teste'
     | '/_authenticated/assinatura-bloqueada'
@@ -569,6 +581,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CursoCarreiraJudiciariaRoute: typeof CursoCarreiraJudiciariaRoute
+  EscolhaSuaCarreiraRoute: typeof EscolhaSuaCarreiraRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TesteRoute: typeof TesteRoute
   ApiPublicConversoesGoogleAdsRoute: typeof ApiPublicConversoesGoogleAdsRoute
@@ -608,6 +621,13 @@ declare module '@tanstack/react-router' {
       path: '/curso-carreira-judiciaria'
       fullPath: '/curso-carreira-judiciaria'
       preLoaderRoute: typeof CursoCarreiraJudiciariaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/escolha-sua-carreira': {
+      id: '/escolha-sua-carreira'
+      path: '/escolha-sua-carreira'
+      fullPath: '/escolha-sua-carreira'
+      preLoaderRoute: typeof EscolhaSuaCarreiraRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -981,6 +1001,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CursoCarreiraJudiciariaRoute: CursoCarreiraJudiciariaRoute,
+  EscolhaSuaCarreiraRoute: EscolhaSuaCarreiraRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TesteRoute: TesteRoute,
   ApiPublicConversoesGoogleAdsRoute: ApiPublicConversoesGoogleAdsRoute,

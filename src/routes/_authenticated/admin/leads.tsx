@@ -41,10 +41,15 @@ function telefoneInternacional(telefone: string) {
   return d.startsWith("55") ? d : `55${d}`;
 }
 
+/** Leads de formulário (Meta, Google ou do site) têm as 4 respostas em colunas; o Diagnóstico não. */
+function ehFormulario(origem?: string) {
+  return origem === "meta_form" || origem === "google_form" || origem === "site_form";
+}
+
 function linkWhatsApp(lead: { telefone: string; nome: string; origem?: string; carreira?: string | null }) {
   const primeiro = lead.nome.trim().split(/\s+/)[0] || "tudo bem";
   let texto: string;
-  if (lead.origem === "meta_form") {
+  if (ehFormulario(lead.origem)) {
     const carreiraDefinida = lead.carreira && !/ainda n[aã]o defini/i.test(lead.carreira.replace(/_/g, " "));
     texto = carreiraDefinida
       ? `Olá, ${primeiro}! Aqui é da equipe do Instituto J&D.\n\nVi que você preencheu nosso formulário e tem foco na carreira ${lead.carreira!.replace(/_/g, " ")}. Vamos te ajudar com os próximos passos!\n\nVocê já tem algum concurso em vista que tenha interesse em fazer? Se sim, qual o cargo?`
@@ -58,10 +63,12 @@ function linkWhatsApp(lead: { telefone: string; nome: string; origem?: string; c
 const ORIGEM_LABEL: Record<string, string> = {
   diagnostico: "Diagnóstico",
   meta_form: "Formulário Meta",
+  google_form: "Formulário Google",
+  site_form: "Formulário do site",
 };
 
 function resumoLead(lead: any): string {
-  if (lead.origem === "meta_form") {
+  if (ehFormulario(lead.origem)) {
     return [lead.carreira, lead.como_estuda, lead.horas_dia, lead.prazo_prova].filter(Boolean).join(" · ") || "—";
   }
   return resumoRespostas(lead.respostas);
@@ -78,7 +85,7 @@ function resumoRespostas(respostas: Record<string, unknown>): string {
 function Leads() {
   const listFn = useServerFn(adminListLeadsDiagnostico);
   const [segmento, setSegmento] = useState<"todos" | "quente" | "morno" | "frio">("todos");
-  const [origem, setOrigem] = useState<"todas" | "diagnostico" | "meta_form">("todas");
+  const [origem, setOrigem] = useState<"todas" | "diagnostico" | "meta_form" | "google_form" | "site_form">("todas");
 
   const query = useQuery({
     queryKey: ["admin", "leads-diagnostico", segmento, origem],
@@ -151,6 +158,8 @@ function Leads() {
               <SelectItem value="todas">Todas as origens</SelectItem>
               <SelectItem value="diagnostico">Diagnóstico</SelectItem>
               <SelectItem value="meta_form">Formulário Meta</SelectItem>
+              <SelectItem value="google_form">Formulário Google</SelectItem>
+              <SelectItem value="site_form">Formulário do site</SelectItem>
             </SelectContent>
           </Select>
           <Select value={segmento} onValueChange={(v) => setSegmento(v as any)}>

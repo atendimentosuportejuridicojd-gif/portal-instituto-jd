@@ -13,7 +13,7 @@ export const adminListLeadsDiagnostico = createServerFn({ method: "GET" })
     z
       .object({
         segmento: z.enum(["todos", "quente", "morno", "frio"]).default("todos"),
-        origem: z.enum(["todas", "diagnostico", "meta_form"]).default("todas"),
+        origem: z.enum(["todas", "diagnostico", "meta_form", "google_form", "site_form"]).default("todas"),
       })
       .parse(d ?? {}),
   )
