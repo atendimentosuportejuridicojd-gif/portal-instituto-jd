@@ -25,6 +25,8 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { emblemaCarreira } from "@/components/brand";
+import { useQuery } from "@tanstack/react-query";
+import { UserAvatar } from "@/components/user-avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -47,6 +49,16 @@ const TELEGRAM: Record<string, string> = {
 export function AppSidebar({ isAdmin, assinaturaAtiva, carreira }: { isAdmin: boolean; assinaturaAtiva: boolean; carreira?: string | null }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
+  const meu = useQuery({
+    queryKey: ["meu-avatar"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase.from("profiles").select("nome_completo, avatar_url").eq("id", u.user.id).maybeSingle();
+      return { nome: data?.nome_completo ?? null, avatar: data?.avatar_url ?? null, email: u.user.email ?? null };
+    },
+    staleTime: 5 * 60_000,
+  });
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -110,6 +122,16 @@ export function AppSidebar({ isAdmin, assinaturaAtiva, carreira }: { isAdmin: bo
 
       <SidebarFooter>
         <SidebarMenu>
+          {meu.data && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild className="h-auto py-2" tooltip="Meu perfil">
+                <Link to="/perfil">
+                  <UserAvatar url={meu.data.avatar} nome={meu.data.nome} email={meu.data.email} className="h-7 w-7" />
+                  <span className="truncate">{meu.data.nome || meu.data.email}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           {assinaturaAtiva && (
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="h-auto py-2" tooltip="Comunidade Telegram para assinantes">
