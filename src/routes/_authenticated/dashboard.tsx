@@ -26,6 +26,9 @@ import { alunoCronogramaAtual } from "@/lib/cronograma-aluno.functions";
 import { AnelProgresso, SeloTipo } from "@/components/cronograma/visual";
 import { formatarData, formatarMinutos } from "@/components/cronograma/formato";
 import { cn } from "@/lib/utils";
+import { emblemaCarreira } from "@/components/brand";
+import { getMinhaAssinatura } from "@/lib/assinaturas.functions";
+import { nomeCarreira } from "@/lib/carreiras";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -59,6 +62,9 @@ function Dashboard() {
   const continuarQuestoes = qResumo.data?.continuarQuestoes ?? null;
   const continuarLeitura = qResumo.data?.continuarLeitura ?? null;
   const favoritos = qFav.data ?? [];
+  const assFn = useServerFn(getMinhaAssinatura);
+  const qAss = useQuery({ queryKey: ["minha-assinatura"], queryFn: () => assFn(), staleTime: 60_000 });
+  const carreira = (qAss.data as any)?.carreira as string | null | undefined;
 
   return (
     <>
@@ -70,6 +76,15 @@ function Dashboard() {
       />
       <PageContent>
         <div className="space-y-9">
+          {carreira && (
+            <div className="surface-card flex items-center gap-4 p-4">
+              <img src={emblemaCarreira(carreira)} alt={`Emblema ${nomeCarreira(carreira)}`} className="h-20 w-20 shrink-0 object-contain" />
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Sua carreira</p>
+                <p className="text-lg font-bold text-foreground">{nomeCarreira(carreira)}</p>
+              </div>
+            </div>
+          )}
           <CartaoCronograma />
 
           {/* Continuar de onde parei */}

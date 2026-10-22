@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Scale, Landmark, Shield, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { emblemaCarreira } from "@/components/brand";
 import { CARREIRAS, type CarreiraId } from "@/lib/carreiras";
 import { definirCarreira, getMinhaAssinatura } from "@/lib/assinaturas.functions";
 
@@ -50,7 +51,6 @@ function EscolherCarreira() {
       </div>
       <div className="mt-10 grid gap-5 md:grid-cols-3">
         {CARREIRAS.map((c) => {
-          const Icone = ICONES[c.id];
           const ativo = sel === c.id;
           return (
             <button
@@ -67,9 +67,7 @@ function EscolherCarreira() {
                   <Check className="h-4 w-4" />
                 </span>
               )}
-              <span className="grid h-12 w-12 place-items-center rounded-lg bg-primary text-primary-foreground">
-                <Icone className="h-6 w-6" />
-              </span>
+              <img src={emblemaCarreira(c.id)} alt={`Emblema ${c.nome}`} className="mx-auto h-32 w-32 object-contain" loading="eager" />
               <h2 className="mt-4 text-lg font-bold text-foreground">{c.nome}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{c.descricao}</p>
               {q.data?.carreira === c.id && <p className="mt-3 text-xs font-semibold text-accent">Carreira atual</p>}
