@@ -14,6 +14,7 @@ import {
   BookMarked,
   Gavel,
   UserCheck,
+  Mail,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,6 +44,7 @@ const items = [
   { title: "Notícias", url: "/admin/noticias", icon: Newspaper },
   { title: "Usuários", url: "/admin/usuarios", icon: Users },
   { title: "Leads Qualificados", url: "/admin/leads", icon: UserCheck },
+  { title: "E-mail", url: "/admin/email", icon: Mail },
   { title: "Configurações", url: "/admin/configuracoes", icon: Settings },
   { title: "Ver portal como carreira", url: "/escolher-carreira", icon: Target },
 ];
