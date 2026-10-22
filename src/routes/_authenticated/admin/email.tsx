@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Mail, Search, Send, X } from "lucide-react";
+import { Inbox, Mail, Search, Send, X } from "lucide-react";
 import { toast } from "sonner";
 import { PageContent, PageHeader } from "@/components/page";
 import { Badge } from "@/components/ui/badge";
@@ -105,6 +105,18 @@ function EmailAdmin() {
         title="E-mail"
         description="Envie e-mails de contato a alunos e leads, e acompanhe a entrega."
         icone={Mail}
+        actions={
+          <Button asChild variant="outline">
+            <a
+              href="https://mail.google.com/mail/u/atendimento.suportejuridicojd@gmail.com/#inbox"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Inbox className="mr-2 h-4 w-4" />
+              Abrir caixa de entrada
+            </a>
+          </Button>
+        }
       />
       <PageContent>
         <Tabs defaultValue="escrever">
@@ -212,8 +224,8 @@ function EmailAdmin() {
                   />
                   <p className="text-xs text-muted-foreground">
                     Use <code>{"{nome}"}</code> para inserir o primeiro nome de cada pessoa. Linha em branco separa
-                    parágrafos. O e-mail sai com a marca do Instituto J&D e as respostas voltam para o e-mail de contato
-                    configurado em Configurações.
+                    parágrafos. O e-mail sai com a marca do Instituto J&D e as respostas chegam no Gmail de atendimento
+                    (botão "Abrir caixa de entrada", no topo).
                   </p>
                 </div>
                 <div className="flex items-center justify-between gap-3">
