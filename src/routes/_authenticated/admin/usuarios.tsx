@@ -27,6 +27,7 @@ import { Search, Lock, Unlock, Mail, Pencil, MessageCircle, Trash2, ClipboardChe
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { CARREIRAS } from "@/lib/carreiras";
+import { UserAvatar } from "@/components/user-avatar";
 import {
   adminListUsuarios,
   adminEditarUsuario,
@@ -243,6 +244,7 @@ function Usuarios() {
                 <TableRow key={r.id} className={r.online ? "bg-green-500/10" : undefined}>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      <UserAvatar url={r.avatar_url} nome={r.nome_completo} email={r.email} className="h-8 w-8" />
                       {r.online && (
                         <span className="relative flex h-2.5 w-2.5" title="Online agora">
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60" />

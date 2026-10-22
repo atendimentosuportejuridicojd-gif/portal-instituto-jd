@@ -22,7 +22,7 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
     let query = supabase
       .from("profiles")
       .select(
-        "id, nome_completo, email, telefone, origem, carreira, created_at, ultimo_acesso_em, bloqueado, bloqueado_motivo",
+        "id, nome_completo, email, telefone, origem, carreira, avatar_url, created_at, ultimo_acesso_em, bloqueado, bloqueado_motivo",
       )
       .order("created_at", { ascending: false })
       .limit(200);
