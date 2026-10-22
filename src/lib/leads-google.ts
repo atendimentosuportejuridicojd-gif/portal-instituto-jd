@@ -2,7 +2,7 @@
  * Adaptador do webhook de formulário de lead do Google Ads: converte o payload (WebhookLead) para
  * o núcleo de src/lib/leads-meta.ts. Módulo puro, sem alias "@/".
  */
-import { prepararLeadFormulario, type CampoFormulario, type LinhaLead } from "./leads-meta";
+import { perguntaDaResposta, prepararLeadFormulario, type CampoFormulario, type LinhaLead, type PerguntaPontuada } from "./leads-meta";
 
 export type ColunaGoogle = { column_id?: string; column_name?: string; string_value?: string };
 
@@ -20,17 +20,27 @@ export type LeadGoogle = {
 
 const texto = (v: unknown) => (v === undefined || v === null || v === "" ? null : String(v));
 
+/** Nomes que o núcleo reconhece para cada pergunta pontuada. */
+const NOME_CANONICO: Record<PerguntaPontuada, string> = {
+  carreira: "carreira",
+  estudo: "como estuda",
+  horas: "horas por dia",
+  prazo: "prazo da prova",
+};
+
 /**
- * Cada resposta vira um campo pelo column_id (FULL_NAME, EMAIL, PHONE_NUMBER) e outro pelo
- * column_name (rótulo da pergunta personalizada, hoje "deprecated" mas ainda enviado). O núcleo
- * acha o primeiro que casar, então perguntas com id opaco continuam pontuando pelo rótulo.
+ * Cada resposta vira um campo. Se o valor é uma das opções pontuadas, o campo recebe o nome canônico
+ * da pergunta (o texto da pergunta no Google pode ser qualquer um, e o column_name nem sempre vem).
+ * Caso contrário usa o column_id (FULL_NAME, EMAIL, PHONE_NUMBER ou o texto da pergunta) e o column_name.
  */
 export function camposDoGoogle(colunas: ColunaGoogle[] | undefined): CampoFormulario[] {
   const campos: CampoFormulario[] = [];
   for (const c of colunas ?? []) {
     const valor = c?.string_value;
     if (typeof valor !== "string" || !valor.trim()) continue;
-    for (const nome of new Set([c.column_id, c.column_name])) {
+    const pergunta = perguntaDaResposta(valor);
+    const nomes = pergunta ? [NOME_CANONICO[pergunta]] : [c.column_id, c.column_name];
+    for (const nome of new Set(nomes)) {
       if (nome) campos.push({ name: nome, values: [valor] });
     }
   }
