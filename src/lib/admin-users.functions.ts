@@ -10,6 +10,8 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
   if (!data) throw new Error("Acesso restrito ao administrador.");
 }
 
+const JANELA_ONLINE_MS = 90_000;
+
 export const adminListUsuarios = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ q: z.string().trim().max(200).default("") }).parse(d ?? {}))
@@ -20,7 +22,7 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
     let query = supabase
       .from("profiles")
       .select(
-        "id, nome_completo, email, telefone, origem, created_at, ultimo_acesso_em, bloqueado, bloqueado_motivo",
+        "id, nome_completo, email, telefone, origem, carreira, created_at, ultimo_acesso_em, bloqueado, bloqueado_motivo",
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -33,7 +35,7 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
     const ids = (profiles ?? []).map((p: any) => p.id);
     if (ids.length === 0) return [];
 
-    const [{ data: assins }, { data: sessoes }, { data: tent }, { data: roles }, { data: simulados }] =
+    const [{ data: assins }, { data: sessoes }, { data: tent }, { data: roles }, { data: simulados }, { data: ativas }] =
       await Promise.all([
         supabase
           .from("assinaturas")
@@ -43,7 +45,12 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
         supabase.from("questao_tentativas").select("user_id").in("user_id", ids),
         supabase.from("user_roles").select("user_id, role, expira_em").in("user_id", ids),
         (supabase as any).from("simulado_acessos").select("user_id, ativo, origem, fim").in("user_id", ids),
+        supabase.from("sessoes_ativas").select("user_id, updated_at").in("user_id", ids),
       ]);
+
+    // Online = o navegador do aluno avisou presença (a cada ~25 s, com a aba visível) nos últimos 90 s.
+    const presenca = new Map<string, string>();
+    (ativas ?? []).forEach((a: any) => presenca.set(a.user_id, a.updated_at));
 
     const simuladoMap = new Map<string, any>();
     (simulados ?? []).forEach((s: any) => simuladoMap.set(s.user_id, s));
@@ -75,6 +82,8 @@ export const adminListUsuarios = createServerFn({ method: "GET" })
       assinatura_status: assinMap.get(p.id)?.status ?? "sem_assinatura",
       assinatura_plano: assinMap.get(p.id)?.plano ?? null,
       assinatura_fim: assinMap.get(p.id)?.fim ?? null,
+      ultima_atividade_em: presenca.get(p.id) ?? null,
+      online: !!presenca.get(p.id) && Date.now() - new Date(presenca.get(p.id)!).getTime() < JANELA_ONLINE_MS,
       questionarios_concluidos: sessCount.get(p.id) ?? 0,
       questoes_respondidas: tentCount.get(p.id) ?? 0,
       roles: roleMap.get(p.id) ?? ["aluno"],
