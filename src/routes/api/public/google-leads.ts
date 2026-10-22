@@ -6,7 +6,7 @@ import { prepararLeadGoogle, type LeadGoogle } from "@/lib/leads-google";
  * Webhook do formulário de lead do Google Ads (extensão de formulário).
  *
  * POST -> confere google_key do corpo com GOOGLE_LEADS_KEY (o Google não assina o corpo). Chave errada = 401
- *         e nada é gravado. Lead de teste (is_test) responde 200 sem gravar. Os demais são gravados em
+ *         e nada é gravado. Os demais, inclusive os de teste (marcados com aviso), são gravados em
  *         leads_diagnostico com upsert por google_lead_id (reentregas do Google não duplicam).
  *
  * Respostas: 200 {} = recebido; 4xx {message} = o Google não reenvia; 5xx = o Google reenvia.
@@ -42,7 +42,6 @@ export const Route = createFileRoute("/api/public/google-leads")({
           return json({ message: "Unauthorized" }, 401);
         }
         if (!lead.lead_id) return json({ message: "lead_id ausente" }, 400);
-        if (lead.is_test === true) return json({}, 200);
 
         try {
           const linha = prepararLeadGoogle(lead);

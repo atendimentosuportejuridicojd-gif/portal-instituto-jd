@@ -37,6 +37,11 @@ describe("prepararLeadGoogle", () => {
     expect(JSON.stringify(prepararLeadGoogle(base).payload_bruto)).not.toContain("segredo");
   });
 
+  it("marca o lead de teste com aviso", () => {
+    expect(prepararLeadGoogle({ ...base, is_test: true }).avisos).toContain("lead de teste do Google (is_test)");
+    expect(prepararLeadGoogle(base).avisos).not.toContain("lead de teste do Google (is_test)");
+  });
+
   it("não lança com pergunta faltando: registra aviso", () => {
     const l = prepararLeadGoogle({ lead_id: "z", user_column_data: [{ column_id: "EMAIL", string_value: "a@b.com" }] });
     expect(l.avisos.length).toBeGreaterThan(0);
