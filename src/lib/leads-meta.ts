@@ -11,7 +11,7 @@
  */
 
 export type Segmento = "quente" | "morno" | "frio";
-export type OrigemFormulario = "meta_form";
+export type OrigemFormulario = "meta_form" | "google_form";
 
 export type CampoFormulario = { name: string; values?: string[] };
 
@@ -92,7 +92,9 @@ function valorDoCampo(campos: CampoFormulario[], achar: (chave: string) => boole
 
 export type LinhaLead = {
   origem: OrigemFormulario;
-  meta_lead_id: string;
+  meta_lead_id: string | null;
+  google_lead_id?: string;
+  gclid?: string | null;
   nome: string;
   email: string | null;
   telefone: string | null;
