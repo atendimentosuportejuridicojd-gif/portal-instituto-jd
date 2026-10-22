@@ -24,7 +24,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { BrandLogo } from "@/components/brand";
+import { emblemaCarreira } from "@/components/brand";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -59,7 +59,7 @@ export function AppSidebar({ isAdmin, assinaturaAtiva, carreira }: { isAdmin: bo
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5">
           <div className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-md bg-white">
-            <BrandLogo size={28} alt="Instituto J&D Especialistas na Carreira Judiciária" />
+            <img src={emblemaCarreira(carreira)} alt={carreira ? `Emblema ${nomeCarreira(carreira)}` : "Instituto J&D"} className="h-7 w-7 object-contain" />
           </div>
           <div className="min-w-0 leading-tight group-data-[collapsible=icon]:hidden">
             <p className="truncate text-sm font-bold text-sidebar-foreground">Instituto J&D</p>

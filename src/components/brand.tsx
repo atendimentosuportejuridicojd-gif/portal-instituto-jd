@@ -59,3 +59,17 @@ export function BrandLockup({
     </div>
   );
 }
+
+import emblemaJudiciaria from "@/assets/emblema-judiciaria.png.asset.json";
+import emblemaFiscal from "@/assets/emblema-fiscal.png.asset.json";
+import emblemaPolicial from "@/assets/emblema-policial.png.asset.json";
+
+export const EMBLEMAS: Record<string, string> = {
+  judiciaria: emblemaJudiciaria.url,
+  fiscal: emblemaFiscal.url,
+  policial: emblemaPolicial.url,
+};
+
+export function emblemaCarreira(carreira?: string | null): string {
+  return (carreira && EMBLEMAS[carreira]) || LOGO_URL;
+}
