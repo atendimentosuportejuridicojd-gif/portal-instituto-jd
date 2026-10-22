@@ -37,6 +37,11 @@ const items = [
   { title: "Fique por Dentro", url: "/noticias", icon: Newspaper },
   { title: "Perfil", url: "/perfil", icon: User },
 ];
+const TELEGRAM: Record<string, string> = {
+  judiciaria: "https://t.me/+Y5hY1y0N6os1ZTUx",
+  policial: "https://t.me/+jETqYkNku5A1MDUx",
+  fiscal: "https://t.me/+sSdXzdeEbLdkZGYx",
+};
 
 
 export function AppSidebar({ isAdmin, assinaturaAtiva, carreira }: { isAdmin: boolean; assinaturaAtiva: boolean; carreira?: string | null }) {
@@ -108,7 +113,7 @@ export function AppSidebar({ isAdmin, assinaturaAtiva, carreira }: { isAdmin: bo
           {assinaturaAtiva && (
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="h-auto py-2" tooltip="Comunidade Telegram para assinantes">
-                <a href="https://t.me/+Y5hY1y0N6os1ZTUx" target="_blank" rel="noopener noreferrer">
+                <a href={TELEGRAM[carreira ?? ""] ?? TELEGRAM.judiciaria} target="_blank" rel="noopener noreferrer">
                   <Send />
                   <span className="whitespace-normal leading-tight">
                     Exclusivo para Assinantes: Comunidade Telegram
