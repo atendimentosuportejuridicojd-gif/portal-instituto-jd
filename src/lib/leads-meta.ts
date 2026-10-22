@@ -71,6 +71,21 @@ function pontuar(rotulo: string, valor: string | null, tabela: Record<string, nu
   return pontos;
 }
 
+export type PerguntaPontuada = "carreira" | "estudo" | "horas" | "prazo";
+
+/**
+ * Descobre a que pergunta uma resposta pertence, pelo valor. As quatro listas de respostas não se
+ * cruzam, então serve para formulários em que o texto da pergunta foge das palavras esperadas.
+ */
+export function perguntaDaResposta(valor: string): PerguntaPontuada | null {
+  const chave = chaveResposta(valor);
+  if (chave in PONTOS_CARREIRA) return "carreira";
+  if (chave in PONTOS_ESTUDO) return "estudo";
+  if (chave in PONTOS_HORAS) return "horas";
+  if (chave in PONTOS_PRAZO) return "prazo";
+  return null;
+}
+
 export function segmentoPorPontuacao(total: number): Segmento {
   return total >= 9 ? "quente" : total >= 5 ? "morno" : "frio";
 }
