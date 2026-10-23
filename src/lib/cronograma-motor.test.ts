@@ -105,3 +105,16 @@ describe("motor do cronograma J&D", () => {
     expect(vazio.cabe).toBe(true);
   });
 });
+
+import { gerarPlano as gerarSoQuestoes } from "./cronograma-motor";
+import { test as t2, expect as e2 } from "vitest";
+t2("só questões: o plano não tem blocos de leitura", () => {
+  const r = gerarSoQuestoes({
+    dataInicio: "2026-11-01", dataProva: "2026-12-30",
+    minutosPorDiaSemana: [120, 120, 120, 120, 120, 120, 120],
+    disciplinas: [{ id: "d", nome: "D", materias: [{ id: "m", titulo: "M", minutosLeitura: 40, qtdQuestoes: 10 }] }],
+    somenteQuestoes: true,
+  });
+  e2(r.blocos.some((b) => b.tipo === "estudo")).toBe(false);
+  e2(r.blocos.some((b) => b.tipo === "questoes")).toBe(true);
+});

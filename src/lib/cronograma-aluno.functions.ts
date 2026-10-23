@@ -13,6 +13,7 @@ const parametrosSchema = z.object({
   minutos_por_questao: z.number().int().min(1).max(60).default(3),
   ordem_disciplinas: z.array(z.string().uuid()).max(60).optional(),
   usa_simulado: z.boolean().default(false),
+  somente_questoes: z.boolean().default(false),
   duracao_prova_min: z.number().int().min(10).max(1440).nullable().optional(),
 });
 

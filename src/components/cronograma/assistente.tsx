@@ -119,6 +119,7 @@ export function Assistente({
   const [dias, setDias] = useState<Record<number, boolean>>({ 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true });
   const [minQuestao, setMinQuestao] = useState("3");
   const [usaSimulado, setUsaSimulado] = useState(false);
+  const [somenteQuestoes, setSomenteQuestoes] = useState(false);
   const [duracaoH, setDuracaoH] = useState("4");
   const [duracaoM, setDuracaoM] = useState("0");
   const [ordem, setOrdem] = useState<string[]>([]);
@@ -139,9 +140,10 @@ export function Assistente({
       minutos_por_questao: Math.round(Number(minQuestao)) || 3,
       ordem_disciplinas: ordem.length ? ordem : undefined,
       usa_simulado: usaSimulado,
+      somente_questoes: somenteQuestoes,
       duracao_prova_min: usaSimulado ? duracaoProva : null,
     }),
-    [concursoId, dataInicio, dataProva, dias, minutosDia, minQuestao, ordem, usaSimulado, duracaoProva],
+    [concursoId, dataInicio, dataProva, dias, minutosDia, minQuestao, ordem, usaSimulado, duracaoProva, somenteQuestoes],
   );
 
   const previa = useMutation({
@@ -410,6 +412,33 @@ export function Assistente({
                       )}
                     >
                       {d.rotulo}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                <Label>Como você quer estudar?</Label>
+                <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Forma de estudo">
+                  {[
+                    { v: false, t: "Material + Questões", d: "Leitura da matéria seguida das questões comentadas." },
+                    { v: true, t: "Só questões", d: "Todo o tempo vai para resolver questões comentadas." },
+                  ].map((o) => (
+                    <button
+                      key={o.t}
+                      type="button"
+                      role="radio"
+                      aria-checked={somenteQuestoes === o.v}
+                      onClick={() => setSomenteQuestoes(o.v)}
+                      className={cn(
+                        "rounded-xl border p-4 text-left transition-all",
+                        somenteQuestoes === o.v
+                          ? "border-primary bg-primary/[0.04] ring-2 ring-primary/30"
+                          : "border-border bg-card hover:border-primary/40",
+                      )}
+                    >
+                      <p className="font-semibold">{o.t}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{o.d}</p>
                     </button>
                   ))}
                 </div>
