@@ -23,6 +23,7 @@ export interface ParametrosAluno {
   minutos_por_questao: number;
   ordem_disciplinas?: string[];
   usa_simulado: boolean;
+  somente_questoes?: boolean;
   duracao_prova_min?: number | null;
 }
 
@@ -180,6 +181,7 @@ function paraMotor(p: ParametrosAluno, disciplinas: DisciplinaCarregada[], dataI
     minutosPorQuestao: p.minutos_por_questao,
     simulados: p.usa_simulado,
     minutosSimulado: p.usa_simulado ? (p.duracao_prova_min ?? 0) : 0,
+    somenteQuestoes: !!p.somente_questoes,
   };
 }
 
@@ -355,7 +357,7 @@ export async function criarCronograma(ctx: Ctx, p: ParametrosAluno) {
       duracao_prova_min: p.usa_simulado ? p.duracao_prova_min : null,
       ordem_disciplinas: disciplinas.map((d) => d.id),
       status,
-      resumo: resumo(plano),
+      resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes },
     })
     .select("id")
     .single();
@@ -407,6 +409,7 @@ export async function finalizarRascunho(ctx: Ctx) {
     ordem_disciplinas: r.ordem_disciplinas,
     usa_simulado: r.usa_simulado,
     duracao_prova_min: r.duracao_prova_min,
+    somente_questoes: !!r.resumo?.somente_questoes,
   };
   const disciplinas = await carregarDisciplinas(supabase, r.concurso_id, r.ordem_disciplinas);
   const plano = gerarPlano(paraMotor(p, disciplinas, dataInicio));
@@ -414,7 +417,7 @@ export async function finalizarRascunho(ctx: Ctx) {
   await supabase.from("cronogramas_aluno").update({ status: "arquivado" }).eq("user_id", userId).eq("status", "ativo");
   const { error } = await supabase
     .from("cronogramas_aluno")
-    .update({ status: "ativo", data_inicio: dataInicio, resumo: resumo(plano) })
+    .update({ status: "ativo", data_inicio: dataInicio, resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes } })
     .eq("id", r.id);
   if (error) throw new Error(error.message);
   await inserirBlocos(supabase, r.id, plano.blocos);

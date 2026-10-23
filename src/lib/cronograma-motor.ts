@@ -52,6 +52,8 @@ export interface ParametrosPlano {
   simulados?: boolean;
   /** Duração de cada simulado em minutos (total de questões da prova × minutos por questão). */
   minutosSimulado?: number;
+  /** Aluno escolheu estudar só por questões: sem blocos de leitura. */
+  somenteQuestoes?: boolean;
 }
 
 export interface BlocoPlano {
@@ -129,7 +131,7 @@ function montarItens(p: ParametrosPlano): ItemTrabalho[] {
   for (const d of p.disciplinas) {
     let totalDisciplina = 0;
     for (const m of d.materias) {
-      const leitura = Math.max(0, Math.round(m.minutosLeitura));
+      const leitura = p.somenteQuestoes ? 0 : Math.max(0, Math.round(m.minutosLeitura));
       const questoes = Math.max(0, Math.round(m.qtdQuestoes * minQ));
       if (leitura > 0) {
         itens.push({ tipo: "estudo", disciplinaId: d.id, materiaId: m.id, titulo: m.titulo, minutos: leitura });
