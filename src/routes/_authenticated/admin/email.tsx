@@ -108,7 +108,7 @@ function EmailAdmin() {
         actions={
           <Button asChild variant="outline">
             <a
-              href="https://mail.google.com/mail/u/atendimento.suportejuridicojd@gmail.com/#inbox"
+              href="https://mail.google.com/mail/u/?authuser=atendimento.suportejuridicojd@gmail.com"
               target="_blank"
               rel="noreferrer"
             >
