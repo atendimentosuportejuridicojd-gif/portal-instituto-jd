@@ -632,6 +632,7 @@ export async function recalcularCronograma(ctx: Ctx) {
     ordem_disciplinas: c.ordem_disciplinas,
     usa_simulado: c.usa_simulado,
     duracao_prova_min: c.duracao_prova_min,
+    somente_questoes: !!c.resumo?.somente_questoes,
   };
   const disciplinas = await carregarDisciplinas(supabase, c.concurso_id, c.ordem_disciplinas, concluidas);
   const plano = gerarPlano(paraMotor(p, disciplinas, hoje));
@@ -644,7 +645,7 @@ export async function recalcularCronograma(ctx: Ctx) {
     .eq("concluido", false);
   if (eDel) throw new Error(eDel.message);
   await inserirBlocos(supabase, c.id, plano.blocos);
-  const { error } = await supabase.from("cronogramas_aluno").update({ resumo: resumo(plano) }).eq("id", c.id);
+  const { error } = await supabase.from("cronogramas_aluno").update({ resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes } }).eq("id", c.id);
   if (error) throw new Error(error.message);
   return { resumo: resumo(plano) };
 }
