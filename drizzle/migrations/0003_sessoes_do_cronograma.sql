@@ -1,0 +1,1 @@
+ALTER TABLE public.questao_sessoes ADD COLUMN IF NOT EXISTS do_cronograma boolean NOT NULL DEFAULT false;

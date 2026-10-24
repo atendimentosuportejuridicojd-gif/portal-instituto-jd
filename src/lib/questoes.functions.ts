@@ -213,7 +213,7 @@ export const alunoSessoesEmAndamento = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: sessoes } = await supabase
       .from("questao_sessoes")
-      .select("id, material_id, total_questoes")
+      .select("id, material_id, total_questoes, do_cronograma")
       .eq("user_id", userId)
       .eq("status", "em_andamento");
     const lista = (sessoes ?? []).filter((s: any) => s.material_id);
@@ -237,6 +237,7 @@ export const alunoSessoesEmAndamento = createServerFn({ method: "GET" })
     }
     return lista.map((s: any) => ({
       material_id: s.material_id as string,
+      do_cronograma: !!s.do_cronograma,
       respondidas: respondidas.get(s.id) ?? 0,
       total: (s.total_questoes as number) ?? 0,
     }));
@@ -258,12 +259,15 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
       banca = normalizarBanca(conc?.banca);
     }
 
+    // Sessões do cronograma são separadas das do acervo: uma nunca retoma a outra.
+    const doCronograma = !!data.concurso_id;
     let busca = supabase
       .from("questao_sessoes")
       .select("id")
       .eq("user_id", userId)
       .eq("material_id", data.material_id)
-      .eq("status", "em_andamento");
+      .eq("status", "em_andamento")
+      .eq("do_cronograma", doCronograma);
     busca = banca ? busca.eq("banca", banca) : busca.is("banca", null);
     const { data: existing } = await busca.limit(1).maybeSingle();
 
@@ -292,6 +296,7 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
         total_questoes: count,
         status: "em_andamento",
         banca,
+        do_cronograma: doCronograma,
       })
       .select("id")
       .single();

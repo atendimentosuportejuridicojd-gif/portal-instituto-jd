@@ -22,6 +22,13 @@
       "when": 1792817934746,
       "tag": "0002_questoes_por_banca",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792822858512,
+      "tag": "0003_sessoes_do_cronograma",
+      "breakpoints": true
     }
   ]
 }
