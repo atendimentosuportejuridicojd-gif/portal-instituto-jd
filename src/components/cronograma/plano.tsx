@@ -260,9 +260,10 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
           )}
 
           {atrasados.length > 0 && (
-            <Dia titulo="Em atraso" blocos={atrasados} nomeDisciplina={nomeDisciplina} onMarcar={marcar.mutate} mostrarData />
+            <Dia concursoId={c.concurso_id} titulo="Em atraso" blocos={atrasados} nomeDisciplina={nomeDisciplina} onMarcar={marcar.mutate} mostrarData />
           )}
           <Dia
+            concursoId={c.concurso_id}
             titulo={`Hoje — ${formatarDia(hoje)}`}
             blocos={doDia(hoje)}
             nomeDisciplina={nomeDisciplina}
@@ -352,6 +353,8 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
           />
           {diaSelecionado ? (
             <Dia
+              concursoId={c.concurso_id}
+            concursoId={c.concurso_id}
               titulo={formatarDia(diaSelecionado)}
               blocos={doDia(diaSelecionado)}
               nomeDisciplina={nomeDisciplina}
@@ -563,7 +566,9 @@ function Dia({
   onMarcar,
   vazio,
   mostrarData,
+  concursoId,
 }: {
+  concursoId?: string | null;
   titulo: string;
   blocos: Bloco[];
   nomeDisciplina: Map<string, string>;
@@ -614,7 +619,7 @@ function Dia({
                 </p>
               </div>
               <SeloTipo tipo={b.tipo} />
-              <AcaoDoBloco bloco={b} concursoId={c.concurso_id} />
+              <AcaoDoBloco bloco={b} concursoId={concursoId} />
             </li>
           ))}
         </ul>
