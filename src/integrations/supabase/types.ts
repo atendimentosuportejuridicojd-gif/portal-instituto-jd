@@ -664,6 +664,7 @@ export type Database = {
           carreiras: string[]
           codigo: string | null
           concurso_id: string | null
+          concurso_ids: string[]
           created_at: string
           descricao: string | null
           disciplina_base_id: string | null
@@ -680,6 +681,7 @@ export type Database = {
           carreiras?: string[]
           codigo?: string | null
           concurso_id?: string | null
+          concurso_ids?: string[]
           created_at?: string
           descricao?: string | null
           disciplina_base_id?: string | null
@@ -696,6 +698,7 @@ export type Database = {
           carreiras?: string[]
           codigo?: string | null
           concurso_id?: string | null
+          concurso_ids?: string[]
           created_at?: string
           descricao?: string | null
           disciplina_base_id?: string | null

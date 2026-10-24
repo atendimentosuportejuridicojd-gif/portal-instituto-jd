@@ -29,6 +29,13 @@
       "when": 1792822858512,
       "tag": "0003_sessoes_do_cronograma",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792871735530,
+      "tag": "0004_disciplinas_multiplos_concursos",
+      "breakpoints": true
     }
   ]
 }
