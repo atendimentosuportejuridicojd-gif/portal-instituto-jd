@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { normalizarBanca } from "@/lib/banca";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,7 @@ function AdminQuestoes() {
     setEditing({
       material_id: selectedMat,
       referencia: "",
+      banca: null,
       enunciado: "",
       comentario_professor: "",
       alternativas: LETRAS.map((l) => ({ letra: l, texto: "" })),
@@ -78,6 +80,7 @@ function AdminQuestoes() {
       id: q.id,
       material_id: selectedMat,
       referencia: q.referencia ?? "",
+      banca: normalizarBanca(q.banca),
       enunciado: q.enunciado ?? "",
       comentario_professor: q.comentario_professor ?? "",
       alternativas: alts,
@@ -94,6 +97,7 @@ function AdminQuestoes() {
           id: editing.id,
           material_id: editing.material_id,
           referencia: editing.referencia,
+          banca: editing.banca ?? null,
           enunciado: editing.enunciado,
           comentario_professor: editing.comentario_professor ?? "",
           ordem: 0,
@@ -251,6 +255,24 @@ function AdminQuestoes() {
                   value={editing.referencia}
                   onChange={(e) => setEditing({ ...editing, referencia: e.target.value })}
                 />
+              </div>
+              <div>
+                <Label>Banca (oficial ou inédita no estilo da banca)</Label>
+                <Select
+                  value={editing.banca ?? "nenhuma"}
+                  onValueChange={(v) => setEditing({ ...editing, banca: v === "nenhuma" ? null : v })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CEBRASPE">Cebraspe</SelectItem>
+                    <SelectItem value="FGV">FGV</SelectItem>
+                    <SelectItem value="FCC">FCC</SelectItem>
+                    <SelectItem value="nenhuma">Sem banca</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Só o administrador vê. No cronograma e nos simulados, a questão aparece apenas para concursos dessa banca.
+                </p>
               </div>
               <div>
                 <Label>Enunciado</Label>

@@ -99,7 +99,7 @@ export const adminListQuestoesPorMaterial = createServerFn({ method: "GET" })
     const { data: questoes, error } = await context.supabase
       .from("questoes")
       .select(
-        "id, enunciado, referencia, ordem, publicado, comentario_professor, questao_alternativas(id, letra, texto, correta, ordem)",
+        "id, enunciado, referencia, banca, ordem, publicado, comentario_professor, questao_alternativas(id, letra, texto, correta, ordem)",
       )
       .eq("material_id", data.material_id)
       .order("ordem", { ascending: true });
