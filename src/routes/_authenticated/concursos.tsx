@@ -8,6 +8,7 @@ import { alunoListConcursos } from "@/lib/trilhas.functions";
 import { diferencaDias } from "@/lib/cronograma-motor";
 import { formatarData } from "@/components/cronograma/formato";
 import { hojeBrasilia } from "@/lib/simulado-pagamento";
+import { TextoComLinks } from "@/components/texto-com-links";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/concursos")({
@@ -111,7 +112,9 @@ function ConcursosPage() {
                     )}
                   </div>
 
-                  {c.observacoes && <p className="px-5 pt-3 text-sm text-muted-foreground">{c.observacoes}</p>}
+                  {c.observacoes && (
+                    <TextoComLinks texto={c.observacoes} className="px-5 pt-3 text-sm text-muted-foreground" />
+                  )}
 
                   <div className="mt-auto flex flex-wrap items-center gap-2 p-5 pt-4">
                     <Button asChild size="sm">
