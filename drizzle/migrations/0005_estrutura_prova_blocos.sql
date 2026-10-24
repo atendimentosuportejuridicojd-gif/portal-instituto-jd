@@ -1,0 +1,2 @@
+ALTER TABLE public.concurso_prova_estrutura ADD COLUMN bloco text NOT NULL DEFAULT 'gerais';
+ALTER TABLE public.concurso_prova_estrutura ADD CONSTRAINT concurso_prova_estrutura_bloco_check CHECK (bloco IN ('gerais','especificos'));
