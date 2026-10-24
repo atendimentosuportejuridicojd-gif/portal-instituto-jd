@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAcessoAluno, getCarreiraUsuario } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
+import { normalizarBanca, BANCAS } from "@/lib/banca";
 
 // ============ Admin ============
 
@@ -14,6 +15,7 @@ const upsertQuestaoSchema = z.object({
   comentario_professor: z.string().trim().default(""),
   ordem: z.number().int().default(0),
   publicado: z.boolean().default(true),
+  banca: z.enum(BANCAS).nullable().default(null),
   alternativas: z
     .array(
       z.object({
@@ -47,6 +49,7 @@ export const adminUpsertQuestao = createServerFn({ method: "POST" })
       comentario_professor: data.comentario_professor || null,
       ordem: data.ordem,
       publicado: data.publicado,
+      banca: data.banca,
     };
 
     let questaoId = data.id;
@@ -241,29 +244,45 @@ export const alunoSessoesEmAndamento = createServerFn({ method: "GET" })
 
 export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ material_id: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ material_id: z.string().uuid(), concurso_id: z.string().uuid().optional() }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertAcessoAluno(context);
     const { supabase, userId } = context;
 
-    const { data: existing } = await supabase
+    // Vindo do cronograma: só as questões da banca do concurso. Pelo acervo: todas as questões da matéria.
+    let banca: string | null = null;
+    if (data.concurso_id) {
+      const { data: conc } = await supabase.from("concursos").select("banca").eq("id", data.concurso_id).maybeSingle();
+      banca = normalizarBanca(conc?.banca);
+    }
+
+    let busca = supabase
       .from("questao_sessoes")
       .select("id")
       .eq("user_id", userId)
       .eq("material_id", data.material_id)
-      .eq("status", "em_andamento")
-      .maybeSingle();
+      .eq("status", "em_andamento");
+    busca = banca ? busca.eq("banca", banca) : busca.is("banca", null);
+    const { data: existing } = await busca.limit(1).maybeSingle();
 
     if (existing) return { sessaoId: existing.id };
 
-    const { count } = await supabase
+    let contar = supabase
       .from("questoes")
       .select("id", { count: "exact", head: true })
       .eq("material_id", data.material_id)
       .eq("publicado", true);
+    if (banca) contar = contar.ilike("banca", banca);
+    const { count } = await contar;
 
     if (!count || count === 0)
-      throw new Error("Este material ainda não possui questões cadastradas.");
+      throw new Error(
+        banca
+          ? `Esta matéria ainda não tem questões da banca ${banca}. Aproveite para estudar o material teórico.`
+          : "Este material ainda não possui questões cadastradas.",
+      );
 
     const { data: nova, error } = await supabase
       .from("questao_sessoes")
@@ -272,6 +291,7 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
         material_id: data.material_id,
         total_questoes: count,
         status: "em_andamento",
+        banca,
       })
       .select("id")
       .single();
@@ -288,19 +308,20 @@ export const getSessaoAtual = createServerFn({ method: "GET" })
     const { data: sessao, error } = await supabase
       .from("questao_sessoes")
       .select(
-        "id, material_id, status, total_questoes, acertos, erros, percentual, iniciada_em, concluida_em, materiais(id, titulo, disciplinas(nome))",
+        "id, material_id, banca, status, total_questoes, acertos, erros, percentual, iniciada_em, concluida_em, materiais(id, titulo, disciplinas(nome))",
       )
       .eq("id", data.sessao_id)
       .eq("user_id", userId)
       .single();
     if (error) throw new Error(error.message);
 
-    const { data: questoes, error: qerr } = await supabase
+    let consulta = supabase
       .from("questoes")
       .select("id, enunciado, referencia, ordem, questao_alternativas(id, letra, texto, ordem)")
       .eq("material_id", sessao.material_id)
-      .eq("publicado", true)
-      .order("ordem");
+      .eq("publicado", true);
+    if ((sessao as any).banca) consulta = consulta.ilike("banca", (sessao as any).banca);
+    const { data: questoes, error: qerr } = await consulta.order("ordem");
     if (qerr) throw new Error(qerr.message);
 
     const { data: tentativas } = await supabase

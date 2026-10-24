@@ -17,7 +17,10 @@ export function BotaoQuestoes({
   size = "sm",
   className,
   mostrarProgresso = true,
+  concursoId,
 }: {
+  /** Aberto pelo cronograma: filtra as questões pela banca deste concurso. */
+  concursoId?: string | null;
   materialId: string;
   /** Texto quando não há questões em andamento. */
   rotulo?: ReactNode;
@@ -34,7 +37,7 @@ export function BotaoQuestoes({
 
   return (
     <Button asChild variant={variant} size={size} className={className}>
-      <Link to="/materiais/$materialId/questoes" params={{ materialId }}>
+      <Link to="/materiais/$materialId/questoes" params={{ materialId }} search={concursoId ? { concurso: concursoId } : {}}>
         {sessao ? (
           <>
             <Play className="mr-1.5 h-3.5 w-3.5" />
