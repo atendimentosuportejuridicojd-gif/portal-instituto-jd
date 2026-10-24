@@ -1,5 +1,6 @@
 import { assertAcessoAluno, getCarreiraUsuario } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
+import { normalizarBanca } from "@/lib/banca";
 import { hojeBrasilia } from "@/lib/simulado-pagamento";
 import {
   META_DESEMPENHO,
@@ -74,6 +75,8 @@ export async function carregarDisciplinas(
   const estruturaEfetiva = estrutura.filter((e: any) => !idsComplemento.has(e.disciplina_id));
   const idsMaterias = [...new Set([...ids, ...idsComplemento])];
 
+  const { data: concursoInfo } = await supabase.from("concursos").select("banca").eq("id", concursoId).maybeSingle();
+  const banca = normalizarBanca(concursoInfo?.banca);
   const [{ data: disciplinas }, { data: materiais }, { data: vinculos }, contagem] = await Promise.all([
     supabase.from("disciplinas").select("id, nome").in("id", ids),
     supabase
@@ -85,7 +88,7 @@ export async function carregarDisciplinas(
       .order("ordem")
       .order("titulo"),
     supabase.from("concurso_materiais").select("material_id").eq("concurso_id", concursoId),
-    contarQuestoesPorMaterial(supabase, { somentePublicadas: true }),
+    contarQuestoesPorMaterial(supabase, { somentePublicadas: true }, banca),
   ]);
 
   const nomes = new Map<string, string>((disciplinas ?? []).map((d: any) => [d.id, d.nome]));
@@ -165,7 +168,8 @@ export async function carregarDisciplinas(
           id: m.id,
           titulo: m.titulo,
           minutosLeitura: m.tempo_leitura ?? LEITURA_PADRAO_MIN,
-          qtdQuestoes: contagem.get(m.id) || mediaDisciplina,
+          // Concurso com banca: só as questões reais daquela banca (sem estimativa).
+          qtdQuestoes: banca ? (contagem.get(m.id) ?? 0) : contagem.get(m.id) || mediaDisciplina,
           qtdReal: contagem.get(m.id) ?? 0,
         })),
     };
