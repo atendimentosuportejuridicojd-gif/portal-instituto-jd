@@ -6,10 +6,14 @@
 export async function contarQuestoesPorMaterial(
   supabase: any,
   opts?: { somentePublicadas?: boolean },
+  banca?: string | null,
 ): Promise<Map<string, number>> {
-  const { data, error } = await supabase.rpc("contar_questoes_por_material", {
-    _somente_publicadas: opts?.somentePublicadas ?? false,
-  });
+  // Com banca: só as questões publicadas daquela banca (oficiais e inéditas no estilo dela).
+  const { data, error } = banca
+    ? await supabase.rpc("contar_questoes_por_material_banca", { _banca: banca })
+    : await supabase.rpc("contar_questoes_por_material", {
+        _somente_publicadas: opts?.somentePublicadas ?? false,
+      });
   if (error) throw new Error(error.message);
   const contagem = new Map<string, number>();
   for (const linha of data ?? []) {
