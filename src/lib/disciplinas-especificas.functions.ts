@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAcessoAluno, assertAdmin, gerarSlug } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
+import { pertenceAoConcurso } from "@/lib/concursos-da-disciplina";
 
 // ===================== ADMIN =====================
 
@@ -18,7 +19,7 @@ export const adminListDisciplinasEspecificas = createServerFn({ method: "GET" })
         supabase.from("concursos").select("id, nome, orgao, publicado").order("nome"),
         (supabase as any)
           .from("disciplinas")
-          .select("id, nome, descricao, ordem, concurso_id, grupo, disciplina_base_id")
+          .select("id, nome, descricao, ordem, concurso_id, concurso_ids, grupo, disciplina_base_id")
           .eq("especifica", true)
           .order("ordem"),
         supabase
@@ -51,7 +52,7 @@ export const adminUpsertDisciplinaEspecifica = createServerFn({ method: "POST" }
         id: z.string().uuid().optional(),
         nome: z.string().trim().min(1).max(200),
         descricao: z.string().trim().max(1000).optional().default(""),
-        concurso_id: z.string().uuid(),
+        concurso_ids: z.array(z.string().uuid()).min(1),
         ordem: z.number().int().min(0).default(0),
         // Prova do edital a que a disciplina pertence (Conhecimentos Gerais ou Específicos).
         grupo: z.enum(["gerais", "especificos"]).optional(),
@@ -74,7 +75,8 @@ export const adminUpsertDisciplinaEspecifica = createServerFn({ method: "POST" }
     const payload: Record<string, unknown> = {
       nome: data.nome,
       descricao: data.descricao || null,
-      concurso_id: data.concurso_id,
+      concurso_id: data.concurso_ids[0],
+      concurso_ids: data.concurso_ids,
       ordem: data.ordem,
       especifica: true,
     };
@@ -128,14 +130,14 @@ export const alunoListConcursosEspecificos = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false }),
       supabase
         .from("disciplinas")
-        .select("id, nome, concurso_id")
+        .select("id, nome, concurso_id, concurso_ids")
         .eq("especifica", true),
     ]);
 
     return (concursos ?? [])
       .map((c: any) => ({
         ...c,
-        total_disciplinas: (disciplinas ?? []).filter((d: any) => d.concurso_id === c.id).length,
+        total_disciplinas: (disciplinas ?? []).filter((d: any) => pertenceAoConcurso(d, c.id)).length,
       }))
       .filter((c: any) => c.total_disciplinas > 0);
   });
@@ -148,7 +150,7 @@ export const alunoGetConcursoEspecifico = createServerFn({ method: "GET" })
     await assertAcessoAluno(context);
     const { supabase } = context;
 
-    const [{ data: concurso }, { data: disciplinas }] = await Promise.all([
+    const [{ data: concurso }, { data: todasDisciplinas }] = await Promise.all([
       supabase
         .from("concursos")
         .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes")
@@ -157,11 +159,11 @@ export const alunoGetConcursoEspecifico = createServerFn({ method: "GET" })
         .maybeSingle(),
       supabase
         .from("disciplinas")
-        .select("id, nome, descricao, ordem")
+        .select("id, nome, descricao, ordem, concurso_id, concurso_ids")
         .eq("especifica", true)
-        .eq("concurso_id", data.concurso_id)
         .order("ordem"),
     ]);
+    const disciplinas = (todasDisciplinas ?? []).filter((d: any) => pertenceAoConcurso(d, data.concurso_id));
     if (!concurso) throw new Error("Concurso indisponível.");
 
     const ids = (disciplinas ?? []).map((d: any) => d.id);

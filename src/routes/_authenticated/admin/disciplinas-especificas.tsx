@@ -1,3 +1,5 @@
+import { Checkbox } from "@/components/ui/checkbox";
+import { concursosDaDisciplina, pertenceAoConcurso } from "@/lib/concursos-da-disciplina";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -90,7 +92,7 @@ function AdminDisciplinasEspecificas() {
         ) : (
           <div className="space-y-6">
             {concursos
-              .filter((c: any) => disciplinas.some((d: any) => d.concurso_id === c.id))
+              .filter((c: any) => disciplinas.some((d: any) => pertenceAoConcurso(d, c.id)))
               .map((c: any) => (
                 <section key={c.id} className="surface-card p-5">
                   <div className="flex items-center gap-2">
@@ -99,10 +101,10 @@ function AdminDisciplinasEspecificas() {
                   </div>
                   <div className="mt-4 space-y-4">
                     {disciplinas
-                      .filter((d: any) => d.concurso_id === c.id)
+                      .filter((d: any) => pertenceAoConcurso(d, c.id))
                       .map((d: any) => (
                         <DisciplinaCard
-                          key={d.id}
+                          key={`${c.id}-${d.id}`}
                           d={d}
                           concursos={concursos}
                           base={base}
@@ -258,7 +260,7 @@ function DisciplinaDialog({
   const [open, setOpen] = useState(false);
   const [nome, setNome] = useState(disciplina?.nome ?? "");
   const [descricao, setDescricao] = useState(disciplina?.descricao ?? "");
-  const [concursoId, setConcursoId] = useState<string>(disciplina?.concurso_id ?? "");
+  const [concursoIds, setConcursoIds] = useState<string[]>(disciplina ? concursosDaDisciplina(disciplina) : []);
   const [ordem, setOrdem] = useState(String(disciplina?.ordem ?? 0));
   const [grupo, setGrupo] = useState<string>(disciplina?.grupo ?? "gerais");
   const [baseId, setBaseId] = useState<string>(disciplina?.disciplina_base_id ?? "nenhuma");
@@ -271,7 +273,7 @@ function DisciplinaDialog({
           id: disciplina?.id,
           nome: nome.trim(),
           descricao: descricao.trim(),
-          concurso_id: concursoId,
+          concurso_ids: concursoIds,
           ordem: Number(ordem) || 0,
           grupo: grupo as "gerais" | "especificos",
           disciplina_base_id: baseId === "nenhuma" ? null : baseId,
@@ -311,19 +313,23 @@ function DisciplinaDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Concurso</Label>
-            <Select value={concursoId} onValueChange={setConcursoId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Escolher concurso" />
-              </SelectTrigger>
-              <SelectContent>
-                {concursos.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Concursos</Label>
+            <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border border-border/60 p-3">
+              {concursos.map((c: any) => (
+                <label key={c.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={concursoIds.includes(c.id)}
+                    onCheckedChange={(v) =>
+                      setConcursoIds((ids) => (v ? [...ids, c.id] : ids.filter((x) => x !== c.id)))
+                    }
+                  />
+                  {c.nome}
+                </label>
+              ))}
+            </div>
+            {concursoIds.length === 0 && (
+              <p className="text-xs text-destructive">Escolha pelo menos um concurso.</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="nome-disc">Nome da disciplina</Label>
@@ -389,7 +395,7 @@ function DisciplinaDialog({
         <DialogFooter>
           <Button
             onClick={() => salvar.mutate()}
-            disabled={!nome.trim() || !concursoId || salvar.isPending}
+            disabled={!nome.trim() || concursoIds.length === 0 || salvar.isPending}
           >
             Salvar
           </Button>

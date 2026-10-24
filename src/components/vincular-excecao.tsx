@@ -1,3 +1,4 @@
+import { pertenceAoConcurso } from "@/lib/concursos-da-disciplina";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -63,7 +64,7 @@ export function VincularExcecao({
     if (!destino) return [];
     const juntas = new Set(
       disciplinas
-        .filter((d: any) => d.especifica && d.disciplina_base_id === destino && d.concurso_id === concurso.id)
+        .filter((d: any) => d.especifica && d.disciplina_base_id === destino && pertenceAoConcurso(d, concurso.id))
         .map((d: any) => d.id),
     );
     const termo = semAcento(busca.trim());

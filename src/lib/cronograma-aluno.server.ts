@@ -63,12 +63,13 @@ export async function carregarDisciplinas(
   // Disciplinas específicas deste concurso vinculadas a uma disciplina do Acervo Base que está na prova: as
   // matérias delas entram na disciplina-base e a específica não vira uma disciplina à parte. Sem vínculo (ou com
   // a base fora da prova), a específica continua sendo uma disciplina própria.
+  // Uma disciplina específica pode pertencer a vários concursos (concurso_ids).
   const { data: especificas } = await supabase
     .from("disciplinas")
-    .select("id, ordem, disciplina_base_id")
-    .eq("concurso_id", concursoId)
+    .select("id, ordem, disciplina_base_id, concurso_id, concurso_ids")
     .eq("especifica", true);
   const complementos = (especificas ?? [])
+    .filter((d: any) => (d.concurso_ids?.length ? d.concurso_ids.includes(concursoId) : d.concurso_id === concursoId))
     .filter((d: any) => d.disciplina_base_id && ids.includes(d.disciplina_base_id))
     .sort((a: any, b: any) => a.ordem - b.ordem);
   const idsComplemento = new Set<string>(complementos.map((d: any) => d.id));
