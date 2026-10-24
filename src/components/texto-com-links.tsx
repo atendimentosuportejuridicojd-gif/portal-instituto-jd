@@ -11,7 +11,7 @@ export function TextoComLinks({ texto, className }: { texto: string; className?:
   return (
     <p className={className} style={{ whiteSpace: "pre-line" }}>
       {partes.map((parte, i) => {
-        if (!URL_REGEX.test("") && /^(https?:\/\/|www\.)/.test(parte)) {
+        if (/^(https?:\/\/|www\.)/.test(parte)) {
           const href = parte.startsWith("www.") ? `https://${parte}` : parte;
           return (
             <a
