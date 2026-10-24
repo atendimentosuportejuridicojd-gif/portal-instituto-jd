@@ -33,7 +33,7 @@ export function BotaoQuestoes({
   mostrarProgresso?: boolean;
 }) {
   const { emAndamento } = useSessoesEmAndamento();
-  const sessao = emAndamento(materialId);
+  const sessao = emAndamento(materialId, !!concursoId);
 
   return (
     <Button asChild variant={variant} size={size} className={className}>

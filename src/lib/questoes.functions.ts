@@ -213,7 +213,7 @@ export const alunoSessoesEmAndamento = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: sessoes } = await supabase
       .from("questao_sessoes")
-      .select("id, material_id, total_questoes")
+      .select("id, material_id, total_questoes, do_cronograma")
       .eq("user_id", userId)
       .eq("status", "em_andamento");
     const lista = (sessoes ?? []).filter((s: any) => s.material_id);
@@ -237,6 +237,7 @@ export const alunoSessoesEmAndamento = createServerFn({ method: "GET" })
     }
     return lista.map((s: any) => ({
       material_id: s.material_id as string,
+      do_cronograma: !!s.do_cronograma,
       respondidas: respondidas.get(s.id) ?? 0,
       total: (s.total_questoes as number) ?? 0,
     }));
