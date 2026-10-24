@@ -354,7 +354,6 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
           {diaSelecionado ? (
             <Dia
               concursoId={c.concurso_id}
-            concursoId={c.concurso_id}
               titulo={formatarDia(diaSelecionado)}
               blocos={doDia(diaSelecionado)}
               nomeDisciplina={nomeDisciplina}
