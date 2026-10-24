@@ -258,12 +258,15 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
       banca = normalizarBanca(conc?.banca);
     }
 
+    // Sessões do cronograma são separadas das do acervo: uma nunca retoma a outra.
+    const doCronograma = !!data.concurso_id;
     let busca = supabase
       .from("questao_sessoes")
       .select("id")
       .eq("user_id", userId)
       .eq("material_id", data.material_id)
-      .eq("status", "em_andamento");
+      .eq("status", "em_andamento")
+      .eq("do_cronograma", doCronograma);
     busca = banca ? busca.eq("banca", banca) : busca.is("banca", null);
     const { data: existing } = await busca.limit(1).maybeSingle();
 
@@ -292,6 +295,7 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
         total_questoes: count,
         status: "em_andamento",
         banca,
+        do_cronograma: doCronograma,
       })
       .select("id")
       .single();
