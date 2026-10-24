@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { CarreirasPicker } from "@/components/carreiras-picker";
+import { pertenceAoConcurso } from "@/lib/concursos-da-disciplina";
 import { VincularExcecao } from "@/components/vincular-excecao";
 import {
   adminListConcursos,
@@ -377,7 +378,7 @@ function EstruturaProva({
   // Específicas vinculadas a uma disciplina do Acervo Base entram sozinhas nela (no cronograma e no simulado),
   // então não são escolhidas à parte na estrutura da prova.
   const opcoes = disciplinas.filter((d: any) =>
-    d.especifica ? d.concurso_id === concurso.id && !d.disciplina_base_id : true,
+    d.especifica ? pertenceAoConcurso(d, concurso.id) && !d.disciplina_base_id : true,
   );
   const nomeDe = (id: string) => opcoes.find((d: any) => d.id === id)?.nome ?? "Disciplina";
 

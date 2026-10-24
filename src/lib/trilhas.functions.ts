@@ -136,7 +136,7 @@ export const adminListConcursos = createServerFn({ method: "GET" })
         .from("concurso_prova_estrutura")
         .select("concurso_id, disciplina_id, qtd_questoes, peso, ordem")
         .order("ordem"),
-      (supabase as any).from("disciplinas").select("id, nome, especifica, concurso_id, disciplina_base_id").order("nome"),
+      (supabase as any).from("disciplinas").select("id, nome, especifica, concurso_id, concurso_ids, disciplina_base_id").order("nome"),
       (supabase as any).from("concurso_materiais_excecao").select("concurso_id, material_id, disciplina_id"),
     ]);
 
