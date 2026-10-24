@@ -134,7 +134,7 @@ export const adminListConcursos = createServerFn({ method: "GET" })
         .order("titulo"),
       (supabase as any)
         .from("concurso_prova_estrutura")
-        .select("concurso_id, disciplina_id, qtd_questoes, peso, ordem")
+        .select("concurso_id, disciplina_id, qtd_questoes, peso, ordem, bloco")
         .order("ordem"),
       (supabase as any).from("disciplinas").select("id, nome, especifica, concurso_id, concurso_ids, disciplina_base_id").order("nome"),
       (supabase as any).from("concurso_materiais_excecao").select("concurso_id, material_id, disciplina_id"),
@@ -224,7 +224,9 @@ export const adminSalvarEstruturaProva = createServerFn({ method: "POST" })
             z.object({
               disciplina_id: z.string().uuid(),
               qtd_questoes: z.number().int().min(1).max(500),
+              // Peso do quadro (Gerais/Específicos), repetido em cada disciplina do quadro.
               peso: z.number().min(0.01).max(99),
+              bloco: z.enum(["gerais", "especificos"]).default("gerais"),
             }),
           )
           .max(60),

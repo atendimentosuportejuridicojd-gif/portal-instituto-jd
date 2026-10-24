@@ -359,7 +359,15 @@ function VincularConcurso({
   );
 }
 
-type LinhaProva = { disciplina_id: string; qtd: string; peso: string };
+type Bloco = "gerais" | "especificos";
+type LinhaProva = { disciplina_id: string; qtd: string; bloco: Bloco };
+
+const QUADROS: { bloco: Bloco; titulo: string }[] = [
+  { bloco: "gerais", titulo: "Conhecimentos Gerais" },
+  { bloco: "especificos", titulo: "Conhecimentos Específicos" },
+];
+
+const numero = (v: string) => Number(String(v).replace(",", "."));
 
 function EstruturaProva({
   concurso,
@@ -372,6 +380,7 @@ function EstruturaProva({
 }) {
   const [open, setOpen] = useState(false);
   const [linhas, setLinhas] = useState<LinhaProva[]>([]);
+  const [pesos, setPesos] = useState<Record<Bloco, string>>({ gerais: "1", especificos: "1" });
   const fn = useServerFn(adminSalvarEstruturaProva);
 
   // Acervo Base + disciplinas específicas deste concurso.
@@ -385,28 +394,37 @@ function EstruturaProva({
   const abrir = (v: boolean) => {
     setOpen(v);
     if (v) {
+      const est: any[] = concurso.estrutura ?? [];
       setLinhas(
-        (concurso.estrutura ?? []).map((e: any) => ({
+        est.map((e: any) => ({
           disciplina_id: e.disciplina_id,
           qtd: String(e.qtd_questoes),
-          peso: String(e.peso),
+          bloco: (e.bloco === "especificos" ? "especificos" : "gerais") as Bloco,
         })),
       );
+      const pesoDe = (b: Bloco) => {
+        const e = est.find((x: any) => (x.bloco ?? "gerais") === b);
+        return e ? String(e.peso) : "1";
+      };
+      setPesos({ gerais: pesoDe("gerais"), especificos: pesoDe("especificos") });
     }
   };
 
   const mut = useMutation({
-    mutationFn: () =>
-      fn({
+    mutationFn: () => {
+      const ordenadas = [...linhas.filter((l) => l.bloco === "gerais"), ...linhas.filter((l) => l.bloco === "especificos")];
+      return fn({
         data: {
           concurso_id: concurso.id,
-          linhas: linhas.map((l) => ({
+          linhas: ordenadas.map((l) => ({
             disciplina_id: l.disciplina_id,
             qtd_questoes: Math.round(Number(l.qtd)),
-            peso: Number(String(l.peso).replace(",", ".")),
+            peso: numero(pesos[l.bloco]),
+            bloco: l.bloco,
           })),
         },
-      }),
+      });
+    },
     onSuccess: () => {
       toast.success("Estrutura da prova salva.");
       setOpen(false);
@@ -418,12 +436,12 @@ function EstruturaProva({
   const usadas = new Set(linhas.map((l) => l.disciplina_id));
   const disponiveis = opcoes.filter((d: any) => !usadas.has(d.id));
   const total = linhas.reduce((acc, l) => acc + (Number(l.qtd) || 0), 0);
-  const invalido = linhas.some(
-    (l) => !(Number(l.qtd) >= 1) || !(Number(String(l.peso).replace(",", ".")) > 0),
-  );
+  const blocosUsados = new Set(linhas.map((l) => l.bloco));
+  const invalido =
+    linhas.some((l) => !(Number(l.qtd) >= 1)) || [...blocosUsados].some((b) => !(numero(pesos[b]) > 0));
 
-  const alterar = (i: number, campo: "qtd" | "peso", valor: string) =>
-    setLinhas((ls) => ls.map((l, j) => (j === i ? { ...l, [campo]: valor } : l)));
+  const alterarQtd = (id: string, valor: string) =>
+    setLinhas((ls) => ls.map((l) => (l.disciplina_id === id ? { ...l, qtd: valor } : l)));
 
   return (
     <Dialog open={open} onOpenChange={abrir}>
@@ -437,71 +455,91 @@ function EstruturaProva({
         <DialogHeader>
           <DialogTitle>Estrutura da prova — {concurso.nome}</DialogTitle>
           <DialogDescription>
-            Informe, por disciplina, quantas questões a prova tem e o peso. É a base para montar os simulados.
-            As disciplinas específicas vinculadas a uma disciplina do Acervo Base entram automaticamente nela.
+            Separe as disciplinas em Conhecimentos Gerais e Específicos, informe o peso de cada quadro e quantas
+            questões cada disciplina tem. As específicas vinculadas a uma disciplina do Acervo Base entram
+            automaticamente nela.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          {linhas.length === 0 && (
-            <p className="text-sm text-muted-foreground">Nenhuma disciplina adicionada ainda.</p>
-          )}
-          {linhas.map((l, i) => (
-            <div key={l.disciplina_id} className="grid grid-cols-[1fr_5rem_5rem_auto] items-end gap-2">
-              <div className="min-w-0">
-                {i === 0 && <Label className="text-xs">Disciplina</Label>}
-                <p className="truncate rounded-md border border-border/60 px-3 py-2 text-sm">
-                  {nomeDe(l.disciplina_id)}
-                </p>
-              </div>
-              <div>
-                {i === 0 && <Label className="text-xs">Questões</Label>}
-                <Input
-                  inputMode="numeric"
-                  value={l.qtd}
-                  onChange={(e) => alterar(i, "qtd", e.target.value)}
-                  aria-label={`Questões de ${nomeDe(l.disciplina_id)}`}
-                />
-              </div>
-              <div>
-                {i === 0 && <Label className="text-xs">Peso</Label>}
-                <Input
-                  inputMode="decimal"
-                  value={l.peso}
-                  onChange={(e) => alterar(i, "peso", e.target.value)}
-                  aria-label={`Peso de ${nomeDe(l.disciplina_id)}`}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                title="Remover"
-                onClick={() => setLinhas((ls) => ls.filter((_, j) => j !== i))}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+        <div className="space-y-4">
+          {QUADROS.map((q) => {
+            const doQuadro = linhas.filter((l) => l.bloco === q.bloco);
+            const totalQuadro = doQuadro.reduce((a, l) => a + (Number(l.qtd) || 0), 0);
+            return (
+              <section key={q.bloco} className="space-y-3 rounded-xl border border-border p-4">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="font-semibold">{q.titulo}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {totalQuadro} questão(ões) em {doQuadro.length} disciplina(s)
+                    </p>
+                  </div>
+                  <div className="w-24">
+                    <Label className="text-xs">Peso</Label>
+                    <Input
+                      inputMode="decimal"
+                      value={pesos[q.bloco]}
+                      onChange={(e) => setPesos((p) => ({ ...p, [q.bloco]: e.target.value }))}
+                      aria-label={`Peso de ${q.titulo}`}
+                    />
+                  </div>
+                </div>
 
-          {disponiveis.length > 0 && (
-            <Select
-              value=""
-              onValueChange={(id) => setLinhas((ls) => [...ls, { disciplina_id: id, qtd: "10", peso: "1" }])}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Adicionar disciplina à prova…" />
-              </SelectTrigger>
-              <SelectContent>
-                {disponiveis.map((d: any) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.nome}
-                    {d.especifica ? " (específica)" : ""}
-                  </SelectItem>
+                {doQuadro.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Nenhuma disciplina neste quadro.</p>
+                )}
+                {doQuadro.map((l, i) => (
+                  <div key={l.disciplina_id} className="grid grid-cols-[1fr_5rem_auto] items-end gap-2">
+                    <div className="min-w-0">
+                      {i === 0 && <Label className="text-xs">Disciplina</Label>}
+                      <p className="truncate rounded-md border border-border/60 px-3 py-2 text-sm">
+                        {nomeDe(l.disciplina_id)}
+                      </p>
+                    </div>
+                    <div>
+                      {i === 0 && <Label className="text-xs">Questões</Label>}
+                      <Input
+                        inputMode="numeric"
+                        value={l.qtd}
+                        onChange={(e) => alterarQtd(l.disciplina_id, e.target.value)}
+                        aria-label={`Questões de ${nomeDe(l.disciplina_id)}`}
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Remover"
+                      onClick={() => setLinhas((ls) => ls.filter((x) => x.disciplina_id !== l.disciplina_id))}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
-          )}
+
+                {disponiveis.length > 0 && (
+                  <Select
+                    value=""
+                    onValueChange={(id) =>
+                      setLinhas((ls) => [...ls, { disciplina_id: id, qtd: "10", bloco: q.bloco }])
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={`Adicionar disciplina em ${q.titulo}…`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {disponiveis.map((d: any) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.nome}
+                          {d.especifica ? " (exclusiva)" : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </section>
+            );
+          })}
           <p className="text-xs text-muted-foreground">
-            Total: {total} questão(ões) em {linhas.length} disciplina(s).
+            Total da prova: {total} questão(ões) em {linhas.length} disciplina(s).
           </p>
         </div>
         <DialogFooter>

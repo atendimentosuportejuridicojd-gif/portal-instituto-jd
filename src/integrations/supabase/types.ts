@@ -182,6 +182,7 @@ export type Database = {
       }
       concurso_prova_estrutura: {
         Row: {
+          bloco: string
           concurso_id: string
           created_at: string
           disciplina_id: string
@@ -191,6 +192,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bloco?: string
           concurso_id: string
           created_at?: string
           disciplina_id: string
@@ -200,6 +202,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bloco?: string
           concurso_id?: string
           created_at?: string
           disciplina_id?: string
