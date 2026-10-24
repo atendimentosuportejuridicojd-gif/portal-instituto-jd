@@ -1418,6 +1418,7 @@ export type Database = {
       questao_sessoes: {
         Row: {
           acertos: number
+          banca: string | null
           concluida_em: string | null
           created_at: string
           erros: number
@@ -1432,6 +1433,7 @@ export type Database = {
         }
         Insert: {
           acertos?: number
+          banca?: string | null
           concluida_em?: string | null
           created_at?: string
           erros?: number
@@ -1446,6 +1448,7 @@ export type Database = {
         }
         Update: {
           acertos?: number
+          banca?: string | null
           concluida_em?: string | null
           created_at?: string
           erros?: number
@@ -1900,6 +1903,13 @@ export type Database = {
       }
       contar_questoes_por_material: {
         Args: { _somente_publicadas?: boolean }
+        Returns: {
+          material_id: string
+          total: number
+        }[]
+      }
+      contar_questoes_por_material_banca: {
+        Args: { _banca: string }
         Returns: {
           material_id: string
           total: number

@@ -15,6 +15,13 @@
       "when": 1792447245005,
       "tag": "0001_multi_carreira",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792817934746,
+      "tag": "0002_questoes_por_banca",
+      "breakpoints": true
     }
   ]
 }
