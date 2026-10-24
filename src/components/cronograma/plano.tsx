@@ -245,7 +245,7 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
                     {proxima.data < hoje && <span>· era para {formatarDia(proxima.data)}</span>}
                   </div>
                 </div>
-                <AcaoDoBloco bloco={proxima} grande />
+                <AcaoDoBloco bloco={proxima} grande concursoId={c.concurso_id} />
               </div>
             </div>
           ) : (
@@ -614,7 +614,7 @@ function Dia({
                 </p>
               </div>
               <SeloTipo tipo={b.tipo} />
-              <AcaoDoBloco bloco={b} />
+              <AcaoDoBloco bloco={b} concursoId={c.concurso_id} />
             </li>
           ))}
         </ul>
@@ -623,7 +623,7 @@ function Dia({
   );
 }
 
-function AcaoDoBloco({ bloco, grande }: { bloco: Bloco; grande?: boolean }) {
+function AcaoDoBloco({ bloco, grande, concursoId }: { bloco: Bloco; grande?: boolean; concursoId?: string | null }) {
   const tamanho = grande ? "default" : "sm";
   if (bloco.tipo === "estudo" && bloco.material_id) {
     return (
@@ -640,6 +640,7 @@ function AcaoDoBloco({ bloco, grande }: { bloco: Bloco; grande?: boolean }) {
       <BotaoQuestoes
         materialId={bloco.material_id}
         rotulo="Resolver"
+        concursoId={concursoId}
         icone={<ListChecks className="mr-1.5 h-4 w-4" />}
         size={tamanho}
         variant={grande ? "default" : "outline"}
@@ -647,7 +648,7 @@ function AcaoDoBloco({ bloco, grande }: { bloco: Bloco; grande?: boolean }) {
     );
   }
   if (bloco.tipo === "revisao") {
-    return <RevisaoBloco blocoId={bloco.id} />;
+    return <RevisaoBloco blocoId={bloco.id} concursoId={concursoId} />;
   }
   if (bloco.tipo === "simulado") {
     return (

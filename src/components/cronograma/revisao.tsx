@@ -11,7 +11,7 @@ import { BotaoQuestoes } from "@/components/botao-questoes";
 import { formatarMinutos } from "./formato";
 
 /** Botão do bloco de revisão: abre a lista das matérias abaixo da meta, calculada no momento. */
-export function RevisaoBloco({ blocoId }: { blocoId: string }) {
+export function RevisaoBloco({ blocoId, concursoId }: { blocoId: string; concursoId?: string | null }) {
   const [aberto, setAberto] = useState(false);
   const fn = useServerFn(alunoRevisaoBloco);
   const q = useQuery({
@@ -88,6 +88,7 @@ export function RevisaoBloco({ blocoId }: { blocoId: string }) {
                       <BotaoQuestoes
                         materialId={i.material_id}
                         rotulo="Resolver"
+                        concursoId={concursoId}
                         icone={<ListChecks className="mr-1.5 h-3.5 w-3.5" />}
                         variant="default"
                       />
