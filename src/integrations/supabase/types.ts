@@ -1421,6 +1421,7 @@ export type Database = {
           banca: string | null
           concluida_em: string | null
           created_at: string
+          do_cronograma: boolean
           erros: number
           id: string
           iniciada_em: string
@@ -1436,6 +1437,7 @@ export type Database = {
           banca?: string | null
           concluida_em?: string | null
           created_at?: string
+          do_cronograma?: boolean
           erros?: number
           id?: string
           iniciada_em?: string
@@ -1451,6 +1453,7 @@ export type Database = {
           banca?: string | null
           concluida_em?: string | null
           created_at?: string
+          do_cronograma?: boolean
           erros?: number
           id?: string
           iniciada_em?: string
