@@ -29,12 +29,15 @@ import {
 } from "@/lib/questoes.functions";
 
 export const Route = createFileRoute("/_authenticated/materiais/$materialId/questoes")({
+  validateSearch: (s: Record<string, unknown>): { concurso?: string } =>
+    typeof s.concurso === "string" ? { concurso: s.concurso } : {},
   head: () => ({ meta: [{ title: "Resolver questões — Portal J&D" }] }),
   component: Resolver,
 });
 
 function Resolver() {
   const { materialId } = Route.useParams();
+  const { concurso } = Route.useSearch();
   const navigate = useNavigate();
   const nav = useMaterialNavegacao(materialId);
   const iniciar = useServerFn(iniciarOuRetomarSessao);
@@ -65,7 +68,7 @@ function Resolver() {
   useEffect(() => {
     (async () => {
       try {
-        const { sessaoId } = await iniciar({ data: { material_id: materialId } });
+        const { sessaoId } = await iniciar({ data: { material_id: materialId, concurso_id: concurso } });
         setSessaoId(sessaoId);
         const s = await carregar({ data: { sessao_id: sessaoId } });
         setState(s);
@@ -77,7 +80,7 @@ function Resolver() {
         setLoading(false);
       }
     })();
-  }, [materialId]);
+  }, [materialId, concurso]);
 
   if (loading) {
     return <PageContent><div className="text-sm text-muted-foreground">Carregando…</div></PageContent>;

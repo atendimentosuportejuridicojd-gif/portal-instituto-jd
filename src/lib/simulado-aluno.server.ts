@@ -5,6 +5,7 @@ import {
   recalcularCronograma,
 } from "@/lib/cronograma-aluno.server";
 import { hojeBrasilia } from "@/lib/simulado-pagamento";
+import { normalizarBanca } from "@/lib/banca";
 
 /** admin e aleatorio podem ser trocados nos testes; em produção usam a chave de serviço e Math.random. */
 type Ctx = { supabase: any; userId: string; admin?: any; aleatorio?: () => number };
@@ -102,13 +103,13 @@ export async function painelSimulados(ctx: Ctx) {
 // ---------- montar e iniciar ----------
 
 /** IDs das questões publicadas e não anuladas, agrupados por matéria. */
-async function questoesPorMateria(supabase: any, materialIds: string[]): Promise<Map<string, string[]>> {
+async function questoesPorMateria(supabase: any, materialIds: string[], banca: string | null): Promise<Map<string, string[]>> {
   const mapa = new Map<string, string[]>();
   for (const grupo of pedacos(materialIds, 60)) {
     for (let de = 0; ; de += 1000) {
       const { data, error } = await supabase
         .from("questoes")
-        .select("id, material_id")
+        .select("id, material_id, banca")
         .in("material_id", grupo)
         .eq("publicado", true)
         .eq("anulada", false)
@@ -116,6 +117,8 @@ async function questoesPorMateria(supabase: any, materialIds: string[]): Promise
         .range(de, de + 999);
       if (error) throw new Error(error.message);
       for (const q of data ?? []) {
+        // Mesma regra do cronograma: concurso com banca usa só as questões daquela banca.
+        if (banca && normalizarBanca(q.banca) !== banca) continue;
         const l = mapa.get(q.material_id) ?? [];
         l.push(q.id);
         mapa.set(q.material_id, l);
@@ -169,7 +172,8 @@ export async function iniciarSimulado(ctx: Ctx, blocoId: string) {
   const disciplinas = await carregarDisciplinas(supabase, c.concurso_id, undefined);
   const materiasDe = new Map<string, string[]>(disciplinas.map((d) => [d.id, d.materias.map((m) => m.id)]));
   const todasMaterias = [...new Set([...materiasDe.values()].flat())];
-  const porMateria = await questoesPorMateria(supabase, todasMaterias);
+  const { data: concursoInfo } = await supabase.from("concursos").select("banca").eq("id", c.concurso_id).maybeSingle();
+  const porMateria = await questoesPorMateria(supabase, todasMaterias, normalizarBanca(concursoInfo?.banca));
 
   // Questões que o aluno já viu em simulados anteriores deste cronograma: só repetem se faltar opção.
   const { data: anteriores } = await supabase.from("simulados_aluno").select("id").eq("cronograma_id", c.id);
