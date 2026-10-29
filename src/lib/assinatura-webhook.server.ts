@@ -21,6 +21,10 @@ async function gravar(db: any, ref: string, row: Record<string, unknown>) {
     ? await db.from("assinaturas").update(payload).eq("id", atual.id)
     : await db.from("assinaturas").insert({ ...payload, hotmart_transaction_id: ref });
   if (r.error) throw r.error;
+  // A paying student is no longer a trial student.
+  if (row.status === "ativa" && row.user_id) {
+    await db.from("user_roles").delete().eq("user_id", row.user_id).eq("role", "aluno_teste");
+  }
 }
 
 async function syncSubscription(db: any, stripe: Stripe, subId: string, evento: string) {
