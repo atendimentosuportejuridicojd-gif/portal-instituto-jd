@@ -41,7 +41,7 @@ export function fimAnual(pagoEm: Date): string {
   return d.toISOString();
 }
 
-/** Monthly plan is a one-time payment (Pix-friendly, no auto-renewal): one month of access. */
+/** Fallback for legacy one-time monthly payments: one month of access (new monthly plans are recurring). */
 export function fimMensal(pagoEm: Date): string {
   const d = new Date(pagoEm);
   d.setUTCMonth(d.getUTCMonth() + 1);
