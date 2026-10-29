@@ -1,5 +1,5 @@
 import { createStripeClient, type StripeEnv } from "@/lib/stripe.server";
-import { ASSINATURA_SERVICE, parsePriceId, priceIdPlano, TESTE_PRICE_ID, type Periodo } from "@/lib/assinatura-planos";
+import { ASSINATURA_SERVICE, carreiraPlano, parsePriceId, priceIdPlano, TESTE_PRICE_ID, type Periodo } from "@/lib/assinatura-planos";
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -44,7 +44,7 @@ export async function criarSessaoAssinatura(
     // Internal low-value test plan, reachable only via ?teste=1 link.
     if (ativa) throw new Error("Você já possui uma assinatura ativa.");
     priceId = TESTE_PRICE_ID;
-    plano = { carreira: "judiciaria", periodo: "mensal" };
+    plano = { carreira: carreiraPlano(profile.carreira), periodo: "mensal" };
   } else {
     if (ativa) throw new Error("Você já possui uma assinatura ativa.");
     // Career comes from the profile, never from the client.
@@ -57,7 +57,9 @@ export async function criarSessaoAssinatura(
   if (!price) throw new Error("Plano não configurado.");
   const recorrente = price.type === "recurring";
   const customer = await resolveOrCreateCustomer(stripe, { userId: context.userId, email: profile.email });
-  const metadata = { userId: context.userId, user_id: context.userId, service: ASSINATURA_SERVICE, plano: priceId, carreira: plano.carreira };
+  // Test plan shares one Stripe price; record it under the student's own career.
+  const planoRegistro = priceId === TESTE_PRICE_ID ? `${plano.carreira}_teste_mensal` : priceId;
+  const metadata = { userId: context.userId, user_id: context.userId, service: ASSINATURA_SERVICE, plano: planoRegistro, carreira: plano.carreira };
   let description: string | undefined;
   if (!recorrente) {
     const product = await stripe.products.retrieve(typeof price.product === "string" ? price.product : price.product.id);
