@@ -18,6 +18,14 @@ function bancoFalso(inicial: Record<string, any[]> = {}) {
       insert: async (l: any) => (linhas.push(l), { error: null }),
       update: (l: any) => ({ eq: async () => ({ error: null, l }) }),
       upsert: async (l: any) => (linhas.push(l), { error: null }),
+      delete: () => ({
+        eq: (c1: string, v1: unknown) => ({
+          eq: async (c2: string, v2: unknown) => {
+            tabelas[nome] = linhas.filter((l) => !(l[c1] === v1 && l[c2] === v2));
+            return { error: null };
+          },
+        }),
+      }),
     };
   };
   return { db: { from }, tabelas };
@@ -77,5 +85,11 @@ describe("conversão do Google Ads no webhook do Stripe", () => {
     await expect(processarEventoAssinatura(evento({}), "live", db, {} as any)).resolves.toBeUndefined();
     expect(tabelas.admin_logs[0]).toMatchObject({ acao: "stripe.conversao_google_erro" });
     expect(tabelas.assinaturas).toHaveLength(1);
+  });
+
+  it("assinatura paga tira a marca de aluno teste", async () => {
+    const teste = bancoFalso({ user_roles: [{ user_id: "u1", role: "aluno_teste" }, { user_id: "u2", role: "aluno_teste" }] });
+    await processarEventoAssinatura(evento({}), "live", teste.db, {} as any);
+    expect(teste.tabelas.user_roles).toEqual([{ user_id: "u2", role: "aluno_teste" }]);
   });
 });
