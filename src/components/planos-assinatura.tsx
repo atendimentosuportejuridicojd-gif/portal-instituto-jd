@@ -65,7 +65,7 @@ export function PlanosAssinatura({ carreira }: { carreira?: string | null }) {
         {/* Mensal */}
         <div className="flex flex-col rounded-2xl border border-border bg-card p-6 text-left shadow-sm">
           <h3 className="text-lg font-semibold">Assinatura Mensal</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Sem fidelidade. Pague por Pix ou cartão, mês a mês.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Sem fidelidade. Renovação automática todo mês no cartão de crédito ou débito. Cancele quando quiser.</p>
           <p className="mt-5">
             <span className="text-4xl font-bold tracking-tight text-primary">{brl(p.mensal)}</span>
             <span className="text-sm text-muted-foreground"> /mês</span>
