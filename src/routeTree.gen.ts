@@ -43,6 +43,7 @@ import { Route as AuthenticatedSimuladosSimuladoIdRouteImport } from './routes/_
 import { Route as ApiPublicConversoesGoogleAdsRouteImport } from './routes/api/public/conversoes-google-ads'
 import { Route as ApiPublicGoogleLeadsRouteImport } from './routes/api/public/google-leads'
 import { Route as ApiPublicMetaLeadsRouteImport } from './routes/api/public/meta-leads'
+import { Route as ApiPublicSimuladoProgressoRouteImport } from './routes/api/public/simulado-progresso'
 import { Route as AuthenticatedAcervoCargoIdIndexRouteImport } from './routes/_authenticated/acervo.$cargoId.index'
 import { Route as AuthenticatedAcervoCargoIdDisciplinaIdRouteImport } from './routes/_authenticated/acervo.$cargoId.$disciplinaId'
 import { Route as AuthenticatedMateriaisMaterialIdDesempenhoRouteImport } from './routes/_authenticated/materiais.$materialId.desempenho'
@@ -242,6 +243,12 @@ const ApiPublicMetaLeadsRoute = ApiPublicMetaLeadsRouteImport.update({
   path: '/api/public/meta-leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSimuladoProgressoRoute =
+  ApiPublicSimuladoProgressoRouteImport.update({
+    id: '/api/public/simulado-progresso',
+    path: '/api/public/simulado-progresso',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAcervoCargoIdIndexRoute =
   AuthenticatedAcervoCargoIdIndexRouteImport.update({
     id: '/acervo/$cargoId/',
@@ -339,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/api/public/conversoes-google-ads': typeof ApiPublicConversoesGoogleAdsRoute
   '/api/public/google-leads': typeof ApiPublicGoogleLeadsRoute
   '/api/public/meta-leads': typeof ApiPublicMetaLeadsRoute
+  '/api/public/simulado-progresso': typeof ApiPublicSimuladoProgressoRoute
   '/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
@@ -385,6 +393,7 @@ export interface FileRoutesByTo {
   '/api/public/conversoes-google-ads': typeof ApiPublicConversoesGoogleAdsRoute
   '/api/public/google-leads': typeof ApiPublicGoogleLeadsRoute
   '/api/public/meta-leads': typeof ApiPublicMetaLeadsRoute
+  '/api/public/simulado-progresso': typeof ApiPublicSimuladoProgressoRoute
   '/acervo': typeof AuthenticatedAcervoIndexRoute
   '/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
@@ -433,6 +442,7 @@ export interface FileRoutesById {
   '/api/public/conversoes-google-ads': typeof ApiPublicConversoesGoogleAdsRoute
   '/api/public/google-leads': typeof ApiPublicGoogleLeadsRoute
   '/api/public/meta-leads': typeof ApiPublicMetaLeadsRoute
+  '/api/public/simulado-progresso': typeof ApiPublicSimuladoProgressoRoute
   '/_authenticated/acervo/': typeof AuthenticatedAcervoIndexRoute
   '/_authenticated/acervo/$cargoId/$disciplinaId': typeof AuthenticatedAcervoCargoIdDisciplinaIdRoute
   '/_authenticated/materiais/$materialId/desempenho': typeof AuthenticatedMateriaisMaterialIdDesempenhoRoute
@@ -481,6 +491,7 @@ export interface FileRouteTypes {
     | '/api/public/conversoes-google-ads'
     | '/api/public/google-leads'
     | '/api/public/meta-leads'
+    | '/api/public/simulado-progresso'
     | '/acervo/'
     | '/acervo/$cargoId/$disciplinaId'
     | '/materiais/$materialId/desempenho'
@@ -527,6 +538,7 @@ export interface FileRouteTypes {
     | '/api/public/conversoes-google-ads'
     | '/api/public/google-leads'
     | '/api/public/meta-leads'
+    | '/api/public/simulado-progresso'
     | '/acervo'
     | '/acervo/$cargoId/$disciplinaId'
     | '/materiais/$materialId/desempenho'
@@ -574,6 +586,7 @@ export interface FileRouteTypes {
     | '/api/public/conversoes-google-ads'
     | '/api/public/google-leads'
     | '/api/public/meta-leads'
+    | '/api/public/simulado-progresso'
     | '/_authenticated/acervo/'
     | '/_authenticated/acervo/$cargoId/$disciplinaId'
     | '/_authenticated/materiais/$materialId/desempenho'
@@ -599,6 +612,7 @@ export interface RootRouteChildren {
   ApiPublicConversoesGoogleAdsRoute: typeof ApiPublicConversoesGoogleAdsRoute
   ApiPublicGoogleLeadsRoute: typeof ApiPublicGoogleLeadsRoute
   ApiPublicMetaLeadsRoute: typeof ApiPublicMetaLeadsRoute
+  ApiPublicSimuladoProgressoRoute: typeof ApiPublicSimuladoProgressoRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicPistasSlugRoute: typeof ApiPublicPistasSlugRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -845,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMetaLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/simulado-progresso': {
+      id: '/api/public/simulado-progresso'
+      path: '/api/public/simulado-progresso'
+      fullPath: '/api/public/simulado-progresso'
+      preLoaderRoute: typeof ApiPublicSimuladoProgressoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/acervo/$cargoId/': {
       id: '/_authenticated/acervo/$cargoId/'
       path: '/acervo/$cargoId'
@@ -1028,6 +1049,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicConversoesGoogleAdsRoute: ApiPublicConversoesGoogleAdsRoute,
   ApiPublicGoogleLeadsRoute: ApiPublicGoogleLeadsRoute,
   ApiPublicMetaLeadsRoute: ApiPublicMetaLeadsRoute,
+  ApiPublicSimuladoProgressoRoute: ApiPublicSimuladoProgressoRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicPistasSlugRoute: ApiPublicPistasSlugRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

@@ -6,11 +6,10 @@ import {
 } from "@/lib/cronograma-aluno.server";
 import { hojeBrasilia } from "@/lib/simulado-pagamento";
 import { normalizarBanca } from "@/lib/banca";
+import { tempoRestanteSimulado } from "@/lib/simulado-progresso";
 
 /** admin e aleatorio podem ser trocados nos testes; em produção usam a chave de serviço e Math.random. */
 type Ctx = { supabase: any; userId: string; admin?: any; aleatorio?: () => number };
-
-const TOLERANCIA_MS = 30_000;
 
 async function adminDb(ctx: Ctx) {
   return ctx.admin ?? (await import("@/integrations/supabase/client.server")).supabaseAdmin;
@@ -38,8 +37,8 @@ async function exigirSimulados(ctx: Ctx) {
   }
 }
 
-function expiraEm(s: { iniciado_em: string; duracao_min: number }): number {
-  return new Date(s.iniciado_em).getTime() + s.duracao_min * 60_000;
+function restanteDe(s: any): number {
+  return tempoRestanteSimulado(s.duracao_min, Number(s.tempo_decorrido_ms ?? 0));
 }
 
 // ---------- painel ----------
@@ -254,7 +253,7 @@ export async function lerSimulado(ctx: Ctx, id: string) {
   let s = await carregarSimulado(ctx, id);
 
   // Passou do tempo: encerra com o que foi respondido.
-  if (s.status === "em_andamento" && Date.now() > expiraEm(s) + TOLERANCIA_MS) {
+  if (s.status === "em_andamento" && restanteDe(s) === 0) {
     await finalizarSimulado(ctx, id);
     s = await carregarSimulado(ctx, id);
   }
@@ -285,7 +284,9 @@ export async function lerSimulado(ctx: Ctx, id: string) {
   return {
     status: "em_andamento" as const,
     duracao_min: s.duracao_min as number,
-    expira_em: new Date(expiraEm(s)).toISOString(),
+    expira_em: new Date(Date.now() + restanteDe(s)).toISOString(),
+    tempo_decorrido_ms: Number(s.tempo_decorrido_ms ?? 0),
+    questao_atual: Number(s.questao_atual ?? 0),
     agora: new Date().toISOString(),
     numero: s.numero as number,
     questoes: (sq ?? [])
@@ -315,7 +316,7 @@ export async function responderSimulado(
   await exigirSimulados(ctx);
   const s = await carregarSimulado(ctx, d.simulado_id);
   if (s.status !== "em_andamento") throw new Error("Este simulado já foi finalizado.");
-  if (Date.now() > expiraEm(s) + TOLERANCIA_MS) throw new Error("O tempo do simulado acabou.");
+  if (restanteDe(s) === 0) throw new Error("O tempo do simulado acabou.");
 
   const { data: sq } = await ctx.supabase
     .from("simulado_aluno_questoes")
@@ -340,6 +341,26 @@ export async function responderSimulado(
     .update({ alternativa_id: d.alternativa_id, respondida_em: d.alternativa_id ? new Date().toISOString() : null })
     .eq("simulado_id", d.simulado_id)
     .eq("questao_id", d.questao_id);
+  if (error) throw new Error(error.message);
+  return { ok: true };
+}
+
+export async function salvarProgressoSimulado(
+  ctx: Ctx,
+  d: { simulado_id: string; tempo_decorrido_ms: number; questao_atual: number },
+) {
+  await exigirSimulados(ctx);
+  const s = await carregarSimulado(ctx, d.simulado_id);
+  if (s.status === "concluido") return { ok: true };
+  const { data: questoes, error: erroQuestoes } = await ctx.supabase.from("simulado_aluno_questoes")
+    .select("questao_id").eq("simulado_id", d.simulado_id);
+  if (erroQuestoes) throw new Error(erroQuestoes.message);
+  if (d.questao_atual >= (questoes ?? []).length) throw new Error("Questão não pertence a este simulado.");
+  const db = await adminDb(ctx);
+  const { error } = await db.rpc("salvar_progresso_simulado", {
+    p_id: d.simulado_id, p_user_id: ctx.userId,
+    p_tempo_ms: d.tempo_decorrido_ms, p_questao: d.questao_atual,
+  });
   if (error) throw new Error(error.message);
   return { ok: true };
 }

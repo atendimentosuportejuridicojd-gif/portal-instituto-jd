@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/acervo.server", () => ({ assertAcessoAluno: async () => undefined }));
 vi.mock("@/lib/questoes-count", () => ({ contarQuestoesPorMaterial: async () => new Map() }));
 
-import { finalizarSimulado, iniciarSimulado, lerSimulado, responderSimulado } from "@/lib/simulado-aluno.server";
+import { finalizarSimulado, iniciarSimulado, lerSimulado, responderSimulado, salvarProgressoSimulado } from "@/lib/simulado-aluno.server";
 
 /** Banco em memória com o mínimo de Supabase usado pelo servidor (select/insert/update/upsert/delete). */
 function criarBanco(tabelas: Record<string, any[]>) {
@@ -11,7 +11,17 @@ function criarBanco(tabelas: Record<string, any[]>) {
   return {
     tabelas,
     // Papéis: o teste de administrador liga u-admin; os demais alunos não são administradores.
-    rpc: async (_nome: string, args: { _user_id: string }) => ({ data: args._user_id === "u-admin" }),
+    rpc: async (nome: string, args: any) => {
+      if (nome === "salvar_progresso_simulado") {
+        const s = tabelas.simulados_aluno.find((r) => r.id === args.p_id && r.user_id === args.p_user_id && r.status === "em_andamento");
+        if (s) {
+          if (args.p_tempo_ms >= (s.tempo_decorrido_ms ?? 0)) s.questao_atual = args.p_questao;
+          s.tempo_decorrido_ms = Math.min(s.duracao_min * 60000, Math.max(s.tempo_decorrido_ms ?? 0, args.p_tempo_ms));
+        }
+        return { data: null, error: null };
+      }
+      return { data: args._user_id === "u-admin" };
+    },
     from(nome: string) {
       const linhas = (tabelas[nome] ??= []);
       const filtros: ((r: any) => boolean)[] = [];
@@ -115,6 +125,7 @@ describe("simulados do cronograma", () => {
   beforeEach(() => {
     c = cenario();
   });
+  afterEach(() => vi.useRealTimers());
 
   it("monta a prova pela estrutura (qtd por disciplina), registra o que faltou e retoma se já iniciado", async () => {
     const r = await iniciarSimulado(c.ctx, "b1");
@@ -190,7 +201,7 @@ describe("simulados do cronograma", () => {
     const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
     const q = c.t.simulado_aluno_questoes.find((x) => x.disciplina_id === "d1")!;
     await responderSimulado(c.ctx, { simulado_id, questao_id: q.questao_id, alternativa_id: `${q.questao_id}-a` });
-    c.t.simulados_aluno[0].iniciado_em = new Date(Date.now() - 3 * 3600_000).toISOString(); // 3 h atrás, prova de 2 h
+    c.t.simulados_aluno[0].tempo_decorrido_ms = 120 * 60000;
     const r: any = await lerSimulado(c.ctx, simulado_id);
     expect(r.status).toBe("concluido");
     expect(r.resultado.acertos).toBe(1);
@@ -209,6 +220,44 @@ describe("simulados do cronograma", () => {
     expect(segundo).toHaveLength(3);
     expect(inéditas).toBe(2); // só existiam 2 inéditas em d1; a 3ª repete
     expect(c.t.simulados_aluno[1].numero).toBe(2);
+  });
+
+  it("congela o tempo enquanto está fora, mesmo retornando no dia seguinte", async () => {
+    vi.useFakeTimers();
+    const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
+    await salvarProgressoSimulado(c.ctx, { simulado_id, tempo_decorrido_ms: 60000, questao_atual: 2 });
+    vi.advanceTimersByTime(24 * 3600000);
+    const r = await lerSimulado(c.ctx, simulado_id);
+    expect(r.status).toBe("em_andamento");
+    if (r.status !== "em_andamento") throw new Error("Simulado encerrado indevidamente");
+    expect(new Date(r.expira_em).getTime() - new Date(r.agora).getTime()).toBe(119 * 60000);
+    await salvarProgressoSimulado(c.ctx, { simulado_id, tempo_decorrido_ms: 90000, questao_atual: 2 });
+    expect(c.t.simulados_aluno[0].tempo_decorrido_ms).toBe(90000);
+  });
+
+  it("retoma a questão selecionada com as respostas previamente marcadas", async () => {
+    const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
+    const q = c.t.simulado_aluno_questoes[0];
+    await responderSimulado(c.ctx, { simulado_id, questao_id: q.questao_id, alternativa_id: `${q.questao_id}-a` });
+    await salvarProgressoSimulado(c.ctx, { simulado_id, tempo_decorrido_ms: 2000, questao_atual: 3 });
+    const r = await lerSimulado(c.ctx, simulado_id);
+    if (r.status !== "em_andamento") throw new Error("Simulado encerrado indevidamente");
+    expect(r.questao_atual).toBe(3);
+    expect(r.questoes.find((x: { id: string; marcada: string | null }) => x.id === q.questao_id)?.marcada).toBe(`${q.questao_id}-a`);
+  });
+
+  it("checkpoints atrasados não devolvem tempo nem alteram a posição mais recente", async () => {
+    const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
+    await salvarProgressoSimulado(c.ctx, { simulado_id, tempo_decorrido_ms: 10000, questao_atual: 3 });
+    await salvarProgressoSimulado(c.ctx, { simulado_id, tempo_decorrido_ms: 5000, questao_atual: 1 });
+    expect(c.t.simulados_aluno[0]).toMatchObject({ tempo_decorrido_ms: 10000, questao_atual: 3 });
+  });
+
+  it("não salva progresso para outro aluno nem para questão inexistente", async () => {
+    const { simulado_id } = await iniciarSimulado(c.ctx, "b1");
+    c.t.simulado_acessos.push({ user_id: "u2", ativo: true, fim: null });
+    await expect(salvarProgressoSimulado({ ...c.ctx, userId: "u2" }, { simulado_id, tempo_decorrido_ms: 1000, questao_atual: 0 })).rejects.toThrow("Simulado não encontrado");
+    await expect(salvarProgressoSimulado(c.ctx, { simulado_id, tempo_decorrido_ms: 1000, questao_atual: 50 })).rejects.toThrow("não pertence");
   });
 
   it("exige acesso liberado e respeita a data prevista", async () => {
