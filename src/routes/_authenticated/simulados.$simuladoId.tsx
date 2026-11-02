@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useBlocker } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { useSimuladoTempo } from "@/hooks/use-simulado-tempo";
 import {
   alunoFinalizarSimulado,
   alunoLerSimulado,
@@ -17,7 +18,14 @@ import {
 } from "@/lib/simulado-aluno.functions";
 
 export const Route = createFileRoute("/_authenticated/simulados/$simuladoId")({
-  head: () => ({ meta: [{ title: "Simulado — Portal do Aluno | Instituto J&D" }] }),
+  head: () => ({ meta: [
+    { title: "Simulado — Portal do Aluno | Instituto J&D" },
+    { name: "description", content: "Responda seu simulado e acompanhe seu desempenho no Instituto J&D." },
+    { property: "og:title", content: "Simulado | Instituto J&D" },
+    { property: "og:description", content: "Avaliação de desempenho do aluno no Instituto J&D." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: SimuladoPage,
 });
 
@@ -38,7 +46,8 @@ function SimuladoPage() {
     queryKey: ["aluno", "simulado", simuladoId],
     queryFn: () => lerFn({ data: { simulado_id: simuladoId } }),
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 0,
+    gcTime: 0,
   });
   const d: any = q.data;
 
@@ -81,23 +90,34 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
   const finalizarFn = useServerFn(alunoFinalizarSimulado);
   const questoes: any[] = dados.questoes;
 
-  const [atual, setAtual] = useState(0);
+  const [atual, setAtual] = useState(() => Math.min(dados.questao_atual ?? 0, Math.max(0, questoes.length - 1)));
   const [marcadas, setMarcadas] = useState<Record<string, string | null>>(() =>
     Object.fromEntries(questoes.map((x) => [x.id, x.marcada])),
   );
   const [confirmar, setConfirmar] = useState(false);
 
-  // Relógio: usa a hora do servidor (diferença medida ao carregar) para não depender do relógio do aluno.
-  const deslocamento = useRef(new Date(dados.agora).getTime() - Date.now());
-  const fim = new Date(dados.expira_em).getTime();
-  const [restante, setRestante] = useState(() => fim - (Date.now() + deslocamento.current));
-  useEffect(() => {
-    const t = setInterval(() => setRestante(fim - (Date.now() + deslocamento.current)), 1000);
-    return () => clearInterval(t);
-  }, [fim]);
+  const { restante, salvarProgresso } = useSimuladoTempo(simuladoId, dados, atual, setAtual);
+  const envios = useRef(new Set<Promise<unknown>>());
+  useBlocker({
+    enableBeforeUnload: false,
+    shouldBlockFn: async () => {
+      try {
+        await Promise.all([...envios.current]);
+        await salvarProgresso();
+        return false;
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Não foi possível salvar suas respostas.");
+        return true;
+      }
+    },
+  });
 
   const finalizar = useMutation({
-    mutationFn: () => finalizarFn({ data: { simulado_id: simuladoId } }),
+    mutationFn: async () => {
+      await Promise.all([...envios.current]);
+      await salvarProgresso();
+      return finalizarFn({ data: { simulado_id: simuladoId } });
+    },
     onSuccess: (resultado) => {
       qc.setQueryData(["aluno", "simulado", simuladoId], { status: "concluido", resultado });
       qc.invalidateQueries({ queryKey: ["aluno", "simulados"] });
@@ -127,10 +147,10 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
     // Clicar de novo na mesma alternativa desmarca.
     const nova = anterior === alternativaId ? null : alternativaId;
     setMarcadas((m) => ({ ...m, [questaoId]: nova }));
-    responder.mutate(
-      { questao_id: questaoId, alternativa_id: nova },
-      { onError: () => setMarcadas((m) => ({ ...m, [questaoId]: anterior })) },
-    );
+    const envio = responder.mutateAsync({ questao_id: questaoId, alternativa_id: nova });
+    envios.current.add(envio);
+    void envio.catch(() => setMarcadas((m) => ({ ...m, [questaoId]: anterior })))
+      .finally(() => envios.current.delete(envio));
   };
 
   const q = questoes[atual];
@@ -151,12 +171,13 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
 
       <div className="flex flex-wrap gap-1.5">
         {questoes.map((x, i) => (
-          <button
+          <Button
             key={x.id}
             type="button"
+            variant="ghost"
             onClick={() => setAtual(i)}
             aria-label={`Questão ${i + 1}`}
-            className={`h-8 w-8 rounded-md border text-xs tabular-nums ${
+            className={`h-8 w-8 rounded-md border p-0 text-xs tabular-nums ${
               i === atual
                 ? "border-primary bg-primary text-primary-foreground"
                 : marcadas[x.id]
@@ -165,7 +186,7 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
             }`}
           >
             {i + 1}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -184,17 +205,19 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
               const marcada = marcadas[q.id] === a.id;
               return (
                 <li key={a.id}>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    disabled={responder.isPending || finalizar.isPending}
                     onClick={() => escolher(q.id, a.id)}
                     aria-pressed={marcada}
-                    className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left text-sm ${
+                    className={`flex h-auto w-full items-start justify-start gap-3 whitespace-normal rounded-lg border p-3 text-left text-sm ${
                       marcada ? "border-primary bg-primary/5" : "border-border/60 hover:border-primary/40"
                     }`}
                   >
                     <span className="font-semibold">{a.letra})</span>
                     <span>{a.texto}</span>
-                  </button>
+                  </Button>
                 </li>
               );
             })}

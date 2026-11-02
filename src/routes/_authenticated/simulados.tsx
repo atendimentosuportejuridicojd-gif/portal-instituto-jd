@@ -23,6 +23,10 @@ export const Route = createFileRoute("/_authenticated/simulados")({
   head: () => ({
     meta: [
       { title: "Simulados — Portal do Aluno | Instituto J&D" },
+      { property: "og:title", content: "Simulados | Instituto J&D" },
+      { property: "og:description", content: "Simulados do concurso e desempenho ao longo do cronograma no Instituto J&D." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content:
