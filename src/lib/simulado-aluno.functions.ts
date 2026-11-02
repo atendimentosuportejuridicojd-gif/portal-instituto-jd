@@ -57,3 +57,12 @@ export const alunoAtivarSimulados = createServerFn({ method: "POST" })
     const { ativarSimulados } = await import("@/lib/simulado-aluno.server");
     return ativarSimulados(context, data.duracao_prova_min);
   });
+
+/** Recomeça o simulado do zero (respostas, tempo e posição). */
+export const alunoRefazerSimulado = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => idSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { refazerSimulado } = await import("@/lib/simulado-aluno.server");
+    return refazerSimulado(context, data.simulado_id);
+  });
