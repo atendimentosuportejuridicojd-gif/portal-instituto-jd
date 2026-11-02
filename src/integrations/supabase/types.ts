@@ -1748,7 +1748,9 @@ export type Database = {
           numero: number
           percentual: number | null
           por_disciplina: Json | null
+          questao_atual: number
           status: string
+          tempo_decorrido_ms: number
           total_questoes: number
           user_id: string
         }
@@ -1765,7 +1767,9 @@ export type Database = {
           numero: number
           percentual?: number | null
           por_disciplina?: Json | null
+          questao_atual?: number
           status?: string
+          tempo_decorrido_ms?: number
           total_questoes?: number
           user_id: string
         }
@@ -1782,7 +1786,9 @@ export type Database = {
           numero?: number
           percentual?: number | null
           por_disciplina?: Json | null
+          questao_atual?: number
           status?: string
+          tempo_decorrido_ms?: number
           total_questoes?: number
           user_id?: string
         }
@@ -1937,6 +1943,15 @@ export type Database = {
       }
       is_assinatura_ativa: { Args: { _user_id: string }; Returns: boolean }
       registrar_ultimo_acesso: { Args: never; Returns: undefined }
+      salvar_progresso_simulado: {
+        Args: {
+          p_id: string
+          p_questao: number
+          p_tempo_ms: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       tem_acesso_conteudo: { Args: never; Returns: boolean }
       verificar_senha_disciplina: {
         Args: { _disciplina_id: string; _senha: string }

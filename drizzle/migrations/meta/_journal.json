@@ -43,6 +43,13 @@
       "when": 1792877800327,
       "tag": "0005_estrutura_prova_blocos",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793658869861,
+      "tag": "0006_simulado_tempo_ativo_ret_omada",
+      "breakpoints": true
     }
   ]
 }
