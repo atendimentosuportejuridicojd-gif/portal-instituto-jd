@@ -243,7 +243,7 @@ describe("simulados do cronograma", () => {
     const r = await lerSimulado(c.ctx, simulado_id);
     if (r.status !== "em_andamento") throw new Error("Simulado encerrado indevidamente");
     expect(r.questao_atual).toBe(3);
-    expect(r.questoes.find((x) => x.id === q.questao_id)?.marcada).toBe(`${q.questao_id}-a`);
+    expect(r.questoes.find((x: { id: string; marcada: string | null }) => x.id === q.questao_id)?.marcada).toBe(`${q.questao_id}-a`);
   });
 
   it("checkpoints atrasados não devolvem tempo nem alteram a posição mais recente", async () => {
