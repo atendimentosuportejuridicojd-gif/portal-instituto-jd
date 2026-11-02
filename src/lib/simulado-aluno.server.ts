@@ -378,6 +378,38 @@ function resultadoDe(s: any) {
   };
 }
 
+/** Recomeça o simulado do zero: apaga respostas, zera o tempo e volta para a 1ª questão. */
+export async function refazerSimulado(ctx: Ctx, id: string) {
+  await exigirSimulados(ctx);
+  const s = await carregarSimulado(ctx, id);
+  const db = await adminDb(ctx);
+  const { error: eQ } = await db
+    .from("simulado_aluno_questoes")
+    .update({ alternativa_id: null, respondida_em: null, acertou: null } as any)
+    .eq("simulado_id", id);
+  if (eQ) throw new Error(eQ.message);
+  const { error } = await db
+    .from("simulados_aluno")
+    .update({
+      status: "em_andamento",
+      concluido_em: null,
+      iniciado_em: new Date().toISOString(),
+      tempo_decorrido_ms: 0,
+      questao_atual: 0,
+      acertos: null,
+      percentual: null,
+      nota_ponderada: null,
+      por_disciplina: { faltaram: s.por_disciplina?.faltaram ?? {} },
+    } as any)
+    .eq("id", id)
+    .eq("user_id", ctx.userId);
+  if (error) throw new Error(error.message);
+  if (s.bloco_id) {
+    await db.from("cronograma_blocos").update({ concluido: false, concluido_em: null }).eq("id", s.bloco_id);
+  }
+  return { ok: true };
+}
+
 /** Corrige a prova. Questão sem resposta conta como errada. Mostra só o desempenho, sem gabarito. */
 export async function finalizarSimulado(ctx: Ctx, id: string) {
   await exigirSimulados(ctx);
