@@ -4,6 +4,26 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ESFERA_IDS } from "@/lib/esferas";
 import { assertAdmin, gerarSlug, getCarreiraUsuario } from "@/lib/acervo.server";
 
+/**
+ * Lê todos os vínculos trilha ↔ matéria. O Supabase devolve no máximo 1.000 linhas por consulta, e já passamos
+ * disso: sem paginar, as trilhas do fim da lista apareciam sem matérias.
+ */
+async function todosVinculos(supabase: any): Promise<{ trilha_id: string; material_id: string; ordem: number }[]> {
+  const linhas: { trilha_id: string; material_id: string; ordem: number }[] = [];
+  for (let de = 0; ; de += 1000) {
+    const { data, error } = await supabase
+      .from("trilha_materiais")
+      .select("trilha_id, material_id, ordem")
+      .order("trilha_id")
+      .order("ordem")
+      .order("material_id")
+      .range(de, de + 999);
+    if (error) throw new Error(error.message);
+    linhas.push(...(data ?? []));
+    if ((data ?? []).length < 1000) return linhas;
+  }
+}
+
 // ===================== ADMIN =====================
 
 export const adminListTrilhas = createServerFn({ method: "GET" })
@@ -11,12 +31,12 @@ export const adminListTrilhas = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabase } = context;
-    const [{ data: trilhas }, { data: vinculos }, { data: materiais }] = await Promise.all([
+    const [{ data: trilhas }, vinculos, { data: materiais }] = await Promise.all([
       (supabase as any)
         .from("trilhas")
         .select("id, nome, descricao, ordem, slug, carreiras, trilha_pai_id, esferas")
         .order("ordem"),
-      supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
+      todosVinculos(supabase),
       supabase
         .from("materiais")
         .select("id, titulo, publicado, storage_path, disciplinas(nome)")
@@ -426,10 +446,10 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const carreira = await getCarreiraUsuario(context);
-    const [{ data: trilhas }, { data: vinculos }, { data: materiais }, { data: favs }] =
+    const [{ data: trilhas }, vinculos, { data: materiais }, { data: favs }] =
       await Promise.all([
         (supabase as any).from("trilhas").select("id, nome, descricao, ordem, trilha_pai_id, esferas").contains("carreiras", [carreira]).order("ordem"),
-        supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
+        todosVinculos(supabase),
         supabase
           .from("materiais")
           .select("id, titulo, versao, storage_path, disciplinas(nome)")
