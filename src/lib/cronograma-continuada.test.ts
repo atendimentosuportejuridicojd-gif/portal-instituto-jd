@@ -141,3 +141,76 @@ describe("preparação continuada: prévia do plano", () => {
     ).rejects.toThrow(/data da prova/);
   });
 });
+
+describe("migração da Preparação continuada para o Pós-edital", () => {
+  const ctx = (supabase: any) => ({ supabase, userId: "u1" });
+  const bloco = (cronograma_id: string, material_id: string, tipo: string, concluido: boolean) => ({
+    cronograma_id,
+    material_id,
+    tipo,
+    concluido,
+  });
+
+  function dadosPosEdital() {
+    return fake({
+      concursos: [{ id: "c1", banca: null, nome: "PRF 2026" }],
+      concurso_prova_estrutura: [{ concurso_id: "c1", disciplina_id: "dp", qtd_questoes: 10, peso: 1, ordem: 0 }],
+      disciplinas: [{ id: "dp", nome: "Português", especifica: false, concurso_id: null, disciplina_base_id: null, ordem: 1 }],
+      materiais: [mat("m1", "dp", 1), mat("m2", "dp", 2), mat("m3", "dp", 3)],
+      concurso_materiais: [],
+      concurso_materiais_excecao: [],
+      cronogramas_aluno: [
+        { id: "cr1", user_id: "u1" },
+        { id: "cr-outro", user_id: "u2" },
+      ],
+      cronograma_blocos: [
+        // m1 concluída (estudo + questões); m2 só leu; m3 não começou
+        bloco("cr1", "m1", "estudo", true),
+        bloco("cr1", "m1", "questoes", true),
+        bloco("cr1", "m2", "estudo", true),
+        bloco("cr1", "m2", "questoes", false),
+        bloco("cr1", "m3", "estudo", false),
+        bloco("cr1", "m1", "revisao", false), // revisão não conta como estudo da matéria
+      ],
+    });
+  }
+
+  const base = {
+    modo: "pos_edital" as const,
+    concurso_id: "c1",
+    data_inicio: "2099-01-05",
+    data_prova: "2099-09-01",
+    minutos_por_dia: [0, 120, 120, 120, 120, 120, 0],
+    minutos_por_questao: 3,
+    usa_simulado: false,
+  };
+
+  it("sem migração, o plano do concurso inclui todas as matérias", async () => {
+    const r = await previaCronograma(ctx(dadosPosEdital()), base);
+    expect(r.disciplinas[0].materias).toBe(3);
+  });
+
+  it("migrando, as matérias já concluídas na continuada não entram de novo", async () => {
+    const r = await previaCronograma(ctx(dadosPosEdital()), { ...base, materias_concluidas_de: "cr1" });
+    expect(r.disciplinas[0].materias).toBe(2); // m1 saiu; m2 (só leu) e m3 continuam
+  });
+
+  it("não aceita cronograma de origem de outro aluno", async () => {
+    await expect(
+      previaCronograma(ctx(dadosPosEdital()), { ...base, materias_concluidas_de: "cr-outro" }),
+    ).rejects.toThrow(/origem não encontrado/);
+  });
+
+  it("na continuada o parâmetro de migração é ignorado", async () => {
+    const r = await previaCronograma(ctx(dados()), {
+      modo: "continuada",
+      trilha_id: "t1",
+      data_inicio: "2099-01-05",
+      minutos_por_dia: [0, 120, 120, 120, 120, 120, 0],
+      minutos_por_questao: 3,
+      usa_simulado: false,
+      materias_concluidas_de: "qualquer",
+    });
+    expect(r.resumo.cabe).toBe(true);
+  });
+});

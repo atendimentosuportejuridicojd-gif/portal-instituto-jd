@@ -9,6 +9,8 @@ const parametrosSchema = z.object({
   modo: z.enum(["pos_edital", "continuada"]).default("pos_edital"),
   concurso_id: z.string().uuid().optional(),
   trilha_id: z.string().uuid().optional(),
+  /** Migração da continuada para o Pós-edital: cronograma de origem, cujas matérias concluídas não se repetem. */
+  materias_concluidas_de: z.string().uuid().optional(),
   data_inicio: dataIso,
   data_prova: dataIso.nullable().optional(),
   /** Minutos por dia da semana: posição 0 = domingo ... 6 = sábado. */

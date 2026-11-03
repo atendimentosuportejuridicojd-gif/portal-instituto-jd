@@ -47,6 +47,8 @@ function MeuCronograma() {
   const finalizarFn = useServerFn(alunoFinalizarRascunho);
   const [criando, setCriando] = useState(false);
   const [direcao, setDirecao] = useState<Direcao | null>(null);
+  // Id da Preparação continuada de onde o aluno está migrando para o Pós-edital.
+  const [migrarDe, setMigrarDe] = useState<string | null>(null);
 
   const q = useQuery({
     queryKey: ["aluno", "cronograma"],
@@ -101,6 +103,7 @@ function MeuCronograma() {
   const aoCriar = () => {
     setCriando(false);
     setDirecao(null);
+    setMigrarDe(null);
     qc.invalidateQueries({ queryKey: ["aluno", "cronograma"] });
   };
 
@@ -112,7 +115,22 @@ function MeuCronograma() {
       <EmptyState icon={CalendarDays} title="Cronograma indisponível" description={(q.error as Error).message} />
     );
   } else if (q.data?.cronograma && !criando) {
-    conteudo = <PlanoDoAluno estado={q.data as any} onNovo={() => setCriando(true)} />;
+    const atual = q.data.cronograma as any;
+    conteudo = (
+      <PlanoDoAluno
+        estado={q.data as any}
+        onNovo={() => setCriando(true)}
+        onMigrar={
+          atual.modo === "continuada"
+            ? () => {
+                setMigrarDe(atual.id);
+                setDirecao("pos_edital");
+                setCriando(true);
+              }
+            : undefined
+        }
+      />
+    );
   } else if (q.data?.rascunho && !criando) {
     conteudo = (
       <div className="surface-card mx-auto flex max-w-xl flex-col items-center gap-3 p-8 text-center">
@@ -166,17 +184,39 @@ function MeuCronograma() {
     conteudo = (
       <div className="space-y-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => setDirecao(null)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setDirecao(null);
+              setMigrarDe(null);
+            }}
+          >
             <ArrowLeft className="mr-1.5 h-4 w-4" />
             Trocar de direção
           </Button>
           <span className="text-sm font-semibold text-muted-foreground">Método J&D aplicado no Pós-edital</span>
         </div>
+        {migrarDe && (
+          <p className="mx-auto max-w-4xl rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">
+            Você está migrando da <strong>Preparação continuada</strong>. As matérias que você já concluiu não entram de
+            novo no plano do concurso, e o cronograma anterior será arquivado quando o novo for criado.
+          </p>
+        )}
         <Assistente
           dados={dadosQ.data as any}
           rascunho={q.data?.rascunho ?? null}
           onCriado={aoCriar}
-          onCancelar={q.data?.cronograma ? () => setCriando(false) : undefined}
+          onCancelar={
+            q.data?.cronograma
+              ? () => {
+                  setCriando(false);
+                  setDirecao(null);
+                  setMigrarDe(null);
+                }
+              : undefined
+          }
+          migrarDe={migrarDe ?? undefined}
         />
       </div>
     );

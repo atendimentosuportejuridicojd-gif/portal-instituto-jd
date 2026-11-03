@@ -31,6 +31,11 @@ export interface ParametrosAluno {
   usa_simulado: boolean;
   somente_questoes?: boolean;
   duracao_prova_min?: number | null;
+  /**
+   * Migração da Preparação continuada para o Pós-edital: id do cronograma de origem. As matérias que o aluno já
+   * concluiu nele não entram de novo no plano novo.
+   */
+  materias_concluidas_de?: string;
 }
 
 const LEITURA_PADRAO_MIN = 30;
@@ -362,6 +367,31 @@ async function lerBlocos(supabase: any, cronogramaId: string, colunas: string): 
   return todos;
 }
 
+/** Uma matéria conta como estudada quando todos os seus blocos de estudo e questões estão concluídos. */
+function materiasConcluidas(blocos: { material_id: string | null; tipo: string; concluido: boolean }[]): Set<string> {
+  const porMateria = new Map<string, { total: number; feitos: number }>();
+  for (const b of blocos) {
+    if (!b.material_id || (b.tipo !== "estudo" && b.tipo !== "questoes")) continue;
+    const m = porMateria.get(b.material_id) ?? { total: 0, feitos: 0 };
+    m.total++;
+    if (b.concluido) m.feitos++;
+    porMateria.set(b.material_id, m);
+  }
+  return new Set<string>([...porMateria.entries()].filter(([, v]) => v.total > 0 && v.feitos === v.total).map(([id]) => id));
+}
+
+/** Matérias já concluídas em um cronograma do próprio aluno (para a migração para o Pós-edital). */
+async function concluidasDoCronograma(supabase: any, userId: string, cronogramaId: string): Promise<Set<string>> {
+  const { data: origem } = await supabase
+    .from("cronogramas_aluno")
+    .select("id")
+    .eq("id", cronogramaId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!origem) throw new Error("Cronograma de origem não encontrado.");
+  return materiasConcluidas(await lerBlocos(supabase, cronogramaId, "material_id, tipo, concluido"));
+}
+
 // ---------- casos de uso ----------
 
 /** Dados para montar o assistente: concursos com estrutura da prova cadastrada e o acesso aos simulados. */
@@ -418,10 +448,15 @@ export async function dadosAssistente(ctx: Ctx) {
 export async function previaCronograma(ctx: Ctx, p: ParametrosAluno) {
   await assertAcessoAluno(ctx);
   validar(p);
+  const excluidas =
+    p.modo !== "continuada" && p.materias_concluidas_de
+      ? await concluidasDoCronograma(ctx.supabase, ctx.userId, p.materias_concluidas_de)
+      : new Set<string>();
   const disciplinas = await carregarDisciplinasDoCronograma(
     ctx.supabase,
     { modo: p.modo, concurso_id: p.concurso_id, trilha_id: p.trilha_id },
     p.ordem_disciplinas,
+    excluidas,
   );
   const plano = gerarPlano(paraMotor(p, disciplinas, p.data_inicio));
   return {
@@ -481,10 +516,15 @@ export async function criarCronograma(ctx: Ctx, p: ParametrosAluno) {
     nomeAlvo = concurso.nome;
   }
 
+  const excluidas =
+    !continuada && p.materias_concluidas_de
+      ? await concluidasDoCronograma(supabase, userId, p.materias_concluidas_de)
+      : new Set<string>();
   const disciplinas = await carregarDisciplinasDoCronograma(
     supabase,
     { modo: p.modo, concurso_id: p.concurso_id, trilha_id: p.trilha_id },
     p.ordem_disciplinas,
+    excluidas,
   );
   const plano = gerarPlano(paraMotor(p, disciplinas, p.data_inicio));
   const precisaPagar = !continuada && p.usa_simulado && !(await acessoSimuladoLiberado(supabase, userId));
@@ -526,7 +566,7 @@ export async function criarCronograma(ctx: Ctx, p: ParametrosAluno) {
       duracao_prova_min: !continuada && p.usa_simulado ? p.duracao_prova_min : null,
       ordem_disciplinas: disciplinas.map((d) => d.id),
       status,
-      resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes },
+      resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes, excluir_materias: [...excluidas] },
     })
     .select("id")
     .single();
@@ -581,13 +621,18 @@ export async function finalizarRascunho(ctx: Ctx) {
     duracao_prova_min: r.duracao_prova_min,
     somente_questoes: !!r.resumo?.somente_questoes,
   };
-  const disciplinas = await carregarDisciplinas(supabase, r.concurso_id, r.ordem_disciplinas);
+  const excluidasRascunho = new Set<string>(r.resumo?.excluir_materias ?? []);
+  const disciplinas = await carregarDisciplinas(supabase, r.concurso_id, r.ordem_disciplinas, excluidasRascunho);
   const plano = gerarPlano(paraMotor(p, disciplinas, dataInicio));
 
   await supabase.from("cronogramas_aluno").update({ status: "arquivado" }).eq("user_id", userId).eq("status", "ativo");
   const { error } = await supabase
     .from("cronogramas_aluno")
-    .update({ status: "ativo", data_inicio: dataInicio, resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes } })
+    .update({
+      status: "ativo",
+      data_inicio: dataInicio,
+      resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes, excluir_materias: [...excluidasRascunho] },
+    })
     .eq("id", r.id);
   if (error) throw new Error(error.message);
   await inserirBlocos(supabase, r.id, plano.blocos);
@@ -783,17 +828,9 @@ export async function recalcularCronograma(ctx: Ctx) {
 
   const blocos = await lerBlocos(supabase, c.id, "id, tipo, material_id, concluido, data");
 
-  const porMateria = new Map<string, { total: number; feitos: number }>();
-  for (const b of blocos) {
-    if (!b.material_id || (b.tipo !== "estudo" && b.tipo !== "questoes")) continue;
-    const m = porMateria.get(b.material_id) ?? { total: 0, feitos: 0 };
-    m.total++;
-    if (b.concluido) m.feitos++;
-    porMateria.set(b.material_id, m);
-  }
-  const concluidas = new Set<string>(
-    [...porMateria.entries()].filter(([, v]) => v.total > 0 && v.feitos === v.total).map(([id]) => id),
-  );
+  // Além do que o aluno concluiu neste plano, continuam fora as matérias que ele já tinha concluído antes de migrar.
+  const excluirBase = new Set<string>(c.resumo?.excluir_materias ?? []);
+  const concluidas = new Set<string>([...materiasConcluidas(blocos), ...excluirBase]);
 
   const p: ParametrosAluno = {
     modo: c.modo === "continuada" ? "continuada" : "pos_edital",
@@ -819,7 +856,10 @@ export async function recalcularCronograma(ctx: Ctx) {
     .eq("concluido", false);
   if (eDel) throw new Error(eDel.message);
   await inserirBlocos(supabase, c.id, plano.blocos);
-  const { error } = await supabase.from("cronogramas_aluno").update({ resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes } }).eq("id", c.id);
+  const { error } = await supabase
+    .from("cronogramas_aluno")
+    .update({ resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes, excluir_materias: [...excluirBase] } })
+    .eq("id", c.id);
   if (error) throw new Error(error.message);
   return { resumo: resumo(plano) };
 }

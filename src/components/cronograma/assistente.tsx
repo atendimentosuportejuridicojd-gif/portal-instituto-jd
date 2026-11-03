@@ -101,11 +101,14 @@ export function Assistente({
   rascunho,
   onCriado,
   onCancelar,
+  migrarDe,
 }: {
   dados: DadosAssistente;
   rascunho: { concurso_nome: string } | null;
   onCriado: () => void;
   onCancelar?: () => void;
+  /** Id do cronograma da Preparação continuada de origem: o que já foi concluído nele não entra de novo. */
+  migrarDe?: string;
 }) {
   const qc = useQueryClient();
   const previaFn = useServerFn(alunoPreviaCronograma);
@@ -142,8 +145,9 @@ export function Assistente({
       usa_simulado: usaSimulado,
       somente_questoes: somenteQuestoes,
       duracao_prova_min: usaSimulado ? duracaoProva : null,
+      materias_concluidas_de: migrarDe,
     }),
-    [concursoId, dataInicio, dataProva, dias, minutosDia, minQuestao, ordem, usaSimulado, duracaoProva, somenteQuestoes],
+    [concursoId, dataInicio, dataProva, dias, minutosDia, minQuestao, ordem, usaSimulado, duracaoProva, somenteQuestoes, migrarDe],
   );
 
   const previa = useMutation({

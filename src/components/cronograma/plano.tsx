@@ -58,7 +58,16 @@ export type EstadoCronograma = {
 
 type Marcar = (v: { id: string; concluido: boolean }) => void;
 
-export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onNovo: () => void }) {
+export function PlanoDoAluno({
+  estado,
+  onNovo,
+  onMigrar,
+}: {
+  estado: EstadoCronograma;
+  onNovo: () => void;
+  /** Só na Preparação continuada: segue para o Pós-edital sem repetir o que já foi concluído. */
+  onMigrar?: () => void;
+}) {
   const qc = useQueryClient();
   const marcarFn = useServerFn(alunoMarcarBloco);
   const recalcularFn = useServerFn(alunoRecalcularCronograma);
@@ -140,6 +149,12 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
                   <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", recalcular.isPending && "animate-spin")} />
                   Recalcular a partir de hoje
                 </Button>
+                {continuada && onMigrar && (
+                  <Button variant="secondary" size="sm" onClick={onMigrar}>
+                    <Target className="mr-1.5 h-3.5 w-3.5" />
+                    Saiu o edital? Migrar para o Pós-edital
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
