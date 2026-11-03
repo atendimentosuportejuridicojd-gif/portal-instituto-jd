@@ -30,6 +30,14 @@ function AcervoCargos() {
   const fetchFn = useServerFn(alunoListTrilhas);
   const q = useQuery({ queryKey: ["aluno", "cargos"], queryFn: () => fetchFn() });
   const cargos = q.data ?? [];
+  const ids = new Set(cargos.map((c: any) => c.id));
+  // Órgãos (sem pai) com seus cargos (subtrilhas) agrupados; sem filhas, o próprio órgão é o cargo.
+  const grupos = cargos
+    .filter((c: any) => !c.trilha_pai_id || !ids.has(c.trilha_pai_id))
+    .map((pai: any) => ({
+      pai,
+      filhas: cargos.filter((c: any) => c.trilha_pai_id === pai.id),
+    }));
 
   return (
     <>
@@ -43,31 +51,21 @@ function AcervoCargos() {
         {q.isLoading ? (
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {cargos.map((c: any) => {
-              const disciplinas = new Set(c.materiais.map((m: any) => m.disciplina));
-              return (
-                <Link
-                  key={c.id}
-                  to="/acervo/$cargoId"
-                  params={{ cargoId: c.id }}
-                  className="surface-card group flex items-center justify-between gap-4 p-5 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-                >
-                  <div className="min-w-0">
-                    <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/15 to-gold/25 text-primary">
-                      <Target className="h-5 w-5" />
-                    </div>
-                    <h2 className="truncate text-sm font-semibold">{c.nome}</h2>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {disciplinas.size} {disciplinas.size === 1 ? "matéria" : "matérias"} ·{" "}
-                      {c.materiais.length} material(is)
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              );
-            })}
+          <div className="space-y-6">
+            {grupos.map((g: any) => (
+              <div key={g.pai.id} className="space-y-3">
+                {g.filhas.length > 0 && (
+                  <h2 className="text-sm font-semibold text-muted-foreground">{g.pai.nome}</h2>
+                )}
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {(g.filhas.length > 0 ? g.filhas : [g.pai]).map((c: any) => (
+                    <CargoCard key={c.id} c={c} />
+                  ))}
+                </div>
+              </div>
+            ))}
 
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Link
               to="/acervo/$cargoId"
               params={{ cargoId: "todos" }}
@@ -84,6 +82,7 @@ function AcervoCargos() {
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </Link>
+            </div>
           </div>
         )}
 
@@ -98,5 +97,27 @@ function AcervoCargos() {
         )}
       </PageContent>
     </>
+  );
+}
+
+function CargoCard({ c }: { c: any }) {
+  const disciplinas = new Set(c.materiais.map((m: any) => m.disciplina));
+  return (
+    <Link
+      to="/acervo/$cargoId"
+      params={{ cargoId: c.id }}
+      className="surface-card group flex items-center justify-between gap-4 p-5 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+    >
+      <div className="min-w-0">
+        <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/15 to-gold/25 text-primary">
+          <Target className="h-5 w-5" />
+        </div>
+        <h2 className="truncate text-sm font-semibold">{c.nome}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {disciplinas.size} {disciplinas.size === 1 ? "matéria" : "matérias"} · {c.materiais.length} material(is)
+        </p>
+      </div>
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+    </Link>
   );
 }

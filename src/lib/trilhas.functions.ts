@@ -11,7 +11,10 @@ export const adminListTrilhas = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabase } = context;
     const [{ data: trilhas }, { data: vinculos }, { data: materiais }] = await Promise.all([
-      supabase.from("trilhas").select("id, nome, descricao, ordem, slug, carreiras").order("ordem"),
+      (supabase as any)
+        .from("trilhas")
+        .select("id, nome, descricao, ordem, slug, carreiras, trilha_pai_id")
+        .order("ordem"),
       supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
       supabase
         .from("materiais")
@@ -51,12 +54,31 @@ export const adminUpsertTrilha = createServerFn({ method: "POST" })
         descricao: z.string().trim().max(2000).optional().default(""),
         ordem: z.number().int().min(0).default(0),
         carreiras: z.array(z.enum(["judiciaria", "fiscal", "policial"])).min(1).default(["judiciaria"]),
+        trilha_pai_id: z.string().uuid().nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const payload = { nome: data.nome, descricao: data.descricao || null, ordem: data.ordem, carreiras: data.carreiras };
+    if (data.trilha_pai_id) {
+      if (data.trilha_pai_id === data.id) throw new Error("Uma trilha não pode ser pai de si mesma.");
+      const { data: pai } = await (context.supabase as any)
+        .from("trilhas")
+        .select("id, trilha_pai_id")
+        .eq("id", data.trilha_pai_id)
+        .maybeSingle();
+      if (!pai) throw new Error("Trilha-pai não encontrada.");
+      if (pai.trilha_pai_id) throw new Error("Só há um nível: a trilha-pai não pode ser uma subtrilha.");
+      if (data.id) {
+        const { count } = await (context.supabase as any)
+          .from("trilhas")
+          .select("id", { count: "exact", head: true })
+          .eq("trilha_pai_id", data.id);
+        if (count) throw new Error("Esta trilha já tem subtrilhas e não pode virar subtrilha.");
+      }
+    }
+    const payload: any = { nome: data.nome, descricao: data.descricao || null, ordem: data.ordem, carreiras: data.carreiras };
+    if (data.trilha_pai_id !== undefined) payload.trilha_pai_id = data.trilha_pai_id;
     if (data.id) {
       const { error } = await context.supabase.from("trilhas").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
@@ -401,7 +423,7 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
     const carreira = await getCarreiraUsuario(context);
     const [{ data: trilhas }, { data: vinculos }, { data: materiais }, { data: favs }] =
       await Promise.all([
-        (supabase as any).from("trilhas").select("id, nome, descricao, ordem").contains("carreiras", [carreira]).order("ordem"),
+        (supabase as any).from("trilhas").select("id, nome, descricao, ordem, trilha_pai_id").contains("carreiras", [carreira]).order("ordem"),
         supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
         supabase
           .from("materiais")
@@ -417,6 +439,7 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
       id: t.id,
       nome: t.nome,
       descricao: t.descricao,
+      trilha_pai_id: (t.trilha_pai_id as string | null) ?? null,
       favorito: favSet.has(t.id),
       materiais: (vinculos ?? [])
         .filter((v: any) => v.trilha_id === t.id && byId.has(v.material_id))

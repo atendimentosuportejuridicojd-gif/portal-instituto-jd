@@ -26,6 +26,7 @@ import {
   adminDeleteTrilha,
   adminToggleMaterialTrilha,
 } from "@/lib/trilhas.functions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CarreirasPicker } from "@/components/carreiras-picker";
 import { nomeCarreira } from "@/lib/carreiras";
 
@@ -47,13 +48,22 @@ function AdminTrilhas() {
 
   const trilhas = q.data?.trilhas ?? [];
   const materiais = q.data?.materiais ?? [];
+  const ids = new Set(trilhas.map((t: any) => t.id));
+  // Raiz = sem pai (ou com pai fora da lista). Filhas ficam agrupadas dentro do pai.
+  const raizes = trilhas.filter((t: any) => !t.trilha_pai_id || !ids.has(t.trilha_pai_id));
+  const filhasDe = new Map<string, any[]>();
+  for (const t of trilhas as any[]) {
+    if (t.trilha_pai_id && ids.has(t.trilha_pai_id)) {
+      filhasDe.set(t.trilha_pai_id, [...(filhasDe.get(t.trilha_pai_id) ?? []), t]);
+    }
+  }
 
   return (
     <>
       <PageHeader
         title="Trilhas de Preparação"
         description="Vincule materiais do acervo. O arquivo permanece único — a trilha apenas cria o vínculo."
-        actions={<TrilhaDialog onDone={invalidate} />}
+        actions={<TrilhaDialog pais={raizes} onDone={invalidate} />}
       />
       <PageContent>
         {q.isLoading ? (
@@ -66,56 +76,86 @@ function AdminTrilhas() {
           />
         ) : (
           <div className="space-y-6">
-            {trilhas.map((t: any) => (
-              <section key={t.id} className="surface-card p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="truncate text-base font-semibold">{t.nome}</h2>
-                    <p className="text-xs text-muted-foreground">
-                      {t.materiais.length} material(is) vinculado(s) ·{" "}
-                      {(t.carreiras ?? []).map((c: string) => nomeCarreira(c)).join(", ")}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <VincularDialog
-                      titulo={t.nome}
-                      materiais={materiais}
-                      vinculados={t.materiais.map((m: any) => m.id)}
-                      onToggle={(materialId, vincular) => ({
-                        trilha_id: t.id,
-                        material_id: materialId,
-                        vincular,
-                      })}
-                      onDone={invalidate}
-                    />
-                    <TrilhaDialog trilha={t} onDone={invalidate} />
-                    <DeleteTrilha id={t.id} onDone={invalidate} />
-                  </div>
+            {raizes.map((t: any) => {
+              const filhas = filhasDe.get(t.id) ?? [];
+              return (
+                <div key={t.id} className="space-y-3">
+                  <TrilhaCard t={t} materiais={materiais} pais={raizes} temFilhas={filhas.length > 0} onDone={invalidate} />
+                  {filhas.length > 0 && (
+                    <div className="ml-4 space-y-3 border-l-2 border-primary/20 pl-4 sm:ml-8 sm:pl-6">
+                      {filhas.map((f: any) => (
+                        <TrilhaCard key={f.id} t={f} materiais={materiais} pais={raizes} temFilhas={false} filha onDone={invalidate} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {t.materiais.length > 0 && (
-                  <ul className="mt-4 space-y-2">
-                    {t.materiais.map((m: any) => (
-                      <li
-                        key={m.id}
-                        className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm"
-                      >
-                        <span className="truncate">
-                          {m.titulo}{" "}
-                          <span className="text-xs text-muted-foreground">· {m.disciplina}</span>
-                        </span>
-                        {!m.tem_arquivo && (
-                          <Badge variant="outline" className="text-destructive">Sem arquivo</Badge>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-            ))}
+              );
+            })}
           </div>
         )}
       </PageContent>
     </>
+  );
+}
+
+function TrilhaCard({
+  t,
+  materiais,
+  pais,
+  temFilhas,
+  filha,
+  onDone,
+}: {
+  t: any;
+  materiais: any[];
+  pais: any[];
+  temFilhas: boolean;
+  filha?: boolean;
+  onDone: () => void;
+}) {
+  return (
+    <section className="surface-card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-base font-semibold">{t.nome}</h2>
+          <p className="text-xs text-muted-foreground">
+            {filha ? "Subtrilha · " : temFilhas ? "Órgão · " : ""}
+            {t.materiais.length} material(is) vinculado(s) ·{" "}
+            {(t.carreiras ?? []).map((c: string) => nomeCarreira(c)).join(", ")}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <VincularDialog
+            titulo={t.nome}
+            materiais={materiais}
+            vinculados={t.materiais.map((m: any) => m.id)}
+            onToggle={(materialId, vincular) => ({
+              trilha_id: t.id,
+              material_id: materialId,
+              vincular,
+            })}
+            onDone={onDone}
+          />
+          <TrilhaDialog trilha={t} pais={pais} onDone={onDone} />
+          <DeleteTrilha id={t.id} onDone={onDone} />
+        </div>
+      </div>
+      {t.materiais.length > 0 && (
+        <ul className="mt-4 space-y-2">
+          {t.materiais.map((m: any) => (
+            <li
+              key={m.id}
+              className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2 text-sm"
+            >
+              <span className="truncate">
+                {m.titulo} <span className="text-xs text-muted-foreground">· {m.disciplina}</span>
+              </span>
+              {!m.tem_arquivo && <Badge variant="outline" className="text-destructive">Sem arquivo</Badge>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -143,17 +183,27 @@ function DeleteTrilha({ id, onDone }: { id: string; onDone: () => void }) {
   );
 }
 
-function TrilhaDialog({ trilha, onDone }: { trilha?: any; onDone: () => void }) {
+function TrilhaDialog({ trilha, pais = [], onDone }: { trilha?: any; pais?: any[]; onDone: () => void }) {
   const [open, setOpen] = useState(false);
   const [nome, setNome] = useState(trilha?.nome ?? "");
   const [descricao, setDescricao] = useState(trilha?.descricao ?? "");
   const [ordem, setOrdem] = useState(String(trilha?.ordem ?? 0));
   const [carreiras, setCarreiras] = useState<string[]>(trilha?.carreiras ?? ["judiciaria"]);
+  const [paiId, setPaiId] = useState<string>(trilha?.trilha_pai_id ?? "none");
   const fn = useServerFn(adminUpsertTrilha);
 
   const mut = useMutation({
     mutationFn: () =>
-      fn({ data: { id: trilha?.id, nome, descricao, ordem: Number(ordem) || 0, carreiras: carreiras as any } }),
+      fn({
+        data: {
+          id: trilha?.id,
+          nome,
+          descricao,
+          ordem: Number(ordem) || 0,
+          carreiras: carreiras as any,
+          trilha_pai_id: paiId === "none" ? null : paiId,
+        },
+      }),
     onSuccess: () => {
       toast.success("Trilha salva.");
       setOpen(false);
@@ -198,6 +248,24 @@ function TrilhaDialog({ trilha, onDone }: { trilha?: any; onDone: () => void }) 
           <div className="space-y-1.5">
             <Label htmlFor="t-ordem">Ordem</Label>
             <Input id="t-ordem" value={ordem} onChange={(e) => setOrdem(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Trilha-pai (órgão)</Label>
+            <Select value={paiId} onValueChange={setPaiId}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhuma (trilha principal)</SelectItem>
+                {pais
+                  .filter((p: any) => p.id !== trilha?.id)
+                  .map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.nome}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
           <CarreirasPicker value={carreiras} onChange={setCarreiras} />
         </div>
