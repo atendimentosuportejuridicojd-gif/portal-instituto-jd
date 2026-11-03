@@ -10,17 +10,21 @@ export const adminListTrilhas = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabase } = context;
-    const [{ data: trilhas }, { data: vinculos }, { data: materiais }] = await Promise.all([
-      (supabase as any)
-        .from("trilhas")
-        .select("id, nome, descricao, ordem, slug, carreiras, trilha_pai_id")
-        .order("ordem"),
-      supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
-      supabase
-        .from("materiais")
-        .select("id, titulo, publicado, storage_path, disciplinas(nome)")
-        .order("titulo"),
-    ]);
+    const [{ data: trilhas }, { data: vinculos }, { data: materiais }, { data: trilhaConcursos }, { data: concursos }, { data: concursoMats }] =
+      await Promise.all([
+        (supabase as any)
+          .from("trilhas")
+          .select("id, nome, descricao, ordem, slug, carreiras, trilha_pai_id")
+          .order("ordem"),
+        supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
+        supabase
+          .from("materiais")
+          .select("id, titulo, publicado, storage_path, disciplinas(nome)")
+          .order("titulo"),
+        (supabase as any).from("trilha_concursos").select("trilha_id, concurso_id"),
+        supabase.from("concursos").select("id, nome, orgao, banca, ano, carreiras").order("nome"),
+        supabase.from("concurso_materiais").select("concurso_id, material_id, ordem").order("ordem"),
+      ]);
 
     const mats = (materiais ?? []).map((m: any) => ({
       id: m.id,
@@ -33,14 +37,37 @@ export const adminListTrilhas = createServerFn({ method: "GET" })
     const byId = new Map(mats.map((m) => [m.id, m]));
 
     return {
-      trilhas: (trilhas ?? []).map((t: any) => ({
-        ...t,
-        materiais: (vinculos ?? [])
-          .filter((v: any) => v.trilha_id === t.id)
-          .map((v: any) => ({ ...byId.get(v.material_id), ordem: v.ordem }))
-          .filter((m: any) => m.id),
-      })),
+      trilhas: (trilhas ?? []).map((t: any) => {
+        const manuais = new Set(
+          (vinculos ?? []).filter((v: any) => v.trilha_id === t.id).map((v: any) => v.material_id),
+        );
+        const concursoIds = (trilhaConcursos ?? [])
+          .filter((tc: any) => tc.trilha_id === t.id)
+          .map((tc: any) => tc.concurso_id as string);
+        // Matérias puxadas dos concursos vinculados (sem duplicar as já vinculadas à mão).
+        const viaConcurso = new Set(
+          (concursoMats ?? [])
+            .filter((cm: any) => concursoIds.includes(cm.concurso_id) && !manuais.has(cm.material_id))
+            .map((cm: any) => cm.material_id as string),
+        );
+        const todos = [
+          ...(vinculos ?? [])
+            .filter((v: any) => v.trilha_id === t.id)
+            .map((v: any) => ({ ...byId.get(v.material_id), ordem: v.ordem, via_concurso: false })),
+          ...[...viaConcurso].map((id) => ({ ...byId.get(id), ordem: 0, via_concurso: true })),
+        ].filter((m: any) => m.id);
+        return { ...t, concurso_ids: concursoIds, materiais: todos };
+      }),
       materiais: mats,
+      concursos: (concursos ?? []).map((c: any) => ({
+        id: c.id,
+        nome: c.nome,
+        orgao: c.orgao,
+        banca: c.banca,
+        ano: c.ano,
+        carreiras: c.carreiras ?? [],
+        total_materias: (concursoMats ?? []).filter((cm: any) => cm.concurso_id === c.id).length,
+      })),
     };
   });
 
@@ -131,6 +158,37 @@ export const adminToggleMaterialTrilha = createServerFn({ method: "POST" })
       { trilha_id: data.trilha_id, material_id: data.material_id, ordem: data.ordem },
       { onConflict: "trilha_id,material_id" },
     );
+    if (error) throw new Error(error.message);
+    return { vinculado: true };
+  });
+
+/** Vincula/desvincula um concurso da trilha — a trilha passa a incluir as matérias desse concurso (nada é copiado). */
+export const adminToggleConcursoTrilha = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        trilha_id: z.string().uuid(),
+        concurso_id: z.string().uuid(),
+        vincular: z.boolean(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const db = context.supabase as any;
+    if (!data.vincular) {
+      const { error } = await db
+        .from("trilha_concursos")
+        .delete()
+        .eq("trilha_id", data.trilha_id)
+        .eq("concurso_id", data.concurso_id);
+      if (error) throw new Error(error.message);
+      return { vinculado: false };
+    }
+    const { error } = await db
+      .from("trilha_concursos")
+      .upsert({ trilha_id: data.trilha_id, concurso_id: data.concurso_id }, { onConflict: "trilha_id,concurso_id" });
     if (error) throw new Error(error.message);
     return { vinculado: true };
   });
@@ -421,7 +479,7 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const carreira = await getCarreiraUsuario(context);
-    const [{ data: trilhas }, { data: vinculos }, { data: materiais }, { data: favs }] =
+    const [{ data: trilhas }, { data: vinculosManuais }, { data: materiais }, { data: favs }, { data: trilhaConcursos }, { data: concursoMats }] =
       await Promise.all([
         (supabase as any).from("trilhas").select("id, nome, descricao, ordem, trilha_pai_id").contains("carreiras", [carreira]).order("ordem"),
         supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
@@ -430,7 +488,22 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
           .select("id, titulo, versao, storage_path, disciplinas(nome)")
           .eq("publicado", true),
         supabase.from("favoritos").select("item_id").eq("user_id", userId).eq("tipo", "trilha"),
+        (supabase as any).from("trilha_concursos").select("trilha_id, concurso_id"),
+        supabase.from("concurso_materiais").select("concurso_id, material_id, ordem").order("ordem"),
       ]);
+
+    // Matérias da trilha = vínculos manuais + matérias dos concursos vinculados (sem repetir).
+    const vinculos: { trilha_id: string; material_id: string }[] = [...(vinculosManuais ?? [])];
+    const jaTem = new Set(vinculos.map((v) => `${v.trilha_id}|${v.material_id}`));
+    for (const tc of trilhaConcursos ?? []) {
+      for (const cm of concursoMats ?? []) {
+        if (cm.concurso_id !== tc.concurso_id) continue;
+        const chave = `${tc.trilha_id}|${cm.material_id}`;
+        if (jaTem.has(chave)) continue;
+        jaTem.add(chave);
+        vinculos.push({ trilha_id: tc.trilha_id, material_id: cm.material_id });
+      }
+    }
 
     const byId = new Map((materiais ?? []).map((m: any) => [m.id, m]));
     const favSet = new Set((favs ?? []).map((f: any) => f.item_id));
