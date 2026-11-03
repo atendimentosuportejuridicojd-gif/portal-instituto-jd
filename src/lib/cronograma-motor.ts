@@ -16,6 +16,8 @@ export const MINUTOS_POR_QUESTAO_PADRAO = 3;
 export const RESERVA_REVISAO_PADRAO = 0.25;
 export const DIAS_FASE_FINAL = 13;
 export const INTERVALO_SIMULADO_DIAS = 15;
+/** Preparação continuada (sem data de prova): até onde o plano pode se estender a partir do início. */
+export const HORIZONTE_CONTINUADA_DIAS = 1095;
 /** Menor pedaço de bloco que vale colocar num dia; abaixo disso o resto vai para o dia seguinte. */
 const MIN_PEDACO = 10;
 
@@ -40,8 +42,11 @@ export interface DisciplinaPlano {
 export interface ParametrosPlano {
   /** YYYY-MM-DD */
   dataInicio: string;
-  /** YYYY-MM-DD: o plano termina um dia antes. */
-  dataProva: string;
+  /**
+   * YYYY-MM-DD: o plano termina um dia antes. Sem data (preparação continuada) o plano segue até acabar o
+   * conteúdo (limite de HORIZONTE_CONTINUADA_DIAS), sem fase final e sem simulados.
+   */
+  dataProva?: string | null;
   /** Minutos disponíveis por dia da semana: índice 0 = domingo ... 6 = sábado. */
   minutosPorDiaSemana: [number, number, number, number, number, number, number];
   /** Disciplinas na ordem de estudo. */
@@ -156,14 +161,17 @@ function montarItens(p: ParametrosPlano): ItemTrabalho[] {
 }
 
 export function gerarPlano(p: ParametrosPlano): ResultadoPlano {
-  const ultimoDia = somarDias(p.dataProva, -1);
+  const dataProva = p.dataProva || null;
+  const ultimoDia = dataProva
+    ? somarDias(dataProva, -1)
+    : somarDias(p.dataInicio, HORIZONTE_CONTINUADA_DIAS - 1);
   const totalDias = Math.max(0, diferencaDias(p.dataInicio, ultimoDia) + 1);
   const itens = montarItens(p);
   const minutosNecessarios = itens.reduce((acc, i) => acc + i.minutos, 0);
 
   // Simulados: reservam tempo nos dias em que caem.
   const datasSimulado: string[] = [];
-  if (p.simulados && (p.minutosSimulado ?? 0) > 0) {
+  if (dataProva && p.simulados && (p.minutosSimulado ?? 0) > 0) {
     for (let d = 0; d < totalDias; d += INTERVALO_SIMULADO_DIAS) datasSimulado.push(somarDias(p.dataInicio, d));
   }
   const simuladoNoDia = new Map<string, number>(datasSimulado.map((d) => [d, p.minutosSimulado ?? 0]));
@@ -177,9 +185,9 @@ export function gerarPlano(p: ParametrosPlano): ResultadoPlano {
   for (let i = 0; i < totalDias; i++) dias.push(somarDias(p.dataInicio, i));
 
   // A fase final só é reservada se o estudo terminar até D-14. Testo com a capacidade dos dias anteriores.
-  const diasAntesDaFase = dias.filter((d) => diferencaDias(d, p.dataProva) > DIAS_FASE_FINAL);
+  const diasAntesDaFase = dataProva ? dias.filter((d) => diferencaDias(d, dataProva) > DIAS_FASE_FINAL) : dias;
   const capacidadeAntesDaFase = diasAntesDaFase.reduce((acc, d) => acc + capacidade(d), 0);
-  const reservaFaseFinal = totalDias > DIAS_FASE_FINAL && minutosNecessarios <= capacidadeAntesDaFase;
+  const reservaFaseFinal = !!dataProva && totalDias > DIAS_FASE_FINAL && minutosNecessarios <= capacidadeAntesDaFase;
   const diasDeEstudo = reservaFaseFinal ? diasAntesDaFase : dias;
   const minutosDisponiveis = diasDeEstudo.reduce((acc, d) => acc + capacidade(d), 0);
 
@@ -224,13 +232,14 @@ export function gerarPlano(p: ParametrosPlano): ResultadoPlano {
     idxItem >= itens.length ? 0 : restoItem + itens.slice(idxItem + 1).reduce((acc, i) => acc + i.minutos, 0);
 
   const disciplinasForaDoPlano = [...new Set(itens.slice(idxItem).map((i) => i.disciplinaId))];
-  const limiteEstudo = reservaFaseFinal ? somarDias(p.dataProva, -(DIAS_FASE_FINAL + 1)) : ultimoDia;
-  const diasSobra = faltamMinutos === 0 && fimEstudo ? Math.max(0, diferencaDias(fimEstudo, limiteEstudo)) : 0;
+  const limiteEstudo = reservaFaseFinal && dataProva ? somarDias(dataProva, -(DIAS_FASE_FINAL + 1)) : ultimoDia;
+  // Sem data de prova não existe "sobra": o plano simplesmente termina quando o conteúdo acaba.
+  const diasSobra = dataProva && faltamMinutos === 0 && fimEstudo ? Math.max(0, diferencaDias(fimEstudo, limiteEstudo)) : 0;
 
   // Fase final: um bloco por dia (conteúdo a definir), com a capacidade do dia.
   let faseFinal: ResultadoPlano["faseFinal"] = null;
-  if (reservaFaseFinal) {
-    const diasFase = dias.filter((d) => diferencaDias(d, p.dataProva) <= DIAS_FASE_FINAL);
+  if (reservaFaseFinal && dataProva) {
+    const diasFase = dias.filter((d) => diferencaDias(d, dataProva) <= DIAS_FASE_FINAL);
     if (diasFase.length) {
       faseFinal = { inicio: diasFase[0], fim: diasFase[diasFase.length - 1] };
       for (const data of diasFase) {

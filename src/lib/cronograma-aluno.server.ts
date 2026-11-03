@@ -15,10 +15,15 @@ import {
 
 type Ctx = { supabase: any; userId: string };
 
+export type ModoCronograma = "pos_edital" | "continuada";
+
 export interface ParametrosAluno {
-  concurso_id: string;
+  /** Padrão: pos_edital (com concurso e data da prova). continuada: com trilha, sem prova e sem simulados. */
+  modo?: ModoCronograma;
+  concurso_id?: string;
+  trilha_id?: string;
   data_inicio: string;
-  data_prova: string;
+  data_prova?: string | null;
   /** Posição 0 = domingo ... 6 = sábado. */
   minutos_por_dia: number[];
   minutos_por_questao: number;
@@ -177,21 +182,130 @@ export async function carregarDisciplinas(
   });
 }
 
+async function emLotes<T>(ids: string[], tamanho: number, buscar: (lote: string[]) => Promise<T[]>): Promise<T[]> {
+  const todos: T[] = [];
+  for (let i = 0; i < ids.length; i += tamanho) todos.push(...(await buscar(ids.slice(i, i + tamanho))));
+  return todos;
+}
+
+/**
+ * Preparação continuada: disciplinas e matérias de uma trilha (só Acervo Base publicado). Não há estrutura de prova;
+ * a ordem é a escolhida pelo aluno e, no que faltar, a ordem das disciplinas no Acervo.
+ */
+export async function carregarDisciplinasTrilha(
+  supabase: any,
+  trilhaId: string,
+  ordemEscolhida: string[] | undefined,
+  filtroMateriaConcluida?: Set<string>,
+): Promise<DisciplinaCarregada[]> {
+  const { data: vinculos, error } = await supabase.from("trilha_materiais").select("material_id").eq("trilha_id", trilhaId);
+  if (error) throw new Error(error.message);
+  const idsMaterial: string[] = (vinculos ?? []).map((v: any) => v.material_id);
+  if (!idsMaterial.length) throw new Error("Esta trilha ainda não tem matérias.");
+
+  const [materiais, contagem] = await Promise.all([
+    emLotes<any>(idsMaterial, 100, async (lote) => {
+      const { data, error: e } = await supabase
+        .from("materiais")
+        .select("id, titulo, disciplina_id, tempo_leitura, ordem")
+        .in("id", lote)
+        .eq("publicado", true)
+        .eq("tipo", "markdown");
+      if (e) throw new Error(e.message);
+      return data ?? [];
+    }),
+    contarQuestoesPorMaterial(supabase, { somentePublicadas: true }, null),
+  ]);
+  if (!materiais.length) throw new Error("Esta trilha ainda não tem matérias publicadas.");
+
+  const idsDisciplina = [...new Set<string>(materiais.map((m: any) => m.disciplina_id).filter(Boolean))];
+  const { data: disciplinas, error: eDisc } = await supabase
+    .from("disciplinas")
+    .select("id, nome, ordem")
+    .in("id", idsDisciplina);
+  if (eDisc) throw new Error(eDisc.message);
+
+  const padrao = [...(disciplinas ?? [])].sort(
+    (a: any, b: any) => (a.ordem ?? 0) - (b.ordem ?? 0) || String(a.nome).localeCompare(String(b.nome), "pt-BR"),
+  );
+  const ordenadas: any[] = [];
+  for (const id of ordemEscolhida ?? []) {
+    const d = padrao.find((x: any) => x.id === id);
+    if (d && !ordenadas.includes(d)) ordenadas.push(d);
+  }
+  for (const d of padrao) if (!ordenadas.includes(d)) ordenadas.push(d);
+
+  const comQuestoes = [...contagem.values()].filter((n) => n > 0);
+  const mediaGlobal = comQuestoes.length
+    ? Math.round(comQuestoes.reduce((a, b) => a + b, 0) / comQuestoes.length)
+    : QUESTOES_PADRAO;
+
+  return ordenadas.map((d: any) => {
+    const doas = materiais
+      .filter((m: any) => m.disciplina_id === d.id)
+      .sort((a: any, b: any) => (a.ordem ?? 0) - (b.ordem ?? 0) || String(a.titulo).localeCompare(String(b.titulo), "pt-BR"));
+    const reais = doas.map((m: any) => contagem.get(m.id) ?? 0).filter((n: number) => n > 0);
+    const mediaDisciplina = reais.length
+      ? Math.round(reais.reduce((a: number, b: number) => a + b, 0) / reais.length)
+      : mediaGlobal;
+    return {
+      id: d.id,
+      nome: d.nome,
+      peso: 0,
+      qtdProva: 0,
+      materias: doas
+        .filter((m: any) => !filtroMateriaConcluida?.has(m.id))
+        .map((m: any) => ({
+          id: m.id,
+          titulo: m.titulo,
+          minutosLeitura: m.tempo_leitura ?? LEITURA_PADRAO_MIN,
+          qtdQuestoes: contagem.get(m.id) || mediaDisciplina,
+          qtdReal: contagem.get(m.id) ?? 0,
+        })),
+    };
+  });
+}
+
+/** Disciplinas de um cronograma, conforme o modo: estrutura da prova do concurso ou matérias da trilha. */
+async function carregarDisciplinasDoCronograma(
+  supabase: any,
+  c: { modo?: string | null; concurso_id?: string | null; trilha_id?: string | null },
+  ordem: string[] | undefined,
+  filtroMateriaConcluida?: Set<string>,
+) {
+  if (c.modo === "continuada") {
+    if (!c.trilha_id) throw new Error("A trilha deste cronograma não existe mais.");
+    return carregarDisciplinasTrilha(supabase, c.trilha_id, ordem, filtroMateriaConcluida);
+  }
+  if (!c.concurso_id) throw new Error("O concurso deste cronograma não existe mais.");
+  return carregarDisciplinas(supabase, c.concurso_id, ordem, filtroMateriaConcluida);
+}
+
 function paraMotor(p: ParametrosAluno, disciplinas: DisciplinaCarregada[], dataInicio: string): ParametrosPlano {
   return {
     dataInicio,
-    dataProva: p.data_prova,
+    dataProva: p.modo === "continuada" ? null : (p.data_prova ?? null),
     minutosPorDiaSemana: p.minutos_por_dia as ParametrosPlano["minutosPorDiaSemana"],
     disciplinas: disciplinas.filter((d) => d.materias.length > 0),
     minutosPorQuestao: p.minutos_por_questao,
-    simulados: p.usa_simulado,
-    minutosSimulado: p.usa_simulado ? (p.duracao_prova_min ?? 0) : 0,
+    simulados: p.modo !== "continuada" && p.usa_simulado,
+    minutosSimulado: p.modo !== "continuada" && p.usa_simulado ? (p.duracao_prova_min ?? 0) : 0,
     somenteQuestoes: !!p.somente_questoes,
   };
 }
 
 function validar(p: ParametrosAluno) {
   const hoje = hojeBrasilia();
+  if (p.modo === "continuada") {
+    if (!p.trilha_id) throw new Error("Escolha a trilha que você quer estudar.");
+    if (p.data_inicio < hoje) throw new Error("A data de início não pode estar no passado.");
+    if (p.minutos_por_dia.length !== 7 || p.minutos_por_dia.every((m) => m <= 0)) {
+      throw new Error("Informe pelo menos um dia da semana com tempo de estudo.");
+    }
+    return;
+  }
+  if (!p.concurso_id) throw new Error("Escolha o concurso.");
+  if (!p.data_prova) throw new Error("Informe a data da prova.");
   if (p.data_prova <= p.data_inicio) throw new Error("A data da prova precisa ser depois da data de início.");
   if (p.data_inicio < hoje) throw new Error("A data de início não pode estar no passado.");
   if (p.data_prova <= hoje) throw new Error("A data da prova precisa estar no futuro.");
@@ -266,10 +380,37 @@ export async function dadosAssistente(ctx: Ctx) {
     acessoSimuladoLiberado(supabase, userId),
   ]);
   const comEstrutura = new Set((estruturas ?? []).map((e: any) => e.concurso_id));
+
+  // Preparação continuada: trilhas da carreira com a quantidade de matérias publicadas do Acervo Base.
+  const { data: trilhasBrutas } = await (supabase as any)
+    .from("trilhas")
+    .select("id, nome, descricao, ordem, trilha_pai_id, esferas")
+    .contains("carreiras", [carreira])
+    .order("ordem");
+  const trilhas = await Promise.all(
+    (trilhasBrutas ?? []).map(async (t: any) => {
+      const { count, error } = await (supabase as any)
+        .from("trilha_materiais")
+        .select("material_id, materiais!inner(id)", { count: "exact", head: true })
+        .eq("trilha_id", t.id)
+        .eq("materiais.publicado", true)
+        .eq("materiais.tipo", "markdown");
+      if (error) throw new Error(error.message);
+      return {
+        id: t.id as string,
+        nome: t.nome as string,
+        descricao: (t.descricao as string | null) ?? null,
+        trilha_pai_id: (t.trilha_pai_id as string | null) ?? null,
+        esferas: ((t.esferas as string[] | null) ?? []) as string[],
+        qtdMaterias: (count ?? 0) as number,
+      };
+    }),
+  );
   return {
     hoje: hojeBrasilia(),
     simuladoLiberado,
     concursos: (concursos ?? []).map((c: any) => ({ ...c, pronto: comEstrutura.has(c.id) })),
+    trilhas,
   };
 }
 
@@ -277,7 +418,11 @@ export async function dadosAssistente(ctx: Ctx) {
 export async function previaCronograma(ctx: Ctx, p: ParametrosAluno) {
   await assertAcessoAluno(ctx);
   validar(p);
-  const disciplinas = await carregarDisciplinas(ctx.supabase, p.concurso_id, p.ordem_disciplinas);
+  const disciplinas = await carregarDisciplinasDoCronograma(
+    ctx.supabase,
+    { modo: p.modo, concurso_id: p.concurso_id, trilha_id: p.trilha_id },
+    p.ordem_disciplinas,
+  );
   const plano = gerarPlano(paraMotor(p, disciplinas, p.data_inicio));
   return {
     resumo: resumo(plano),
@@ -320,12 +465,29 @@ export async function criarCronograma(ctx: Ctx, p: ParametrosAluno) {
   validar(p);
   const { supabase, userId } = ctx;
 
-  const { data: concurso } = await supabase.from("concursos").select("nome").eq("id", p.concurso_id).maybeSingle();
-  if (!concurso) throw new Error("Concurso indisponível.");
+  const continuada = p.modo === "continuada";
+  let nomeAlvo: string;
+  if (continuada) {
+    const { data: trilha } = await (supabase as any)
+      .from("trilhas")
+      .select("nome, carreiras")
+      .eq("id", p.trilha_id)
+      .maybeSingle();
+    if (!trilha) throw new Error("Trilha indisponível.");
+    nomeAlvo = trilha.nome;
+  } else {
+    const { data: concurso } = await supabase.from("concursos").select("nome").eq("id", p.concurso_id).maybeSingle();
+    if (!concurso) throw new Error("Concurso indisponível.");
+    nomeAlvo = concurso.nome;
+  }
 
-  const disciplinas = await carregarDisciplinas(supabase, p.concurso_id, p.ordem_disciplinas);
+  const disciplinas = await carregarDisciplinasDoCronograma(
+    supabase,
+    { modo: p.modo, concurso_id: p.concurso_id, trilha_id: p.trilha_id },
+    p.ordem_disciplinas,
+  );
   const plano = gerarPlano(paraMotor(p, disciplinas, p.data_inicio));
-  const precisaPagar = p.usa_simulado && !(await acessoSimuladoLiberado(supabase, userId));
+  const precisaPagar = !continuada && p.usa_simulado && !(await acessoSimuladoLiberado(supabase, userId));
   const status = precisaPagar ? "rascunho" : "ativo";
 
   // Só um rascunho por vez: o novo substitui o anterior.
@@ -352,14 +514,16 @@ export async function criarCronograma(ctx: Ctx, p: ParametrosAluno) {
     .from("cronogramas_aluno")
     .insert({
       user_id: userId,
-      concurso_id: p.concurso_id,
-      concurso_nome: concurso.nome,
+      modo: continuada ? "continuada" : "pos_edital",
+      concurso_id: continuada ? null : p.concurso_id,
+      trilha_id: continuada ? p.trilha_id : null,
+      concurso_nome: nomeAlvo,
       data_inicio: p.data_inicio,
-      data_prova: p.data_prova,
+      data_prova: continuada ? null : p.data_prova,
       minutos_por_dia: p.minutos_por_dia,
       minutos_por_questao: p.minutos_por_questao,
-      usa_simulado: p.usa_simulado,
-      duracao_prova_min: p.usa_simulado ? p.duracao_prova_min : null,
+      usa_simulado: continuada ? false : p.usa_simulado,
+      duracao_prova_min: !continuada && p.usa_simulado ? p.duracao_prova_min : null,
       ordem_disciplinas: disciplinas.map((d) => d.id),
       status,
       resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes },
@@ -406,6 +570,7 @@ export async function finalizarRascunho(ctx: Ctx) {
     throw new Error("A data da prova já passou. Monte um novo cronograma.");
   }
   const p: ParametrosAluno = {
+    modo: "pos_edital",
     concurso_id: r.concurso_id,
     data_inicio: dataInicio,
     data_prova: r.data_prova,
@@ -436,15 +601,18 @@ export async function cronogramaAtual(ctx: Ctx) {
   const [{ data: brutas }, carreira] = await Promise.all([
     supabase
       .from("cronogramas_aluno")
-      .select("*, concursos(carreiras)")
+      .select("*, concursos(carreiras), trilhas(carreiras)")
       .eq("user_id", userId)
       .in("status", ["ativo", "rascunho"]),
     getCarreiraUsuario(ctx),
   ]);
-  // Cronogramas only appear in the portal of the career their concurso belongs to.
+  // Cronogramas only appear in the portal of the career their concurso (ou trilha) belongs to.
   const linhas = (brutas ?? [])
-    .filter((c: any) => !c.concursos?.carreiras || c.concursos.carreiras.includes(carreira))
-    .map(({ concursos: _c, ...c }: any) => c);
+    .filter((c: any) => {
+      const carreiras = c.modo === "continuada" ? c.trilhas?.carreiras : c.concursos?.carreiras;
+      return !carreiras || carreiras.includes(carreira);
+    })
+    .map(({ concursos: _c, trilhas: _t, ...c }: any) => c);
   const ativo = linhas.find((c: any) => c.status === "ativo") ?? null;
   const rascunho = linhas.find((c: any) => c.status === "rascunho") ?? null;
 
@@ -475,7 +643,7 @@ export async function cronogramaAtual(ctx: Ctx) {
     blocos,
     disciplinas: (nomesDisciplinas ?? []) as { id: string; nome: string }[],
     progresso: { totalMinutos: total, feitoMinutos: feito, percentual: total ? Math.round((feito / total) * 100) : 0 },
-    diasAteProva: ativo ? diferencaDias(hoje, ativo.data_prova) : null,
+    diasAteProva: ativo?.data_prova ? diferencaDias(hoje, ativo.data_prova) : null,
     diasAtrasados: new Set(atrasados.map((b: any) => b.data)).size,
   };
 }
@@ -509,17 +677,16 @@ export async function revisaoDoBloco(ctx: Ctx, blocoId: string) {
 
   const { data: c } = await supabase
     .from("cronogramas_aluno")
-    .select("concurso_id, ordem_disciplinas, minutos_por_questao")
+    .select("modo, concurso_id, trilha_id, ordem_disciplinas, minutos_por_questao")
     .eq("id", bloco.cronograma_id)
     .eq("user_id", userId)
     .maybeSingle();
   if (!c) throw new Error("Cronograma não encontrado.");
-  if (!c.concurso_id) throw new Error("O concurso deste cronograma não existe mais.");
 
   const ordem: string[] = c.ordem_disciplinas ?? [];
   const ate = ordem.indexOf(bloco.disciplina_id);
   const ids = ate >= 0 ? ordem.slice(0, ate + 1) : [bloco.disciplina_id];
-  const disciplinas = (await carregarDisciplinas(supabase, c.concurso_id, ordem)).filter((d) => ids.includes(d.id));
+  const disciplinas = (await carregarDisciplinasDoCronograma(supabase, c, ordem)).filter((d) => ids.includes(d.id));
 
   const materias = disciplinas.flatMap((d) => d.materias.map((m) => ({ ...m, disciplina: d.nome })));
   const comQuestoes = materias.filter((m) => m.qtdReal > 0);
@@ -612,7 +779,7 @@ export async function recalcularCronograma(ctx: Ctx) {
   if (!c) throw new Error("Você não tem um cronograma ativo.");
 
   const hoje = hojeBrasilia();
-  if (c.data_prova <= hoje) throw new Error("A data da prova já chegou.");
+  if (c.modo !== "continuada" && c.data_prova <= hoje) throw new Error("A data da prova já chegou.");
 
   const blocos = await lerBlocos(supabase, c.id, "id, tipo, material_id, concluido, data");
 
@@ -629,7 +796,9 @@ export async function recalcularCronograma(ctx: Ctx) {
   );
 
   const p: ParametrosAluno = {
-    concurso_id: c.concurso_id,
+    modo: c.modo === "continuada" ? "continuada" : "pos_edital",
+    concurso_id: c.concurso_id ?? undefined,
+    trilha_id: c.trilha_id ?? undefined,
     data_inicio: hoje,
     data_prova: c.data_prova,
     minutos_por_dia: c.minutos_por_dia,
@@ -639,7 +808,7 @@ export async function recalcularCronograma(ctx: Ctx) {
     duracao_prova_min: c.duracao_prova_min,
     somente_questoes: !!c.resumo?.somente_questoes,
   };
-  const disciplinas = await carregarDisciplinas(supabase, c.concurso_id, c.ordem_disciplinas, concluidas);
+  const disciplinas = await carregarDisciplinasDoCronograma(supabase, c, c.ordem_disciplinas, concluidas);
   const plano = gerarPlano(paraMotor(p, disciplinas, hoje));
 
   // Remove só o que ainda não foi feito (inclui os atrasados); o histórico concluído fica.

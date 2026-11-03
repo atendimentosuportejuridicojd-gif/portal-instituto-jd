@@ -5,9 +5,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const dataIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const parametrosSchema = z.object({
-  concurso_id: z.string().uuid(),
+  /** Padrão pos_edital. continuada = Preparação continuada (trilha, sem prova nem simulados). */
+  modo: z.enum(["pos_edital", "continuada"]).default("pos_edital"),
+  concurso_id: z.string().uuid().optional(),
+  trilha_id: z.string().uuid().optional(),
   data_inicio: dataIso,
-  data_prova: dataIso,
+  data_prova: dataIso.nullable().optional(),
   /** Minutos por dia da semana: posição 0 = domingo ... 6 = sábado. */
   minutos_por_dia: z.array(z.number().int().min(0).max(1440)).length(7),
   minutos_por_questao: z.number().int().min(1).max(60).default(3),

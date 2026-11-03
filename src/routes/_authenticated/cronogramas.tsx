@@ -7,6 +7,9 @@ import { CalendarDays, Loader2 } from "lucide-react";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Assistente } from "@/components/cronograma/assistente";
+import { AssistenteContinuada } from "@/components/cronograma/assistente-continuada";
+import { EscolhaDirecao, type Direcao } from "@/components/cronograma/escolha-direcao";
+import { ArrowLeft } from "lucide-react";
 import { PlanoDoAluno } from "@/components/cronograma/plano";
 import { ExcluirCronograma } from "@/components/cronograma/excluir";
 import {
@@ -43,6 +46,7 @@ function MeuCronograma() {
   const dadosFn = useServerFn(alunoDadosAssistente);
   const finalizarFn = useServerFn(alunoFinalizarRascunho);
   const [criando, setCriando] = useState(false);
+  const [direcao, setDirecao] = useState<Direcao | null>(null);
 
   const q = useQuery({
     queryKey: ["aluno", "cronograma"],
@@ -96,6 +100,7 @@ function MeuCronograma() {
 
   const aoCriar = () => {
     setCriando(false);
+    setDirecao(null);
     qc.invalidateQueries({ queryKey: ["aluno", "cronograma"] });
   };
 
@@ -134,14 +139,46 @@ function MeuCronograma() {
     ) : (
       <div className="text-sm text-muted-foreground">Carregando…</div>
     );
+  } else if (!direcao) {
+    conteudo = (
+      <EscolhaDirecao
+        onEscolher={setDirecao}
+        onCancelar={
+          q.data?.cronograma
+            ? () => {
+                setCriando(false);
+                setDirecao(null);
+              }
+            : undefined
+        }
+      />
+    );
+  } else if (direcao === "continuada") {
+    conteudo = (
+      <AssistenteContinuada
+        hoje={(dadosQ.data as any).hoje}
+        trilhas={(dadosQ.data as any).trilhas ?? []}
+        onCriado={aoCriar}
+        onVoltar={() => setDirecao(null)}
+      />
+    );
   } else {
     conteudo = (
-      <Assistente
-        dados={dadosQ.data as any}
-        rascunho={q.data?.rascunho ?? null}
-        onCriado={aoCriar}
-        onCancelar={q.data?.cronograma ? () => setCriando(false) : undefined}
-      />
+      <div className="space-y-4">
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <Button variant="ghost" size="sm" onClick={() => setDirecao(null)}>
+            <ArrowLeft className="mr-1.5 h-4 w-4" />
+            Trocar de direção
+          </Button>
+          <span className="text-sm font-semibold text-muted-foreground">Método J&D aplicado no Pós-edital</span>
+        </div>
+        <Assistente
+          dados={dadosQ.data as any}
+          rascunho={q.data?.rascunho ?? null}
+          onCriado={aoCriar}
+          onCancelar={q.data?.cronograma ? () => setCriando(false) : undefined}
+        />
+      </div>
     );
   }
 
@@ -149,7 +186,7 @@ function MeuCronograma() {
     <>
       <PageHeader
         title="Meu Cronograma"
-        description="Pelo Método J&D: uma disciplina por vez, revisão pelas questões e a data da prova como referência."
+        description="Pelo Método J&D: uma disciplina por vez e revisão pelas questões. Antes do edital, em preparação continuada; depois dele, até a data da sua prova."
       />
       <PageContent>{conteudo}</PageContent>
     </>

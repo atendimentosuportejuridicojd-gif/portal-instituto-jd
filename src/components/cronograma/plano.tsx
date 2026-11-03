@@ -106,7 +106,8 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
   const atrasados = blocos.filter((b) => !b.concluido && b.data < hoje && b.tipo !== "simulado");
   const pendentesHoje = doDia(hoje).filter((b) => !b.concluido);
   const proxima = [...atrasados, ...doDia(hoje)].find((b) => !b.concluido) ?? null;
-  const fimPlano = somarDias(c.data_prova, -1);
+  const continuada = c.modo === "continuada";
+  const fimPlano = c.data_prova ? somarDias(c.data_prova, -1) : (resumo.fimEstudo ?? c.data_inicio);
 
   return (
     <div className="space-y-6">
@@ -117,12 +118,13 @@ export function PlanoDoAluno({ estado, onNovo }: { estado: EstadoCronograma; onN
           <div className="relative flex flex-wrap items-center justify-between gap-6">
             <div className="min-w-0 space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-primary-foreground/70">
-                Método J&D · meu cronograma
+                {continuada ? "Preparação continuada" : "Método J&D · pós-edital"} · meu cronograma
               </p>
               <h2 className="text-xl font-semibold leading-tight tracking-tight sm:text-2xl">{c.concurso_nome}</h2>
               <div className="flex flex-wrap gap-2 text-xs">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1">
-                  <Target className="h-3.5 w-3.5" /> Prova em {formatarData(c.data_prova)}
+                  <Target className="h-3.5 w-3.5" />{" "}
+                  {continuada ? "Sem data de prova" : `Prova em ${formatarData(c.data_prova)}`}
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1">
                   <CalendarDays className="h-3.5 w-3.5" /> {formatarData(c.data_inicio)} a {formatarData(fimPlano)}

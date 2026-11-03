@@ -20,7 +20,7 @@ const semana: Semana = [0, 180, 180, 180, 180, 180, 120];
 
 /** Regras que valem para qualquer plano gerado. */
 function confere(p: ParametrosPlano, r: ReturnType<typeof gerarPlano>) {
-  const ultimo = somarDias(p.dataProva, -1);
+  const ultimo = somarDias(p.dataProva!, -1);
   const porDia = new Map<string, number>();
   for (const b of r.blocos) {
     expect(b.data >= p.dataInicio && b.data <= ultimo).toBe(true);
@@ -53,7 +53,7 @@ describe("motor do cronograma J&D", () => {
     confere(p, r);
     expect(r.cabe).toBe(true);
     expect(r.faseFinal).toEqual({ inicio: "2027-03-01", fim: "2027-03-13" });
-    expect(diferencaDias(r.faseFinal!.inicio, p.dataProva)).toBe(13);
+    expect(diferencaDias(r.faseFinal!.inicio, p.dataProva!)).toBe(13);
     expect(r.diasSobra).toBeGreaterThan(14);
     expect(r.disciplinasForaDoPlano).toEqual([]);
   });
@@ -117,4 +117,60 @@ t2("só questões: o plano não tem blocos de leitura", () => {
   });
   e2(r.blocos.some((b) => b.tipo === "estudo")).toBe(false);
   e2(r.blocos.some((b) => b.tipo === "questoes")).toBe(true);
+});
+
+describe("motor do cronograma J&D — preparação continuada (sem data de prova)", () => {
+  const base = (extra: Partial<ParametrosPlano> = {}): ParametrosPlano => ({
+    dataInicio: "2026-11-09",
+    dataProva: null,
+    minutosPorDiaSemana: semana,
+    disciplinas: disciplinas(4, 5),
+    ...extra,
+  });
+
+  it("distribui todo o conteúdo e termina quando ele acaba, sem fase final nem sobra", () => {
+    const r = gerarPlano(base());
+    expect(r.cabe).toBe(true);
+    expect(r.faltamMinutos).toBe(0);
+    expect(r.faseFinal).toBeNull();
+    expect(r.diasSobra).toBe(0);
+    expect(r.fimEstudo).not.toBeNull();
+    expect(r.blocos.some((b) => b.tipo === "fase_final")).toBe(false);
+    const colocado = r.blocos.reduce((a, b) => a + b.minutos, 0);
+    expect(colocado).toBe(r.minutosNecessarios);
+  });
+
+  it("nunca inclui simulados, mesmo se pedidos", () => {
+    const r = gerarPlano(base({ simulados: true, minutosSimulado: 240 }));
+    expect(r.simulados).toEqual([]);
+    expect(r.blocos.some((b) => b.tipo === "simulado")).toBe(false);
+  });
+
+  it("respeita a capacidade de cada dia da semana e mantém uma disciplina por vez", () => {
+    const r = gerarPlano(base());
+    const porDia = new Map<string, number>();
+    for (const b of r.blocos) porDia.set(b.data, (porDia.get(b.data) ?? 0) + b.minutos);
+    for (const [d, m] of porDia) {
+      expect(m).toBeLessThanOrEqual(semana[new Date(`${d}T00:00:00Z`).getUTCDay()]);
+    }
+    let maior = 0;
+    for (const b of r.blocos.filter((x) => x.disciplinaId && x.tipo !== "revisao")) {
+      const n = Number(b.disciplinaId!.slice(1));
+      expect(n).toBeGreaterThanOrEqual(maior);
+      maior = n;
+    }
+  });
+
+  it("com pouco tempo por dia o plano é mais longo, e ainda cabe dentro do horizonte", () => {
+    const rapido = gerarPlano(base());
+    const lento = gerarPlano(base({ minutosPorDiaSemana: [0, 30, 30, 30, 30, 30, 0] }));
+    expect(lento.cabe).toBe(true);
+    expect(lento.fimEstudo! > rapido.fimEstudo!).toBe(true);
+  });
+
+  it("sem nenhum dia de estudo, nada cabe", () => {
+    const r = gerarPlano(base({ minutosPorDiaSemana: [0, 0, 0, 0, 0, 0, 0] }));
+    expect(r.cabe).toBe(false);
+    expect(r.blocos).toEqual([]);
+  });
 });
