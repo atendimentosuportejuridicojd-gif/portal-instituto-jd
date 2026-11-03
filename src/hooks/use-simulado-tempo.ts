@@ -11,6 +11,7 @@ export function useSimuladoTempo(id: string, dados: any, atual: number, retomar:
   posicao.current = atual;
   const pausaRef = useRef(pausado);
   const checkpoint = useRef<() => Promise<void>>(async () => {});
+  const parado = useRef(false);
 
   useEffect(() => {
     const chave = chaveProgressoSimulado(id);
@@ -28,6 +29,7 @@ export function useSimuladoTempo(id: string, dados: any, atual: number, retomar:
     const contando = () => document.visibilityState === "visible" && !pausaRef.current;
     let inicio = contando() ? performance.now() : null;
     const medir = () => {
+      if (parado.current) return null;
       const agora = performance.now();
       if (inicio !== null) decorrido += Math.max(0, agora - inicio);
       inicio = contando() ? agora : null;
@@ -42,7 +44,7 @@ export function useSimuladoTempo(id: string, dados: any, atual: number, retomar:
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => { token = session?.access_token; });
     const salvar = async () => {
       const progresso = medir();
-      if (!token) return;
+      if (!progresso || !token) return;
       const response = await fetch("/api/public/simulado-progresso", {
         method: "POST", keepalive: true,
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -76,5 +78,5 @@ export function useSimuladoTempo(id: string, dados: any, atual: number, retomar:
   }, [pausado]);
 
   useEffect(() => { void checkpoint.current().catch(() => {}); }, [atual]);
-  return { restante, salvarProgresso: () => checkpoint.current() };
+  return { restante, salvarProgresso: () => checkpoint.current(), parar: () => { parado.current = true; } };
 }

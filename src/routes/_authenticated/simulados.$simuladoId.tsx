@@ -74,7 +74,7 @@ function SimuladoPage() {
         ) : q.error ? (
           <EmptyState title="Simulado indisponível" description={(q.error as Error).message} />
         ) : d?.status === "concluido" ? (
-          <Resultado r={d.resultado} />
+          <Resultado r={d.resultado} simuladoId={simuladoId} />
         ) : d ? (
           <Prova simuladoId={simuladoId} dados={d} />
         ) : null}
@@ -98,18 +98,22 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
   const [confirmar, setConfirmar] = useState(false);
   const [pausado, setPausado] = useState(false);
   const [refazerAberto, setRefazerAberto] = useState(false);
+  const envios = useRef(new Set<Promise<unknown>>());
   const refazerFn = useServerFn(alunoRefazerSimulado);
 
-  const { restante, salvarProgresso } = useSimuladoTempo(simuladoId, dados, atual, setAtual, pausado);
+  const { restante, salvarProgresso, parar } = useSimuladoTempo(simuladoId, dados, atual, setAtual, pausado);
   const refazer = useMutation({
-    mutationFn: () => refazerFn({ data: { simulado_id: simuladoId } }),
+    mutationFn: async () => {
+      await Promise.all([...envios.current]);
+      parar();
+      return refazerFn({ data: { simulado_id: simuladoId } });
+    },
     onSuccess: () => {
       try { localStorage.removeItem(chaveProgressoSimulado(simuladoId)); } catch { /* ignore */ }
       window.location.reload();
     },
     onError: (e: any) => toast.error(e.message),
   });
-  const envios = useRef(new Set<Promise<unknown>>());
   useBlocker({
     enableBeforeUnload: false,
     shouldBlockFn: async () => {
@@ -338,7 +342,16 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
 
 // ---------- resultado ----------
 
-function Resultado({ r }: { r: any }) {
+function Resultado({ r, simuladoId }: { r: any; simuladoId: string }) {
+  const refazerFn = useServerFn(alunoRefazerSimulado);
+  const refazer = useMutation({
+    mutationFn: () => refazerFn({ data: { simulado_id: simuladoId } }),
+    onSuccess: () => {
+      try { localStorage.removeItem(chaveProgressoSimulado(simuladoId)); } catch { /* ignore */ }
+      window.location.reload();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
   const abaixo = r.por_disciplina.filter((i: any) => i.percentual < META);
   const faltaram = Object.values(r.faltaram ?? {}).reduce((a: number, b: any) => a + Number(b), 0);
   return (
@@ -386,9 +399,19 @@ function Resultado({ r }: { r: any }) {
           suficientes cadastradas.
         </p>
       )}
-      <Button asChild variant="outline">
-        <Link to="/simulados">Voltar aos simulados</Link>
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline">
+          <Link to="/simulados">Voltar aos simulados</Link>
+        </Button>
+        <Button
+          variant="ghost"
+          disabled={refazer.isPending}
+          onClick={() => { if (window.confirm("Refazer o simulado do zero? O resultado atual será apagado.")) refazer.mutate(); }}
+        >
+          <RotateCcw className="mr-1 h-4 w-4" />
+          Refazer simulado
+        </Button>
+      </div>
     </div>
   );
 }
