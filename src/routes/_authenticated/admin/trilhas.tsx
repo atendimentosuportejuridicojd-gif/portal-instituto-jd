@@ -18,16 +18,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Target, Plus, Trash2, Link2, PencilLine, Loader2, Trophy } from "lucide-react";
+import { Target, Plus, Trash2, Link2, PencilLine, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   adminListTrilhas,
   adminUpsertTrilha,
   adminDeleteTrilha,
   adminToggleMaterialTrilha,
-  adminToggleConcursoTrilha,
 } from "@/lib/trilhas.functions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EsferasPicker } from "@/components/esferas-picker";
+import { nomeEsfera } from "@/lib/esferas";
 import { CarreirasPicker } from "@/components/carreiras-picker";
 import { nomeCarreira } from "@/lib/carreiras";
 
@@ -49,7 +50,6 @@ function AdminTrilhas() {
 
   const trilhas = q.data?.trilhas ?? [];
   const materiais = q.data?.materiais ?? [];
-  const concursos = q.data?.concursos ?? [];
   const ids = new Set(trilhas.map((t: any) => t.id));
   // Raiz = sem pai (ou com pai fora da lista). Filhas ficam agrupadas dentro do pai.
   const raizes = trilhas.filter((t: any) => !t.trilha_pai_id || !ids.has(t.trilha_pai_id));
@@ -82,11 +82,11 @@ function AdminTrilhas() {
               const filhas = filhasDe.get(t.id) ?? [];
               return (
                 <div key={t.id} className="space-y-3">
-                  <TrilhaCard t={t} materiais={materiais} concursos={concursos} pais={raizes} temFilhas={filhas.length > 0} onDone={invalidate} />
+                  <TrilhaCard t={t} materiais={materiais} pais={raizes} temFilhas={filhas.length > 0} onDone={invalidate} />
                   {filhas.length > 0 && (
                     <div className="ml-4 space-y-3 border-l-2 border-primary/20 pl-4 sm:ml-8 sm:pl-6">
                       {filhas.map((f: any) => (
-                        <TrilhaCard key={f.id} t={f} materiais={materiais} concursos={concursos} pais={raizes} temFilhas={false} filha onDone={invalidate} />
+                        <TrilhaCard key={f.id} t={f} materiais={materiais} pais={raizes} temFilhas={false} filha onDone={invalidate} />
                       ))}
                     </div>
                   )}
@@ -103,7 +103,6 @@ function AdminTrilhas() {
 function TrilhaCard({
   t,
   materiais,
-  concursos,
   pais,
   temFilhas,
   filha,
@@ -111,7 +110,6 @@ function TrilhaCard({
 }: {
   t: any;
   materiais: any[];
-  concursos: any[];
   pais: any[];
   temFilhas: boolean;
   filha?: boolean;
@@ -124,16 +122,16 @@ function TrilhaCard({
           <h2 className="truncate text-base font-semibold">{t.nome}</h2>
           <p className="text-xs text-muted-foreground">
             {filha ? "Subtrilha · " : temFilhas ? "Órgão · " : ""}
-            {t.materiais.length} material(is) vinculado(s)
-            {(t.concurso_ids ?? []).length > 0 && ` · ${t.concurso_ids.length} concurso(s)`} ·{" "}
+            {t.materiais.length} material(is) vinculado(s) ·{" "}
             {(t.carreiras ?? []).map((c: string) => nomeCarreira(c)).join(", ")}
+            {(t.esferas ?? []).length > 0 && ` · ${(t.esferas as string[]).map(nomeEsfera).join(" e ")}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <VincularDialog
             titulo={t.nome}
             materiais={materiais}
-            vinculados={t.materiais.filter((m: any) => !m.via_concurso).map((m: any) => m.id)}
+            vinculados={t.materiais.map((m: any) => m.id)}
             onToggle={(materialId, vincular) => ({
               trilha_id: t.id,
               material_id: materialId,
@@ -141,7 +139,6 @@ function TrilhaCard({
             })}
             onDone={onDone}
           />
-          <VincularConcursosDialog trilha={t} concursos={concursos} onDone={onDone} />
           <TrilhaDialog trilha={t} pais={pais} onDone={onDone} />
           <DeleteTrilha id={t.id} onDone={onDone} />
         </div>
@@ -156,10 +153,7 @@ function TrilhaCard({
               <span className="truncate">
                 {m.titulo} <span className="text-xs text-muted-foreground">· {m.disciplina}</span>
               </span>
-              <span className="flex shrink-0 items-center gap-1.5">
-                {m.via_concurso && <Badge variant="secondary">via concurso</Badge>}
-                {!m.tem_arquivo && <Badge variant="outline" className="text-destructive">Sem arquivo</Badge>}
-              </span>
+              {!m.tem_arquivo && <Badge variant="outline" className="text-destructive">Sem arquivo</Badge>}
             </li>
           ))}
         </ul>
@@ -198,6 +192,7 @@ function TrilhaDialog({ trilha, pais = [], onDone }: { trilha?: any; pais?: any[
   const [descricao, setDescricao] = useState(trilha?.descricao ?? "");
   const [ordem, setOrdem] = useState(String(trilha?.ordem ?? 0));
   const [carreiras, setCarreiras] = useState<string[]>(trilha?.carreiras ?? ["judiciaria"]);
+  const [esferas, setEsferas] = useState<string[]>(trilha?.esferas ?? []);
   const [paiId, setPaiId] = useState<string>(trilha?.trilha_pai_id ?? "none");
   const fn = useServerFn(adminUpsertTrilha);
 
@@ -211,6 +206,7 @@ function TrilhaDialog({ trilha, pais = [], onDone }: { trilha?: any; pais?: any[
           ordem: Number(ordem) || 0,
           carreiras: carreiras as any,
           trilha_pai_id: paiId === "none" ? null : paiId,
+          esferas: esferas as any,
         },
       }),
     onSuccess: () => {
@@ -276,6 +272,7 @@ function TrilhaDialog({ trilha, pais = [], onDone }: { trilha?: any; pais?: any[
               </SelectContent>
             </Select>
           </div>
+          <EsferasPicker value={esferas} onChange={setEsferas} />
           <CarreirasPicker value={carreiras} onChange={setCarreiras} />
         </div>
         <DialogFooter>
@@ -353,67 +350,6 @@ function VincularDialog({
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function VincularConcursosDialog({
-  trilha,
-  concursos,
-  onDone,
-}: {
-  trilha: any;
-  concursos: any[];
-  onDone: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const fn = useServerFn(adminToggleConcursoTrilha);
-  const vinculados: string[] = trilha.concurso_ids ?? [];
-  const mut = useMutation({
-    mutationFn: (payload: { concurso_id: string; vincular: boolean }) =>
-      fn({ data: { trilha_id: trilha.id, ...payload } }),
-    onSuccess: () => onDone(),
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Trophy className="mr-1 h-3.5 w-3.5" />
-          Vincular concursos
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Concursos de {trilha.nome}</DialogTitle>
-          <DialogDescription>
-            Marque os concursos desta trilha. As matérias vinculadas a cada concurso passam a fazer parte da
-            trilha automaticamente — nada é copiado, então acompanha mudanças futuras no concurso.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="divide-y divide-border/60 rounded-lg border border-border/60">
-          {concursos.length === 0 && (
-            <p className="p-3 text-sm text-muted-foreground">Nenhum concurso cadastrado.</p>
-          )}
-          {concursos.map((c: any) => (
-            <label key={c.id} className="flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm">
-              <Checkbox
-                checked={vinculados.includes(c.id)}
-                onCheckedChange={(v) => mut.mutate({ concurso_id: c.id, vincular: !!v })}
-              />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate">{c.nome}</span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {[c.orgao, c.banca, c.ano].filter(Boolean).join(" · ")}
-                  {" · "}
-                  {c.total_materias} matéria(s)
-                </span>
-              </span>
-            </label>
           ))}
         </div>
       </DialogContent>

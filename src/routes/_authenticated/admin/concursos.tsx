@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { CarreirasPicker } from "@/components/carreiras-picker";
+import { EsferasPicker } from "@/components/esferas-picker";
 import { pertenceAoConcurso } from "@/lib/concursos-da-disciplina";
 import { VincularExcecao } from "@/components/vincular-excecao";
 import {
@@ -171,6 +172,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
   });
   const [publicado, setPublicado] = useState(concurso?.publicado ?? true);
   const [carreiras, setCarreiras] = useState<string[]>(concurso?.carreiras ?? ["judiciaria"]);
+  const [esferas, setEsferas] = useState<string[]>(concurso?.esferas ?? []);
   const fn = useServerFn(adminUpsertConcurso);
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -183,6 +185,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
           ano: form.ano ? Number(form.ano) : null,
           publicado,
           carreiras: carreiras as any,
+          esferas: esferas as any,
         },
       }),
     onSuccess: () => {
@@ -251,6 +254,7 @@ function ConcursoDialog({ concurso, onDone }: { concurso?: any; onDone: () => vo
               onChange={(e) => set("observacoes", e.target.value)}
             />
           </div>
+          <EsferasPicker value={esferas} onChange={setEsferas} />
           <CarreirasPicker value={carreiras} onChange={setCarreiras} />
           <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
             <div>
