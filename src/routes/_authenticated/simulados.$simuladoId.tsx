@@ -3,17 +3,18 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, ClipboardCheck, Clock, Gauge, Loader2, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, ClipboardCheck, Clock, Gauge, Loader2, Pause, Play, RotateCcw, Target } from "lucide-react";
 import { Kpi } from "@/components/cronograma/visual";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { useSimuladoTempo } from "@/hooks/use-simulado-tempo";
+import { chaveProgressoSimulado, useSimuladoTempo } from "@/hooks/use-simulado-tempo";
 import {
   alunoFinalizarSimulado,
   alunoLerSimulado,
+  alunoRefazerSimulado,
   alunoResponderSimulado,
 } from "@/lib/simulado-aluno.functions";
 
@@ -95,8 +96,19 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
     Object.fromEntries(questoes.map((x) => [x.id, x.marcada])),
   );
   const [confirmar, setConfirmar] = useState(false);
+  const [pausado, setPausado] = useState(false);
+  const [refazerAberto, setRefazerAberto] = useState(false);
+  const refazerFn = useServerFn(alunoRefazerSimulado);
 
-  const { restante, salvarProgresso } = useSimuladoTempo(simuladoId, dados, atual, setAtual);
+  const { restante, salvarProgresso } = useSimuladoTempo(simuladoId, dados, atual, setAtual, pausado);
+  const refazer = useMutation({
+    mutationFn: () => refazerFn({ data: { simulado_id: simuladoId } }),
+    onSuccess: () => {
+      try { localStorage.removeItem(chaveProgressoSimulado(simuladoId)); } catch { /* ignore */ }
+      window.location.reload();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
   const envios = useRef(new Set<Promise<unknown>>());
   useBlocker({
     enableBeforeUnload: false,
@@ -157,17 +169,70 @@ function Prova({ simuladoId, dados }: { simuladoId: string; dados: any }) {
   const respondidas = useMemo(() => Object.values(marcadas).filter(Boolean).length, [marcadas]);
   const alerta = restante < 5 * 60_000;
 
-  return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
-        <p className="text-sm">
-          Simulado {dados.numero} · <strong>{respondidas}</strong> de {questoes.length} respondidas
-        </p>
+  const barra = (
+    <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
+      <p className="text-sm">
+        Simulado {dados.numero} · <strong>{respondidas}</strong> de {questoes.length} respondidas
+      </p>
+      <div className="flex items-center gap-2">
         <p className={`flex items-center gap-2 text-sm font-semibold tabular-nums ${alerta ? "text-destructive" : ""}`}>
           <Clock className="h-4 w-4" />
           {formatarRelogio(restante)}
         </p>
+        <Button size="sm" variant="outline" onClick={() => setPausado((p) => !p)}>
+          {pausado ? <Play className="mr-1 h-4 w-4" /> : <Pause className="mr-1 h-4 w-4" />}
+          {pausado ? "Continuar" : "Pausar"}
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => setRefazerAberto(true)}>
+          <RotateCcw className="mr-1 h-4 w-4" />
+          Refazer
+        </Button>
       </div>
+    </div>
+  );
+
+  const dialogoRefazer = (
+    <Dialog open={refazerAberto} onOpenChange={setRefazerAberto}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Refazer o simulado?</DialogTitle>
+          <DialogDescription>
+            Todas as respostas serão apagadas e o tempo volta ao início. Você recomeça na questão 1.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setRefazerAberto(false)}>Cancelar</Button>
+          <Button onClick={() => refazer.mutate()} disabled={refazer.isPending}>
+            {refazer.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Refazer do zero
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
+  if (pausado) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4">
+        {barra}
+        <section className="surface-card space-y-3 p-8 text-center">
+          <Pause className="mx-auto h-8 w-8 text-muted-foreground" />
+          <h2 className="text-lg font-semibold">Simulado pausado</h2>
+          <p className="text-sm text-muted-foreground">O tempo está congelado. Clique em continuar quando quiser voltar.</p>
+          <Button onClick={() => setPausado(false)}>
+            <Play className="mr-1 h-4 w-4" />
+            Continuar simulado
+          </Button>
+        </section>
+        {dialogoRefazer}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-4">
+      {barra}
+      {dialogoRefazer}
 
       <div className="flex flex-wrap gap-1.5">
         {questoes.map((x, i) => (
