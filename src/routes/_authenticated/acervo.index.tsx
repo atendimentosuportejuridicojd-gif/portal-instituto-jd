@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageContent, PageHeader, EmptyState } from "@/components/page";
 import { Target, ChevronRight, Library } from "lucide-react";
 import { alunoListTrilhas } from "@/lib/trilhas.functions";
+import { ESFERAS } from "@/lib/esferas";
 
 export const Route = createFileRoute("/_authenticated/acervo/")({
   head: () => ({
@@ -38,6 +39,17 @@ function AcervoCargos() {
       pai,
       filhas: cargos.filter((c: any) => c.trilha_pai_id === pai.id),
     }));
+  // Seções por esfera (Federal, Estadual, Municipal). Trilha de mais de uma esfera aparece em cada uma;
+  // trilha sem esfera cai em "Outras". Se nenhuma trilha tem esfera, não mostra títulos de esfera.
+  const secoes = [...ESFERAS.map((e) => ({ id: e.id as string, nome: e.nome })), { id: "sem", nome: "Outras" }]
+    .map((sec) => ({
+      ...sec,
+      grupos: grupos.filter((g: any) =>
+        sec.id === "sem" ? (g.pai.esferas ?? []).length === 0 : (g.pai.esferas ?? []).includes(sec.id),
+      ),
+    }))
+    .filter((sec) => sec.grupos.length > 0);
+  const mostrarEsfera = secoes.some((sec) => sec.id !== "sem");
 
   return (
     <>
@@ -52,18 +64,34 @@ function AcervoCargos() {
           <div className="text-sm text-muted-foreground">Carregando…</div>
         ) : (
           <div className="space-y-6">
-            {grupos.map((g: any) => (
-              <div key={g.pai.id} className="space-y-3">
-                {g.filhas.length > 0 && (
-                  <h2 className="text-sm font-semibold text-muted-foreground">{g.pai.nome}</h2>
-                )}
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {(g.filhas.length > 0 ? g.filhas : [g.pai]).map((c: any) => (
-                    <CargoCard key={c.id} c={c} />
+            {secoes.map((sec) => {
+              const comCargos = sec.grupos.filter((g: any) => g.filhas.length > 0);
+              const diretos = sec.grupos.filter((g: any) => g.filhas.length === 0);
+              return (
+                <section key={sec.id} className="space-y-4">
+                  {mostrarEsfera && (
+                    <h2 className="border-b border-border/60 pb-1.5 text-base font-semibold">{sec.nome}</h2>
+                  )}
+                  {comCargos.map((g: any) => (
+                    <div key={g.pai.id} className="space-y-3">
+                      <h3 className="text-sm font-semibold text-muted-foreground">{g.pai.nome}</h3>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {g.filhas.map((c: any) => (
+                          <CargoCard key={c.id} c={c} />
+                        ))}
+                      </div>
+                    </div>
                   ))}
-                </div>
-              </div>
-            ))}
+                  {diretos.length > 0 && (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {diretos.map((g: any) => (
+                        <CargoCard key={g.pai.id} c={g.pai} />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Link

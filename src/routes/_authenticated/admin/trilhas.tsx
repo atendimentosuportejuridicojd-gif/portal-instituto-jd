@@ -28,7 +28,7 @@ import {
 } from "@/lib/trilhas.functions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EsferasPicker } from "@/components/esferas-picker";
-import { nomeEsfera } from "@/lib/esferas";
+import { ESFERAS, nomeEsfera } from "@/lib/esferas";
 import { CarreirasPicker } from "@/components/carreiras-picker";
 import { nomeCarreira } from "@/lib/carreiras";
 
@@ -48,8 +48,19 @@ function AdminTrilhas() {
   const q = useQuery({ queryKey: ["admin", "trilhas"], queryFn: () => listFn() });
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "trilhas"] });
 
-  const trilhas = q.data?.trilhas ?? [];
+  const [filtroEsfera, setFiltroEsfera] = useState<string>("todas");
+  const todas = q.data?.trilhas ?? [];
   const materiais = q.data?.materiais ?? [];
+  // Filtro por esfera: mostra o órgão e seus cargos juntos (o cargo herda a esfera do órgão).
+  const paiDe = new Map<string, any>(todas.map((t: any) => [t.id, t]));
+  const esferasDe = (t: any): string[] => (t.trilha_pai_id ? paiDe.get(t.trilha_pai_id)?.esferas : null) ?? t.esferas ?? [];
+  const trilhas = todas.filter((t: any) =>
+    filtroEsfera === "todas"
+      ? true
+      : filtroEsfera === "sem"
+        ? esferasDe(t).length === 0
+        : esferasDe(t).includes(filtroEsfera),
+  );
   const ids = new Set(trilhas.map((t: any) => t.id));
   // Raiz = sem pai (ou com pai fora da lista). Filhas ficam agrupadas dentro do pai.
   const raizes = trilhas.filter((t: any) => !t.trilha_pai_id || !ids.has(t.trilha_pai_id));
@@ -78,6 +89,18 @@ function AdminTrilhas() {
           />
         ) : (
           <div className="space-y-6">
+            <div className="flex flex-wrap gap-2">
+              {[{ id: "todas", nome: "Todas" }, ...ESFERAS, { id: "sem", nome: "Sem esfera" }].map((e) => (
+                <Button
+                  key={e.id}
+                  size="sm"
+                  variant={filtroEsfera === e.id ? "default" : "outline"}
+                  onClick={() => setFiltroEsfera(e.id)}
+                >
+                  {e.nome}
+                </Button>
+              ))}
+            </div>
             {raizes.map((t: any) => {
               const filhas = filhasDe.get(t.id) ?? [];
               return (

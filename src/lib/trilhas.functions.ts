@@ -428,7 +428,7 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
     const carreira = await getCarreiraUsuario(context);
     const [{ data: trilhas }, { data: vinculos }, { data: materiais }, { data: favs }] =
       await Promise.all([
-        (supabase as any).from("trilhas").select("id, nome, descricao, ordem, trilha_pai_id").contains("carreiras", [carreira]).order("ordem"),
+        (supabase as any).from("trilhas").select("id, nome, descricao, ordem, trilha_pai_id, esferas").contains("carreiras", [carreira]).order("ordem"),
         supabase.from("trilha_materiais").select("trilha_id, material_id, ordem").order("ordem"),
         supabase
           .from("materiais")
@@ -445,6 +445,7 @@ export const alunoListTrilhas = createServerFn({ method: "GET" })
       nome: t.nome,
       descricao: t.descricao,
       trilha_pai_id: (t.trilha_pai_id as string | null) ?? null,
+      esferas: ((t.esferas as string[] | null) ?? []) as string[],
       favorito: favSet.has(t.id),
       materiais: (vinculos ?? [])
         .filter((v: any) => v.trilha_id === t.id && byId.has(v.material_id))
