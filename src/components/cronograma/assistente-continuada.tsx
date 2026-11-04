@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, CalendarClock, CheckCircle2, Loader2, Route } from "lucide-react";
+import { ArrowLeft, CalendarClock, CheckCircle2, GripVertical, Loader2, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { alunoCriarCronograma, alunoPreviaCronograma } from "@/lib/cronograma-al
 import { ESFERAS } from "@/lib/esferas";
 import { cn } from "@/lib/utils";
 import { formatarData, formatarMinutos } from "./formato";
-import { corDisciplina } from "./visual";
+import { corDisciplina, ListaArrastavel } from "./visual";
 
 export type TrilhaAssistente = {
   id: string;
@@ -57,6 +57,8 @@ export function AssistenteContinuada({
   const [horas, setHoras] = useState("2");
   const [dias, setDias] = useState<Record<number, boolean>>({ 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true });
   const [minQuestao, setMinQuestao] = useState("3");
+  // Ordem das disciplinas escolhida pelo aluno; vazia = ordem padrão do Acervo (preenchida na primeira prévia).
+  const [ordem, setOrdem] = useState<string[]>([]);
 
   const minutosDia = Math.round(Number(String(horas).replace(",", ".")) * 60);
   const diasMarcados = Object.values(dias).filter(Boolean).length;
@@ -85,6 +87,7 @@ export function AssistenteContinuada({
     data_inicio: dataInicio,
     minutos_por_dia: [0, 1, 2, 3, 4, 5, 6].map((i) => (dias[i] ? minutosDia : 0)),
     minutos_por_questao: Math.round(Number(minQuestao)) || 3,
+    ordem_disciplinas: ordem.length ? ordem : undefined,
   };
 
   const erro = (): string | null => {
@@ -97,10 +100,16 @@ export function AssistenteContinuada({
     return null;
   };
 
+  // `novaOrdem` é passada ao reordenar, para a prévia já sair com a ordem recém-arrastada.
   const previa = useMutation({
-    mutationFn: () => previaFn({ data: parametros }),
+    mutationFn: (novaOrdem?: string[]) =>
+      previaFn({ data: { ...parametros, ordem_disciplinas: novaOrdem ?? parametros.ordem_disciplinas } }),
     onError: (e: any) => toast.error(e.message),
   });
+
+  useEffect(() => {
+    if (previa.data && ordem.length === 0) setOrdem(previa.data.disciplinas.map((d: any) => d.id));
+  }, [previa.data, ordem.length]);
   const criar = useMutation({
     mutationFn: () => criarFn({ data: parametros }),
     onSuccess: () => {
@@ -114,9 +123,16 @@ export function AssistenteContinuada({
   const verPrevia = () => {
     const e = erro();
     if (e) return toast.error(e);
-    previa.mutate();
+    previa.mutate(undefined);
   };
   const resumo = previa.data?.resumo;
+  // Mostra na ordem escolhida; antes de `ordem` ser preenchida, usa a ordem devolvida pela prévia.
+  const listaOrdenada: any[] = previa.data
+    ? (ordem.length ? ordem : previa.data.disciplinas.map((d: any) => d.id))
+        .map((id: string) => previa.data!.disciplinas.find((d: any) => d.id === id))
+        .filter(Boolean)
+    : [];
+  const totalMinutosPlano = listaOrdenada.reduce((a, d) => a + d.minutos, 0);
 
   const CartaoTrilha = ({ t }: { t: TrilhaAssistente }) => {
     const pronta = t.qtdMaterias > 0;
@@ -126,6 +142,7 @@ export function AssistenteContinuada({
         type="button"
         disabled={!pronta}
         onClick={() => {
+          if (trilhaId !== t.id) setOrdem([]); // outra trilha, outras disciplinas: volta à ordem padrão
           setTrilhaId(t.id);
           previa.reset();
         }}
@@ -161,8 +178,8 @@ export function AssistenteContinuada({
           <div>
             <h2 className="text-lg font-semibold">Preparação continuada</h2>
             <p className="text-sm text-muted-foreground">
-              Antes do edital: você escolhe o cargo e estuda o Acervo Base dele, uma disciplina por vez, com revisão pelas
-              questões. Sem data de prova e sem simulados.
+              Antes do edital: você escolhe o cargo e estuda o Acervo Base dele, uma disciplina por vez, na ordem que
+              preferir, com revisão pelas questões. Sem data de prova e sem simulados.
             </p>
           </div>
         </div>
@@ -256,20 +273,64 @@ export function AssistenteContinuada({
               da semana.
             </p>
           )}
-          <ul className="divide-y divide-border/60 rounded-lg border border-border/60">
-            {previa.data.disciplinas.map((d: any, i: number) => (
-              <li key={d.id} className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm">
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", corDisciplina(i).barra)} />
-                  <span className="truncate">{d.nome}</span>
-                </span>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {d.materias} matéria(s) · {formatarMinutos(d.minutos)}
-                  {d.inicio && ` · ${formatarData(d.inicio)} a ${formatarData(d.fim)}`}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-2">
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <GripVertical className="h-3.5 w-3.5 shrink-0" />
+              Escolha a ordem das disciplinas: arraste pela alça. Com o teclado, use a alça e as setas para cima e para
+              baixo. As datas se ajustam sozinhas.
+            </p>
+            <ListaArrastavel
+              className="space-y-2"
+              itens={listaOrdenada}
+              idDe={(d: any) => d.id}
+              aoReordenar={(novos: any[]) => {
+                const nova = novos.map((d) => d.id as string);
+                setOrdem(nova);
+                previa.mutate(nova);
+              }}
+              renderItem={(d: any, i, { alca, arrastando }) => {
+                const cor = corDisciplina(i);
+                const fatia = totalMinutosPlano > 0 ? Math.max(3, Math.round((d.minutos / totalMinutosPlano) * 100)) : 0;
+                return (
+                  <div
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl border bg-card px-3 py-3 transition-shadow",
+                      arrastando ? "border-primary/60 ring-2 ring-primary/30" : "border-border hover:border-primary/30",
+                      d.foraDoPlano && "border-amber-500/40 bg-amber-500/[0.04]",
+                    )}
+                  >
+                    <button
+                      type="button"
+                      {...alca}
+                      className="grid h-9 w-7 shrink-0 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <GripVertical className="h-4 w-4" />
+                    </button>
+                    <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-semibold tabular-nums", cor.numero)}>
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <p className="truncate text-sm font-semibold">{d.nome}</p>
+                        {d.foraDoPlano && (
+                          <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                            fora do plano (passa de 3 anos)
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {d.materias} matéria(s) · {formatarMinutos(d.minutos)}
+                        {d.inicio && ` · ${formatarData(d.inicio)} a ${formatarData(d.fim)}`}
+                      </p>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div className={cn("h-full rounded-full", cor.barra)} style={{ width: `${fatia}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }}
+            />
+          </div>
           <Button onClick={() => criar.mutate()} disabled={criar.isPending || !resumo.fimEstudo}>
             {criar.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Criar meu cronograma
