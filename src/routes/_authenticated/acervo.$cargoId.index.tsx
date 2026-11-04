@@ -10,16 +10,16 @@ import { alunoListMateriaisComProgresso } from "@/lib/questoes.functions";
 export const Route = createFileRoute("/_authenticated/acervo/$cargoId/")({
   head: () => ({
     meta: [
-      { title: "Matérias do cargo — Acervo Base | Instituto J&D" },
+      { title: "Disciplinas do cargo — Acervo Base | Instituto J&D" },
       {
         name: "description",
         content:
-          "Matérias do cargo selecionado no Acervo Base do Instituto J&D, com materiais em PDF e questões.",
+          "Disciplinas do cargo selecionado no Acervo Base do Instituto J&D, com materiais em PDF e questões.",
       },
-      { property: "og:title", content: "Matérias do cargo — Acervo Base" },
+      { property: "og:title", content: "Disciplinas do cargo — Acervo Base" },
       {
         property: "og:description",
-        content: "Escolha uma matéria para abrir os materiais em PDF deste cargo.",
+        content: "Escolha uma disciplina para abrir os materiais em PDF deste cargo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -96,7 +96,7 @@ function CargoDisciplinas() {
         icone={BookOpen}
         rotulo="Acervo Base"
         title={loading ? "Carregando…" : titulo}
-        description="Escolha uma matéria para ver os materiais em PDF."
+        description="Escolha uma disciplina para ver os materiais em PDF."
         actions={
           <Button asChild variant="ghost" size="sm">
             <Link to="/acervo">
@@ -112,7 +112,7 @@ function CargoDisciplinas() {
         ) : disciplinas.length === 0 ? (
           <EmptyState
             icon={BookOpen}
-            title="Nenhuma matéria neste cargo"
+            title="Nenhuma disciplina neste cargo"
             description="Os materiais deste cargo serão liberados em breve."
           />
         ) : (
@@ -124,7 +124,7 @@ function CargoDisciplinas() {
                     {g.titulo}
                   </h2>
                   <span className="text-xs text-muted-foreground">
-                    {g.itens.length} {g.itens.length === 1 ? "matéria" : "matérias"}
+                    {g.itens.length} {g.itens.length === 1 ? "disciplina" : "disciplinas"}
                   </span>
                   <div className="h-px flex-1 bg-border" />
                 </div>

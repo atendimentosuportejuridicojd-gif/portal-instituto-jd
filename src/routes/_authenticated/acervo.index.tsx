@@ -13,12 +13,12 @@ export const Route = createFileRoute("/_authenticated/acervo/")({
       {
         name: "description",
         content:
-          "Selecione o cargo desejado no Acervo Base do Instituto J&D e acesse as matérias específicas daquela preparação.",
+          "Selecione o cargo desejado no Acervo Base do Instituto J&D e acesse as disciplinas específicas daquela preparação.",
       },
       { property: "og:title", content: "Acervo Base — Escolha o cargo | Instituto J&D" },
       {
         property: "og:description",
-        content: "Cargos disponíveis no Acervo Base: escolha um para ver as matérias.",
+        content: "Cargos disponíveis no Acervo Base: escolha um para ver as disciplinas.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -57,7 +57,7 @@ function AcervoCargos() {
         icone={Library}
         rotulo="Biblioteca do Instituto"
         title="Acervo Base"
-        description="Escolha o cargo para ver apenas as matérias daquela preparação."
+        description="Escolha o cargo para ver apenas as disciplinas daquela preparação."
       />
       <PageContent>
         {q.isLoading ? (
@@ -105,7 +105,7 @@ function AcervoCargos() {
                 </div>
                 <h2 className="truncate text-sm font-semibold">Acervo completo</h2>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Todas as matérias disponíveis, sem filtro de cargo.
+                  Todas as disciplinas disponíveis, sem filtro de cargo.
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
@@ -142,7 +142,7 @@ function CargoCard({ c }: { c: any }) {
         </div>
         <h2 className="truncate text-sm font-semibold">{c.nome}</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          {disciplinas.size} {disciplinas.size === 1 ? "matéria" : "matérias"} · {c.materiais.length} material(is)
+          {disciplinas.size} {disciplinas.size === 1 ? "disciplina" : "disciplinas"} · {c.materiais.length} material(is)
         </p>
       </div>
       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />

@@ -19,13 +19,13 @@ function unlockKey(disciplinaId: string) {
 export const Route = createFileRoute("/_authenticated/acervo/$cargoId/$disciplinaId")({
   head: () => ({
     meta: [
-      { title: "Materiais da matéria — Acervo Base | Instituto J&D" },
+      { title: "Materiais da disciplina — Acervo Base | Instituto J&D" },
       {
         name: "description",
         content:
           "Matérias da disciplina selecionada, com leitura in-app, marcação de leitura, questões e desempenho.",
       },
-      { property: "og:title", content: "Materiais da matéria — Acervo Base" },
+      { property: "og:title", content: "Materiais da disciplina — Acervo Base" },
       {
         property: "og:description",
         content: "Leia a matéria, marque como lida, resolva as questões e acompanhe seu desempenho.",
@@ -54,7 +54,7 @@ function CargoDisciplinaMateriais() {
     .filter((m: any) => todos || permitidos.has(m.id))
     .filter((m: any) => (m.disciplina_id ?? "sem-disciplina") === disciplinaId);
 
-  const nome = items[0]?.disciplina ?? "Matéria";
+  const nome = items[0]?.disciplina ?? "Disciplina";
   const temSenha = items.some((m: any) => m.tem_senha);
   const loading = qCargos.isLoading || qMats.isLoading;
 
@@ -110,7 +110,7 @@ function CargoDisciplinaMateriais() {
             ? "Escolha um módulo para ver as matérias."
             : todos
               ? "Matérias desta disciplina."
-              : `Materiais desta matéria em ${cargo?.nome ?? "cargo"}.`
+              : `Materiais desta disciplina em ${cargo?.nome ?? "cargo"}.`
         }
         actions={
           temModulos && moduloSel ? (
@@ -122,7 +122,7 @@ function CargoDisciplinaMateriais() {
             <Button asChild variant="ghost" size="sm">
               <Link to="/acervo/$cargoId" params={{ cargoId }}>
                 <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-                Matérias
+                Disciplinas
               </Link>
             </Button>
           )
@@ -136,9 +136,9 @@ function CargoDisciplinaMateriais() {
             <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-md bg-muted">
               <Lock className="h-5 w-5 text-muted-foreground" />
             </div>
-            <h2 className="text-sm font-semibold">Matéria protegida</h2>
+            <h2 className="text-sm font-semibold">Disciplina protegida</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Digite a senha para ver os materiais desta matéria.
+              Digite a senha para ver os materiais desta disciplina.
             </p>
             <form
               className="mt-4 flex items-center gap-2"
@@ -163,7 +163,7 @@ function CargoDisciplinaMateriais() {
         ) : items.length === 0 ? (
           <EmptyState
             icon={BookOpen}
-            title="Nenhum material nesta matéria"
+            title="Nenhum material nesta disciplina"
             description="Os materiais serão publicados em breve."
           />
         ) : temModulos && !moduloSel ? (

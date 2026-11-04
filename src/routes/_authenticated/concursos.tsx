@@ -40,7 +40,7 @@ function ConcursosPage() {
         icone={Landmark}
         rotulo="Preparação específica"
         title="Concursos"
-        description="Informações para consulta. As matérias de cada concurso entram no seu cronograma de estudos."
+        description="Informações para consulta. As disciplinas de cada concurso entram no seu cronograma de estudos."
         actions={
           <Button asChild>
             <Link to="/cronogramas">
