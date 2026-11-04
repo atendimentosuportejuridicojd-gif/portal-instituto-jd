@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getCarreiraUsuario } from "@/lib/acervo.server";
 
 export type BuscaResultado = {
   tipo: "disciplina" | "modulo" | "material" | "concurso" | "noticia" | "cronograma";
@@ -17,6 +18,7 @@ export const buscaGlobal = createServerFn({ method: "GET" })
     const q = data.q.replace(/[%_]/g, "");
     const pattern = `%${q}%`;
     const { supabase } = context;
+    const carreira = await getCarreiraUsuario(context);
 
     const [disc, mods, mats, conc, noti, cron] = await Promise.all([
       supabase.from("disciplinas").select("id, nome, descricao").ilike("nome", pattern).limit(5),
@@ -32,6 +34,7 @@ export const buscaGlobal = createServerFn({ method: "GET" })
         .select("id, nome, banca, slug")
         .ilike("nome", pattern)
         .eq("publicado", true)
+        .contains("carreiras", [carreira]) // cada concurso só aparece na sua carreira
         .limit(5),
       supabase
         .from("noticias")

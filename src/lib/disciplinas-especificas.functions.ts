@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertAcessoAluno, assertAdmin, gerarSlug } from "@/lib/acervo.server";
+import { assertAcessoAluno, assertAdmin, gerarSlug, getCarreiraUsuario } from "@/lib/acervo.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 import { pertenceAoConcurso } from "@/lib/concursos-da-disciplina";
 
@@ -121,12 +121,14 @@ export const alunoListConcursosEspecificos = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAcessoAluno(context);
     const { supabase } = context;
+    const carreira = await getCarreiraUsuario(context);
 
     const [{ data: concursos }, { data: disciplinas }] = await Promise.all([
       supabase
         .from("concursos")
         .select("id, nome, orgao, banca, estado, ano, data_prova")
         .eq("publicado", true)
+        .contains("carreiras", [carreira])
         .order("created_at", { ascending: false }),
       supabase
         .from("disciplinas")
@@ -149,6 +151,7 @@ export const alunoGetConcursoEspecifico = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     await assertAcessoAluno(context);
     const { supabase } = context;
+    const carreira = await getCarreiraUsuario(context);
 
     const [{ data: concurso }, { data: todasDisciplinas }] = await Promise.all([
       supabase
@@ -156,6 +159,7 @@ export const alunoGetConcursoEspecifico = createServerFn({ method: "GET" })
         .select("id, nome, orgao, banca, estado, ano, data_prova, edital_url, observacoes")
         .eq("id", data.concurso_id)
         .eq("publicado", true)
+        .contains("carreiras", [carreira])
         .maybeSingle(),
       supabase
         .from("disciplinas")
