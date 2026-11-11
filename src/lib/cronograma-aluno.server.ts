@@ -809,6 +809,34 @@ export async function marcarBloco(ctx: Ctx, id: string, concluido: boolean) {
 }
 
 /**
+ * Quando o aluno termina a sessão de questões de uma matéria, os blocos "questões" dessa matéria no cronograma
+ * ativo dele passam a concluídos sozinhos. Vale para qualquer origem da sessão (cronograma ou Acervo) e para todos
+ * os pedaços do bloco (continuações). Só marca os que ainda estão pendentes, então quem desmarcar depois mantém.
+ * Devolve quantos blocos foram marcados.
+ */
+export async function concluirBlocosDeQuestoes(supabase: any, userId: string, materialId: string): Promise<number> {
+  const { data: ativos, error: errAtivos } = await supabase
+    .from("cronogramas_aluno")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("status", "ativo");
+  if (errAtivos) throw new Error(errAtivos.message);
+  const ids = (ativos ?? []).map((c: any) => c.id as string);
+  if (ids.length === 0) return 0;
+
+  const { data, error } = await supabase
+    .from("cronograma_blocos")
+    .update({ concluido: true, concluido_em: new Date().toISOString() })
+    .in("cronograma_id", ids)
+    .eq("tipo", "questoes")
+    .eq("material_id", materialId)
+    .eq("concluido", false)
+    .select("id");
+  if (error) throw new Error(error.message);
+  return (data ?? []).length;
+}
+
+/**
  * Recalcula a partir de hoje: mantém o que já foi concluído e redistribui o que falta.
  * Uma matéria conta como estudada quando todos os seus blocos de estudo estão concluídos.
  */

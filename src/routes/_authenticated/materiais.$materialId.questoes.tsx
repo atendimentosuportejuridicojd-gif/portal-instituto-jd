@@ -125,6 +125,8 @@ function Resolver() {
       qc.invalidateQueries({ queryKey: ["aluno", "sessoes-andamento"] });
       qc.invalidateQueries({ queryKey: ["aluno", "acervo"] });
       if (r.finalizada) {
+        // O bloco de questões foi concluído no cronograma: o plano e o painel precisam recarregar.
+        qc.invalidateQueries({ queryKey: ["aluno", "cronograma"] });
         setFinalizada(true);
         toast.success(`Tentativa concluída — ${r.resumo?.percentual}%`);
       }

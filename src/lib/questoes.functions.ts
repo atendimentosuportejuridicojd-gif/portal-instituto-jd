@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAcessoAluno, getCarreiraUsuario } from "@/lib/acervo.server";
+import { concluirBlocosDeQuestoes } from "@/lib/cronograma-aluno.server";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 import { normalizarBanca, BANCAS } from "@/lib/banca";
 
@@ -455,6 +456,14 @@ export const responderQuestao = createServerFn({ method: "POST" })
         .eq("id", data.sessao_id);
       finalizada = true;
       resumo = { total: sessao.total_questoes, acertos, erros, percentual };
+
+      // A tarefa de questões desta matéria no cronograma do aluno passa a concluída. A sessão já está salva:
+      // se o cronograma falhar, o aluno não perde as respostas (e ainda pode marcar o bloco na mão).
+      try {
+        await concluirBlocosDeQuestoes(supabase, userId, sessao.material_id);
+      } catch (e) {
+        console.error("Não foi possível concluir o bloco de questões no cronograma:", e);
+      }
     }
 
     return {
