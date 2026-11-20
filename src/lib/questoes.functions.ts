@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAcessoAluno, getCarreiraUsuario } from "@/lib/acervo.server";
-import { concluirBlocosDeQuestoes } from "@/lib/cronograma-aluno.server";
+import { concluirBlocosDeQuestoes, limiteQuestoesDaMateria } from "@/lib/cronograma-aluno.server";
+import { escolherQuestoes } from "@/lib/cronograma-limite-questoes";
 import { contarQuestoesPorMaterial } from "@/lib/questoes-count";
 import { normalizarBanca, BANCAS } from "@/lib/banca";
 
@@ -244,6 +245,31 @@ export const alunoSessoesEmAndamento = createServerFn({ method: "GET" })
     }));
   });
 
+/**
+ * Cronograma com limite de questões por matéria (exceção por cronograma): ids das questões que a sessão traz.
+ * Reais primeiro, inéditas só para completar o limite; o que já foi respondido na sessão fica na seleção.
+ */
+async function idsQuestoesComLimite(
+  supabase: any,
+  p: { materialId: string; banca: string | null; limite: number; sessaoId?: string },
+): Promise<string[]> {
+  let consulta = supabase
+    .from("questoes")
+    .select("id, referencia, ordem")
+    .eq("material_id", p.materialId)
+    .eq("publicado", true);
+  if (p.banca) consulta = consulta.ilike("banca", p.banca);
+  const { data: questoes, error } = await consulta;
+  if (error) throw new Error(error.message);
+
+  const respondidas = new Set<string>();
+  if (p.sessaoId) {
+    const { data: tentativas } = await supabase.from("questao_tentativas").select("questao_id").eq("sessao_id", p.sessaoId);
+    for (const t of tentativas ?? []) respondidas.add(t.questao_id as string);
+  }
+  return escolherQuestoes(questoes ?? [], p.limite, respondidas);
+}
+
 export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -262,9 +288,12 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
 
     // Sessões do cronograma são separadas das do acervo: uma nunca retoma a outra.
     const doCronograma = !!data.concurso_id;
+    // Exceção por cronograma: limite de questões nesta matéria (null na imensa maioria dos casos).
+    const limite = doCronograma ? await limiteQuestoesDaMateria(supabase, userId, data.material_id) : null;
+
     let busca = supabase
       .from("questao_sessoes")
-      .select("id")
+      .select("id, total_questoes")
       .eq("user_id", userId)
       .eq("material_id", data.material_id)
       .eq("status", "em_andamento")
@@ -272,7 +301,25 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
     busca = banca ? busca.eq("banca", banca) : busca.is("banca", null);
     const { data: existing } = await busca.limit(1).maybeSingle();
 
-    if (existing) return { sessaoId: existing.id };
+    if (existing) {
+      // Sessão aberta antes do limite: acerta o total para ela poder ser concluída com as questões escolhidas.
+      if (limite) {
+        const ids = await idsQuestoesComLimite(supabase, {
+          materialId: data.material_id,
+          banca,
+          limite,
+          sessaoId: existing.id,
+        });
+        if (ids.length > 0 && ids.length !== existing.total_questoes) {
+          const { error: eAjuste } = await supabase
+            .from("questao_sessoes")
+            .update({ total_questoes: ids.length })
+            .eq("id", existing.id);
+          if (eAjuste) throw new Error(eAjuste.message);
+        }
+      }
+      return { sessaoId: existing.id };
+    }
 
     let contar = supabase
       .from("questoes")
@@ -294,7 +341,7 @@ export const iniciarOuRetomarSessao = createServerFn({ method: "POST" })
       .insert({
         user_id: userId,
         material_id: data.material_id,
-        total_questoes: count,
+        total_questoes: limite ? Math.min(limite, count) : count,
         status: "em_andamento",
         banca,
         do_cronograma: doCronograma,
@@ -314,7 +361,7 @@ export const getSessaoAtual = createServerFn({ method: "GET" })
     const { data: sessao, error } = await supabase
       .from("questao_sessoes")
       .select(
-        "id, material_id, banca, status, total_questoes, acertos, erros, percentual, iniciada_em, concluida_em, materiais(id, titulo, disciplinas(nome))",
+        "id, material_id, banca, do_cronograma, status, total_questoes, acertos, erros, percentual, iniciada_em, concluida_em, materiais(id, titulo, disciplinas(nome))",
       )
       .eq("id", data.sessao_id)
       .eq("user_id", userId)
@@ -338,7 +385,23 @@ export const getSessaoAtual = createServerFn({ method: "GET" })
     const respostas = new Map<string, { alternativa_id: string | null; acertou: boolean }>();
     (tentativas ?? []).forEach((t: any) => respostas.set(t.questao_id, t));
 
-    const questoesFmt = (questoes ?? []).map((q: any) => ({
+    // Exceção por cronograma: a sessão do cronograma traz só as questões escolhidas pelo limite da matéria.
+    let lista: any[] = questoes ?? [];
+    if ((sessao as any).do_cronograma) {
+      const limite = await limiteQuestoesDaMateria(supabase, userId, sessao.material_id);
+      if (limite) {
+        const escolhidas = new Set(
+          escolherQuestoes(
+            lista.map((q: any) => ({ id: q.id as string, referencia: q.referencia as string | null, ordem: q.ordem as number })),
+            limite,
+            new Set(respostas.keys()),
+          ),
+        );
+        lista = lista.filter((q: any) => escolhidas.has(q.id));
+      }
+    }
+
+    const questoesFmt = lista.map((q: any) => ({
       id: q.id,
       enunciado: q.enunciado,
       referencia: q.referencia,
