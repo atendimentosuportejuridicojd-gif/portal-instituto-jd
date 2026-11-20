@@ -12,6 +12,7 @@ import {
   type ParametrosPlano,
   type ResultadoPlano,
 } from "@/lib/cronograma-motor";
+import { capar, lerLimite, limiteDaMateria, type LimiteQuestoes } from "@/lib/cronograma-limite-questoes";
 
 type Ctx = { supabase: any; userId: string };
 
@@ -60,6 +61,7 @@ export async function carregarDisciplinas(
   concursoId: string,
   ordemEscolhida: string[] | undefined,
   filtroMateriaConcluida?: Set<string>,
+  limite?: LimiteQuestoes | null,
 ): Promise<DisciplinaCarregada[]> {
   const { data: estrutura, error } = await supabase
     .from("concurso_prova_estrutura")
@@ -179,8 +181,9 @@ export async function carregarDisciplinas(
           id: m.id,
           titulo: m.titulo,
           minutosLeitura: m.tempo_leitura ?? LEITURA_PADRAO_MIN,
-          // Concurso com banca: só as questões reais daquela banca (sem estimativa).
-          qtdQuestoes: banca ? (contagem.get(m.id) ?? 0) : contagem.get(m.id) || mediaDisciplina,
+          // Concurso com banca: só as questões reais daquela banca (sem estimativa). Cronograma com limite por
+          // matéria (exceção do aluno): no máximo esse tanto, nas matérias a que o limite se aplica.
+          qtdQuestoes: capar(limite, m.id, banca ? (contagem.get(m.id) ?? 0) : contagem.get(m.id) || mediaDisciplina),
           qtdReal: contagem.get(m.id) ?? 0,
         })),
     };
@@ -274,7 +277,7 @@ export async function carregarDisciplinasTrilha(
 /** Disciplinas de um cronograma, conforme o modo: estrutura da prova do concurso ou matérias da trilha. */
 async function carregarDisciplinasDoCronograma(
   supabase: any,
-  c: { modo?: string | null; concurso_id?: string | null; trilha_id?: string | null },
+  c: { modo?: string | null; concurso_id?: string | null; trilha_id?: string | null; resumo?: unknown },
   ordem: string[] | undefined,
   filtroMateriaConcluida?: Set<string>,
 ) {
@@ -283,7 +286,22 @@ async function carregarDisciplinasDoCronograma(
     return carregarDisciplinasTrilha(supabase, c.trilha_id, ordem, filtroMateriaConcluida);
   }
   if (!c.concurso_id) throw new Error("O concurso deste cronograma não existe mais.");
-  return carregarDisciplinas(supabase, c.concurso_id, ordem, filtroMateriaConcluida);
+  return carregarDisciplinas(supabase, c.concurso_id, ordem, filtroMateriaConcluida, lerLimite(c.resumo));
+}
+
+/**
+ * Limite de questões que o cronograma ativo do aluno impõe a esta matéria (exceção por cronograma; ver
+ * cronograma-limite-questoes.ts). null = sem limite: o aluno não tem cronograma ativo ou ele não restringe a matéria.
+ */
+export async function limiteQuestoesDaMateria(supabase: any, userId: string, materialId: string): Promise<number | null> {
+  const { data, error } = await supabase
+    .from("cronogramas_aluno")
+    .select("resumo")
+    .eq("user_id", userId)
+    .eq("status", "ativo")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return limiteDaMateria(lerLimite(data?.resumo), materialId);
 }
 
 function paraMotor(p: ParametrosAluno, disciplinas: DisciplinaCarregada[], dataInicio: string): ParametrosPlano {
@@ -722,7 +740,7 @@ export async function revisaoDoBloco(ctx: Ctx, blocoId: string) {
 
   const { data: c } = await supabase
     .from("cronogramas_aluno")
-    .select("modo, concurso_id, trilha_id, ordem_disciplinas, minutos_por_questao")
+    .select("modo, concurso_id, trilha_id, ordem_disciplinas, minutos_por_questao, resumo")
     .eq("id", bloco.cronograma_id)
     .eq("user_id", userId)
     .maybeSingle();
@@ -759,6 +777,7 @@ export async function revisaoDoBloco(ctx: Ctx, blocoId: string) {
     }
   }
 
+  const limite = lerLimite(c.resumo);
   const itens: ItemRevisao[] = [];
   let aprovadas = 0;
   for (const m of comQuestoes) {
@@ -774,7 +793,7 @@ export async function revisaoDoBloco(ctx: Ctx, blocoId: string) {
       percentual: u ? u.percentual : null,
       acertos: u?.acertos ?? null,
       total: u?.total ?? null,
-      qtdQuestoes: m.qtdReal,
+      qtdQuestoes: capar(limite, m.id, m.qtdReal),
       estado: u ? "abaixo" : "sem_resolucao",
     });
   }
@@ -886,7 +905,15 @@ export async function recalcularCronograma(ctx: Ctx) {
   await inserirBlocos(supabase, c.id, plano.blocos);
   const { error } = await supabase
     .from("cronogramas_aluno")
-    .update({ resumo: { ...resumo(plano), somente_questoes: !!p.somente_questoes, excluir_materias: [...excluirBase] } })
+    .update({
+      resumo: {
+        ...resumo(plano),
+        somente_questoes: !!p.somente_questoes,
+        excluir_materias: [...excluirBase],
+        // A exceção de limite de questões do cronograma continua valendo depois de recalcular.
+        ...(c.resumo?.limite_questoes ? { limite_questoes: c.resumo.limite_questoes } : {}),
+      },
+    })
     .eq("id", c.id);
   if (error) throw new Error(error.message);
   return { resumo: resumo(plano) };
